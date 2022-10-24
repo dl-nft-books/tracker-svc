@@ -21,6 +21,8 @@ type config struct {
 	types.Copuser
 	comfig.Listenerer
 	getter kv.Getter
+
+	mintTrackerOnce comfig.Once
 }
 
 func New(getter kv.Getter) Config {
