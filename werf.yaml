@@ -28,6 +28,6 @@ shell:
   - apk add --no-cache ca-certificates
 import:
 - image: builder
-  add: /usr/local/bin/
-  to: /usr/local/bin/
+  add: /usr/local/bin/contract-tracker
+  to: /usr/local/bin/contract-tracker
   after: setup
