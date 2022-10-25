@@ -22,7 +22,9 @@ type config struct {
 	comfig.Listenerer
 	getter kv.Getter
 
-	mintTrackerOnce comfig.Once
+	mintTrackerOnce    comfig.Once
+	factoryTrackerOnce comfig.Once
+	ethererOnce        comfig.Once
 }
 
 func New(getter kv.Getter) Config {

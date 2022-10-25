@@ -7,16 +7,22 @@ db:
 listener:
   addr: :8000
 
-mint_tracker:
-  initial_block: 0
-  iteration_size: 100
+ethereum_client: # Rpc and WS addresses
+  rpc: https://rpc.evm.testnet.moonrabbit.com
+  web_socket: ws://104.248.111.251:9944
+
+factory_tracker:
+  address: 0xE05AD5fcE7f3F8EA8D85BC180a0d738D30daBfFb
   runner: # Periods settings
     normal_period: 10s
     min_abnormal_period: 10s
     max_abnormal_period: 10s
-  contracts:
-    - 0x32C43cd0edF92C7D6C731Ce699798592f36A1Cc3
-    - 0x3bD908CaE172Bd4b37DdF0D69b05C09d75631B36
+  first_block: 564400  # A block to begin from
+  iteration_size: 100
+
+mint_tracker:
+  capacity: 1
+  iteration_size: 100
 
 cop:
   disabled: true
