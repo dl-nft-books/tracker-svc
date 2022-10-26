@@ -7,16 +7,9 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"reflect"
-	"time"
 )
 
 const factoryTrackerYamlKey = "factory_tracker"
-
-type Runner struct {
-	NormalPeriod      time.Duration `fig:"normal_period"`
-	MinAbnormalPeriod time.Duration `fig:"min_abnormal_period"`
-	MaxAbnormalPeriod time.Duration `fig:"normal_period"`
-}
 
 type FactoryTracker struct {
 	Name          string         `fig:"name"`
@@ -27,13 +20,9 @@ type FactoryTracker struct {
 }
 
 var defaultFactoryTracker = FactoryTracker{
-	Name:    "factory_tracker",
-	Address: common.Address{},
-	Runner: Runner{
-		NormalPeriod:      time.Minute,
-		MinAbnormalPeriod: time.Minute,
-		MaxAbnormalPeriod: time.Minute,
-	},
+	Name:          "factory_tracker",
+	Address:       common.Address{},
+	Runner:        defaultRunner,
 	FirstBlock:    0,
 	IterationSize: 100,
 }

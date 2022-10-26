@@ -26,6 +26,10 @@ mint_tracker:
   name: mint_tracker # Name to be displayed in logs
   capacity: 1
   iteration_size: 100
+  runner: # Periods settings
+    normal_period: 10s
+    min_abnormal_period: 10s
+    max_abnormal_period: 10s
 
 cop:
   disabled: true

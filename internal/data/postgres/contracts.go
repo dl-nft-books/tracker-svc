@@ -66,3 +66,8 @@ func (q *contractsQ) UpdateLastBlock(lastBlock uint64, id int64) error {
 		Where(squirrel.Eq{contractsId: id})
 	return q.database.Exec(statement)
 }
+
+func (q *contractsQ) Select() (contracts []data.Contract, err error) {
+	err = q.database.Select(&contracts, q.selector)
+	return
+}

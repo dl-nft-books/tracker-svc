@@ -16,6 +16,7 @@ type Contract struct {
 //go:generate mockery --case=underscore --name=KeyValueQ
 type ContractsQ interface {
 	New() ContractsQ
+	Select() ([]Contract, error)
 	Page(page pgdb.OffsetPageParams) ContractsQ
 	Get(id int64) (*Contract, error)
 	Insert(token Contract) (int64, error)
