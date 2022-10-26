@@ -10,40 +10,40 @@ import (
 )
 
 const (
-	tokensTable = "tokens"
+	contractsTable = "contracts"
 
-	tokensId        = "id"
-	tokensContract  = "contract"
-	tokensName      = "name"
-	tokensSymbol    = "symbol"
-	tokensLastBlock = "last_block"
+	contractsId        = "id"
+	contractsContract  = "contract"
+	contractsName      = "name"
+	contractsSymbol    = "symbol"
+	contractsLastBlock = "last_block"
 )
 
-type tokensQ struct {
+type contractsQ struct {
 	database *pgdb.DB
 	selector squirrel.SelectBuilder
 }
 
-func NewTokensQ(database *pgdb.DB) data.TokensQ {
-	return &tokensQ{
+func NewTokensQ(database *pgdb.DB) data.ContractsQ {
+	return &contractsQ{
 		database: database,
-		selector: squirrel.Select(fmt.Sprintf("%s.*", tokensTable)).From(tokensTable),
+		selector: squirrel.Select(fmt.Sprintf("%s.*", contractsTable)).From(contractsTable),
 	}
 }
 
-func (q *tokensQ) New() data.TokensQ {
+func (q *contractsQ) New() data.ContractsQ {
 	return NewTokensQ(q.database.Clone())
 }
 
-func (q *tokensQ) Page(page pgdb.OffsetPageParams) data.TokensQ {
+func (q *contractsQ) Page(page pgdb.OffsetPageParams) data.ContractsQ {
 	q.selector = page.ApplyTo(q.selector)
 	return q
 }
 
-func (q *tokensQ) Get(id int64) (*data.Token, error) {
-	var token data.Token
+func (q *contractsQ) Get(id int64) (*data.Contract, error) {
+	var token data.Contract
 
-	err := q.database.Get(&token, q.selector.Where(squirrel.Eq{tokensId: id}))
+	err := q.database.Get(&token, q.selector.Where(squirrel.Eq{contractsId: id}))
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -51,8 +51,8 @@ func (q *tokensQ) Get(id int64) (*data.Token, error) {
 	return &token, err
 }
 
-func (q *tokensQ) Insert(token data.Token) (id int64, err error) {
-	statement := squirrel.Insert(tokensTable).
+func (q *contractsQ) Insert(token data.Contract) (id int64, err error) {
+	statement := squirrel.Insert(contractsTable).
 		Suffix("returning id").
 		SetMap(structs.Map(&token))
 
@@ -60,9 +60,9 @@ func (q *tokensQ) Insert(token data.Token) (id int64, err error) {
 	return
 }
 
-func (q *tokensQ) UpdateLastBlock(lastBlock uint64, id int64) error {
-	statement := squirrel.Update(tokensTable).
-		Set(tokensLastBlock, lastBlock).
-		Where(squirrel.Eq{tokensId: id})
+func (q *contractsQ) UpdateLastBlock(lastBlock uint64, id int64) error {
+	statement := squirrel.Update(contractsTable).
+		Set(contractsLastBlock, lastBlock).
+		Where(squirrel.Eq{contractsId: id})
 	return q.database.Exec(statement)
 }

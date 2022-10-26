@@ -9,6 +9,7 @@ import (
 const mintTrackerYamlKey = "mint_tracker"
 
 type MintTracker struct {
+	Name          string `fig:"name"`
 	Capacity      int64  `fig:"capacity"`
 	IterationSize uint64 `fig:"iteration_size"`
 }

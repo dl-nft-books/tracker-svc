@@ -12,11 +12,11 @@ import (
 const ethererYamlKey = "ethereum_client"
 
 type EtherClient struct {
-	Rpc       ethclient.Client `fig:"rpc,required"`
-	WebSocket ethclient.Client `fig:"web_socket,required"`
+	Rpc       *ethclient.Client `fig:"rpc,required"`
+	WebSocket *ethclient.Client `fig:"web_socket,required"`
 }
 
-func (c *config) EtherClients() *EtherClient {
+func (c *config) EtherClient() EtherClient {
 	return c.ethererOnce.Do(func() interface{} {
 		var cfg EtherClient
 
@@ -29,18 +29,18 @@ func (c *config) EtherClients() *EtherClient {
 		}
 
 		return cfg
-	}).(*EtherClient)
+	}).(EtherClient)
 }
 
 var ethClientHook = figure.Hooks{
-	"ethclient.Client": func(value interface{}) (reflect.Value, error) {
+	"*ethclient.Client": func(value interface{}) (reflect.Value, error) {
 		switch v := value.(type) {
 		case string:
 			client, err := ethclient.Dial(v)
 			if err != nil {
 				return reflect.Value{}, errors.Wrap(err, "failed to convert value into ethclient")
 			}
-			return reflect.ValueOf(*client), nil
+			return reflect.ValueOf(client), nil
 		default:
 			return reflect.Value{}, fmt.Errorf("unsupported conversion from %T", value)
 		}

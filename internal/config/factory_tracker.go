@@ -19,6 +19,7 @@ type Runner struct {
 }
 
 type FactoryTracker struct {
+	Name          string         `fig:"name"`
 	Address       common.Address `fig:"address"`
 	Runner        Runner         `fig:"runner"`
 	FirstBlock    uint64         `fig:"first_block"`
@@ -26,6 +27,7 @@ type FactoryTracker struct {
 }
 
 var defaultFactoryTracker = FactoryTracker{
+	Name:    "factory_tracker",
 	Address: common.Address{},
 	Runner: Runner{
 		NormalPeriod:      time.Minute,

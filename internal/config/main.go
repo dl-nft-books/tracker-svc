@@ -13,6 +13,10 @@ type Config interface {
 	pgdb.Databaser
 	types.Copuser
 	comfig.Listenerer
+
+	FactoryTracker() FactoryTracker
+	MintTracker() MintTracker
+	EtherClient() EtherClient
 }
 
 type config struct {
