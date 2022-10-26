@@ -68,10 +68,6 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to get events")
 	}
-	if len(events) == 0 {
-		t.log.Debug("No create contract events found")
-		return nil
-	}
 
 	for _, event := range events {
 		t.log.Debugf("Caught new contract with block number %d", event.BlockNumber)
@@ -138,7 +134,7 @@ func (t *FactoryTracker) InsertEvent(event eth_reader.ContractCreatedEvent) erro
 		Contract:  event.Address.String(),
 		Name:      event.Name,
 		Symbol:    event.Symbol,
-		LastBlock: 0,
+		LastBlock: event.BlockNumber,
 	})
 
 	return errors.Wrap(err, "failed to insert contract into the database")
