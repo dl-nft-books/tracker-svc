@@ -31,6 +31,10 @@ mint_tracker:
     min_abnormal_period: 10s
     max_abnormal_period: 10s
 
+documenter:
+  url: http://localhost:8000
+  token: #doorman auth token
+
 cop:
   disabled: true
   endpoint: "http://..."
