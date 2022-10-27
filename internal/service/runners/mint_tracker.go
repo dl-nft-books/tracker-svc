@@ -11,16 +11,21 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"strconv"
 )
 
 const mintKVTrackerPage = "mint_tracker_page"
 
 type MintTracker struct {
-	log      *logan.Entry
-	database data.DB
-	rpc      *ethclient.Client
-	reader   eth_reader.TokenContractReader
+	log        *logan.Entry
+	rpc        *ethclient.Client
+	reader     eth_reader.TokenContractReader
+	ipfsLoader *ipfs_loader.IpfsLoader
+
+	trackerDB data.TrackerDB
+	tasksQ    data.TasksQ
 
 	name          string
 	capacity      uint64
@@ -30,10 +35,13 @@ type MintTracker struct {
 
 func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
-		log:      cfg.Log(),
-		database: postgres.NewDB(cfg.DB()),
-		rpc:      cfg.EtherClient().Rpc,
-		reader:   eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
+		log:        cfg.Log(),
+		rpc:        cfg.EtherClient().Rpc,
+		reader:     eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
+		ipfsLoader: ipfs_loader.NewIpfsLoader(cfg),
+
+		trackerDB: postgres.NewTrackerDB(cfg.TrackerDB().DB),
+		tasksQ:    postgres.NewTasksQ(cfg.GeneratorDB().DB),
 
 		name:          cfg.MintTracker().Name,
 		iterationSize: cfg.MintTracker().IterationSize,
@@ -83,15 +91,88 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 	}
 
 	for _, event := range events {
-		t.log.Debugf("Found event with a block number of %d", event.BlockNumber)
-		// TODO: Add event processing here
+		t.log.Debugf("Found event with a block number of %d and uri %s", event.BlockNumber, event.Uri)
+
+		if err = t.ProcessEvent(event); err != nil {
+			return errors.Wrap(err, "failed to process event", logan.F{
+				"event_block_number": event.BlockNumber,
+				"event_uri":          event.Uri,
+			})
+		}
+	}
+
+	newBlock, err := t.GetNewBlock(contract.LastBlock, t.iterationSize)
+	if err != nil {
+		return errors.Wrap(err, "failed to get new block", logan.F{
+			"current_block": contract.LastBlock,
+		})
+	}
+
+	if err = t.trackerDB.Contracts().UpdateLastBlock(newBlock, contract.Id); err != nil {
+		return errors.Wrap(err, "failed to update last block")
 	}
 
 	return nil
 }
 
+func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, error) {
+	// Retrieving the last blockchain block number
+	lastBlockchainBlock, err := t.rpc.BlockNumber(context.Background())
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
+	}
+
+	t.log.Debugf("Last blockchain block has id of %d", lastBlockchainBlock)
+
+	if previousBlock+iterationSize+1 > lastBlockchainBlock {
+		return lastBlockchainBlock + 1, nil
+	}
+
+	return previousBlock + iterationSize + 1, nil
+}
+
+func (t *MintTracker) ProcessEvent(event eth_reader.TokenMintedEvent) error {
+	ipfsHash := t.ipfsLoader.GetHashOutUri(event.Uri)
+
+	return t.trackerDB.Transaction(func() error {
+		task, err := t.tasksQ.GetByHash(ipfsHash)
+		if err != nil {
+			return errors.Wrap(err, "failed to get task by ipfs hash")
+		}
+		if task == nil {
+			t.log.Warnf("Could not find task with a hash of %s", ipfsHash)
+			return nil
+		}
+
+		if err = t.tasksQ.UpdateStatus(resources.TaskUploading, task.Id); err != nil {
+			return errors.Wrap(err, "failed to update status", logan.F{
+				"task_id": task.Id,
+			})
+		}
+
+		if err = t.ipfsLoader.Load(event.Uri); err != nil {
+			return errors.Wrap(err, "failed to load file to the ipfs")
+		}
+
+		if err = t.tasksQ.UpdateIpfsHash(ipfsHash, task.Id); err != nil {
+			return errors.Wrap(err, "failed to update ipfs hash")
+		}
+
+		if err = t.tasksQ.UpdateTokenId(event.TokenId, task.Id); err != nil {
+			return errors.Wrap(err, "failed to update token id")
+		}
+
+		if err = t.tasksQ.UpdateStatus(resources.TaskFinishedUploading, task.Id); err != nil {
+			return errors.Wrap(err, "failed to update status", logan.F{
+				"task_id": task.Id,
+			})
+		}
+		return nil
+	})
+}
+
 func (t *MintTracker) Select(pageNumber uint64) ([]data.Contract, error) {
-	cutQ := t.database.Contracts().Page(pgdb.OffsetPageParams{
+	cutQ := t.trackerDB.Contracts().Page(pgdb.OffsetPageParams{
 		Limit:      t.capacity,
 		PageNumber: pageNumber})
 
@@ -99,7 +180,7 @@ func (t *MintTracker) Select(pageNumber uint64) ([]data.Contract, error) {
 }
 
 func (t *MintTracker) FormList() ([]data.Contract, error) {
-	pageNumberKV, err := t.database.KeyValue().Get(mintKVTrackerPage)
+	pageNumberKV, err := t.trackerDB.KeyValue().Get(mintKVTrackerPage)
 	if pageNumberKV == nil {
 		pageNumberKV = &data.KeyValue{
 			Key:   mintKVTrackerPage,
@@ -126,7 +207,7 @@ func (t *MintTracker) FormList() ([]data.Contract, error) {
 	}
 
 	if len(contracts) == 0 {
-		if err = t.database.KeyValue().Upsert(data.KeyValue{
+		if err = t.trackerDB.KeyValue().Upsert(data.KeyValue{
 			Key:   mintKVTrackerPage,
 			Value: "0",
 		}); err != nil {
@@ -136,7 +217,7 @@ func (t *MintTracker) FormList() ([]data.Contract, error) {
 		return t.FormList()
 	}
 
-	if err = t.database.KeyValue().Upsert(data.KeyValue{
+	if err = t.trackerDB.KeyValue().Upsert(data.KeyValue{
 		Key:   mintKVTrackerPage,
 		Value: strconv.FormatInt(pageNumber+1, 10),
 	}); err != nil {

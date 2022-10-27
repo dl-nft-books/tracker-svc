@@ -16,6 +16,6 @@ func initializeRunners(cfg config.Config) (runners []Runner) {
 
 func Run(cfg config.Config, ctx context.Context) {
 	for _, runner := range initializeRunners(cfg) {
-		runner(ctx)
+		go runner(ctx)
 	}
 }

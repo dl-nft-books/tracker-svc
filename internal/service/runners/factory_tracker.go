@@ -18,7 +18,7 @@ const factoryTrackerCursor = "factory_tracker_last_block"
 
 type FactoryTracker struct {
 	log      *logan.Entry
-	database data.DB
+	database data.TrackerDB
 	rpc      *ethclient.Client
 	reader   eth_reader.FactoryContractReader
 
@@ -32,7 +32,7 @@ type FactoryTracker struct {
 func NewFactoryTracker(cfg config.Config) *FactoryTracker {
 	return &FactoryTracker{
 		log:      cfg.Log(),
-		database: postgres.NewDB(cfg.DB()),
+		database: postgres.NewTrackerDB(cfg.TrackerDB().DB),
 		rpc:      cfg.EtherClient().Rpc,
 		reader:   eth_reader.NewFactoryContractReader(cfg.EtherClient().Rpc),
 
@@ -62,6 +62,14 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 		return errors.Wrap(err, "failed to get previous block")
 	}
 
+	must, err := t.MustNotExceedLastBlock(previousBlock)
+	if err != nil {
+		return errors.Wrap(err, "failed to check whether previous block is less than the last block in chain")
+	}
+	if !must {
+		return nil
+	}
+
 	t.log.Debugf("Trying to iterate from block %d to %d...", previousBlock, previousBlock+t.iterationSize)
 
 	events, _, err := t.reader.GetEvents(t.address, previousBlock, previousBlock+t.iterationSize)
@@ -84,10 +92,27 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 		return errors.Wrap(err, "failed to get new block")
 	}
 
-	return t.database.KeyValue().Upsert(data.KeyValue{
+	t.log.Debugf("New block value is %d", newBlock)
+
+	if err = t.database.KeyValue().Upsert(data.KeyValue{
 		Key:   factoryTrackerCursor,
 		Value: strconv.FormatInt(newBlock, 10),
-	})
+	}); err != nil {
+		return errors.Wrap(err, "failed to upsert new value")
+	}
+
+	t.log.Debugf("Updated KV cursor value")
+	return nil
+}
+
+func (t *FactoryTracker) MustNotExceedLastBlock(block uint64) (bool, error) {
+	// Retrieving the last blockchain block number
+	lastBlockchainBlock, err := t.rpc.BlockNumber(context.Background())
+	if err != nil {
+		return false, errors.Wrap(err, "failed to get the last block in the blockchain")
+	}
+
+	return block <= lastBlockchainBlock, nil
 }
 
 func (t *FactoryTracker) GetPreviousBlock() (uint64, error) {
@@ -96,6 +121,7 @@ func (t *FactoryTracker) GetPreviousBlock() (uint64, error) {
 		return 0, errors.Wrap(err, "failed to get cursor value")
 	}
 	if cursorKV == nil {
+		t.log.Debug("Empty key value cursor, setting 0")
 		cursorKV = &data.KeyValue{
 			Key:   factoryTrackerCursor,
 			Value: "0",
@@ -106,12 +132,15 @@ func (t *FactoryTracker) GetPreviousBlock() (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to convert cursor value from string to integer")
 	}
+	t.log.Debugf("Cursor value is %d", cursor)
 
 	cursorUInt64 := uint64(cursor)
 	if cursorUInt64 > t.firstBlock {
+		t.log.Debugf("Cursor has a greater value than a config one. Choosing cursor value")
 		return cursorUInt64, nil
 	}
 
+	t.log.Debugf("Config value has a greater value than a cursor one. Choosing config value")
 	return t.firstBlock, nil
 }
 
@@ -122,8 +151,10 @@ func (t *FactoryTracker) GetNewBlock(previousBlock, iterationSize uint64) (int64
 		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
 	}
 
+	t.log.Debugf("Last blockchain block has id of %d", lastBlockchainBlock)
+
 	if previousBlock+iterationSize+1 > lastBlockchainBlock {
-		return int64(lastBlockchainBlock) + 1, nil
+		return int64(lastBlockchainBlock + 1), nil
 	}
 
 	return int64(previousBlock + iterationSize + 1), nil

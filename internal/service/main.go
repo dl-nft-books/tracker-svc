@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
 	"net"
 	"net/http"
@@ -20,7 +18,6 @@ type service struct {
 	log      *logan.Entry
 	copus    types.Copus
 	listener net.Listener
-	database data.DB
 }
 
 func (s *service) run() error {
@@ -43,7 +40,6 @@ func newService(cfg config.Config) *service {
 		log:      cfg.Log(),
 		copus:    cfg.Copus(),
 		listener: cfg.Listener(),
-		database: postgres.NewDB(cfg.DB()),
 	}
 }
 

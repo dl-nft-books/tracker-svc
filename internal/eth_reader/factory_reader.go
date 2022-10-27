@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/itokenfactory"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
 type FactoryContractReader struct {
@@ -33,7 +33,7 @@ func (r *FactoryContractReader) GetEvents(
 	lastBlock uint64,
 	err error,
 ) {
-	instance, err := itokenfactory.NewItokenfactory(contract, r.rpc)
+	instance, err := tokenfactory.NewTokenfactory(contract, r.rpc)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to initialize token factory instance")
 	}
