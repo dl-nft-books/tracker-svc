@@ -17,6 +17,7 @@ require (
 	gitlab.com/distributed_lab/logan v3.8.1+incompatible
 	gitlab.com/distributed_lab/running v1.6.0
 	gitlab.com/tokend/connectors v0.1.9
+	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221027124230-96d2bab5ea13
 )
 
 require (
@@ -35,7 +36,7 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/google/jsonapi v0.0.0-20200226002910-c8283f632fb7 // indirect
-	github.com/google/uuid v1.2.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0 // indirect

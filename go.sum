@@ -241,8 +241,8 @@ github.com/google/pprof v0.0.0-20210226084205-cbba55b83ad5/go.mod h1:kpwsk12EmLe
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
-github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
@@ -526,6 +526,8 @@ gitlab.com/tokend/go v3.15.0+incompatible h1:+FLJP11ppj5ttU3KNcvvummU3uE6hpju1CY
 gitlab.com/tokend/go v3.15.0+incompatible/go.mod h1:qz38YBc7VL29H2gnXbpRzcEVw2d1NUZ5SVDzIehqDCA=
 gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312 h1:u8pxrNw8QKIsrmClG71uuTPy22fkePAXBkHgxrXkMU8=
 gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312/go.mod h1:vdlhN5/oQR7uY8EsGSqPf8bwnmQxxpaq7qrQn5Y3U/w=
+gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221027124230-96d2bab5ea13 h1:gnUAOJvggjhjqaFHEr/mXIuzFAhIn69PwjzlAeCNdPc=
+gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221027124230-96d2bab5ea13/go.mod h1:ex+/kgOjFVWYSXMoSTtfsW8KkOa54vVP1cAy52wj9Mc=
 go.etcd.io/etcd/api/v3 v3.5.0/go.mod h1:cbVKeC6lCfl7j/8jBhAK6aIYO9XOjdptoxU/nLQcPvs=
 go.etcd.io/etcd/client/pkg/v3 v3.5.0/go.mod h1:IJHfcCEKxYu1Os13ZdwCwIUTUVGYTSAM3YSwc9/Ac1g=
 go.etcd.io/etcd/client/v2 v2.305.0/go.mod h1:h9puh54ZTgAKtEbut2oe9P4L/oqKCVB6xsXlzd7alYQ=

@@ -88,7 +88,7 @@ github.com/go-stack/stack
 # github.com/google/jsonapi v0.0.0-20200226002910-c8283f632fb7
 ## explicit
 github.com/google/jsonapi
-# github.com/google/uuid v1.2.0
+# github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
@@ -234,6 +234,11 @@ gitlab.com/tokend/keypair/figurekeypair
 gitlab.com/tokend/keypair/internal
 gitlab.com/tokend/keypair/internal/crc16
 gitlab.com/tokend/keypair/internal/strkey
+# gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221027124230-96d2bab5ea13
+## explicit; go 1.18
+gitlab.com/tokend/nft-books/blob-svc/connector
+gitlab.com/tokend/nft-books/blob-svc/connector/models
+gitlab.com/tokend/nft-books/blob-svc/resources
 # golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 ## explicit; go 1.17
 golang.org/x/crypto/ed25519
