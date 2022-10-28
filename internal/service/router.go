@@ -17,8 +17,8 @@ func (s *service) router() chi.Router {
 			handlers.CtxLog(s.log),
 		),
 	)
-	r.Route("/integrations/", func(r chi.Router) {
-		// configure endpoints here
+	r.Route("/integrations/tracker", func(r chi.Router) {
+
 	})
 
 	return r
