@@ -80,7 +80,15 @@ func (t *MintTracker) Track(ctx context.Context) error {
 
 func (t *MintTracker) ProcessContract(contract data.Contract) error {
 	t.log.Debugf("Processing contract with id of %d", contract.Id)
+	lastBlock, err := t.rpc.BlockNumber(context.Background())
+	if err != nil {
+		return errors.Wrap(err, "failed to get last block number")
+	}
 
+	if contract.LastBlock > lastBlock {
+		t.log.Debugf("contract last block exceeded last block in the blockchain")
+		return nil
+	}
 	events, _, err := t.reader.GetEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
 	if err != nil {
 		return errors.Wrap(err, "failed to get events")

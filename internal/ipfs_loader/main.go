@@ -53,8 +53,7 @@ func (l *IpfsLoader) Load(uri string) error {
 	}
 	l.logger.Debugf("Successfully loaded document with cid %s", cid)
 
-	_, err = l.documenter.DeleteDocument(fileName)
-	if err != nil {
+	if _, err = l.documenter.DeleteDocument(fileName); err != nil {
 		return errors.Wrap(err, "failed to delete document")
 	}
 	l.logger.Debug("Successfully removed document")
