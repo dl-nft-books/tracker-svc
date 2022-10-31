@@ -11,7 +11,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"strconv"
 )
@@ -22,7 +22,7 @@ type MintTracker struct {
 	log        *logan.Entry
 	rpc        *ethclient.Client
 	reader     eth_reader.TokenContractReader
-	ipfsLoader *ipfs_loader.IpfsLoader
+	ipfsLoader *helpers.IpfsLoader
 
 	trackerDB data.TrackerDB
 	tasksQ    data.TasksQ
@@ -38,7 +38,7 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 		log:        cfg.Log(),
 		rpc:        cfg.EtherClient().Rpc,
 		reader:     eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
-		ipfsLoader: ipfs_loader.NewIpfsLoader(cfg),
+		ipfsLoader: helpers.NewIpfsLoader(cfg),
 
 		trackerDB: postgres.NewTrackerDB(cfg.TrackerDB().DB),
 		tasksQ:    postgres.NewTasksQ(cfg.GeneratorDB().DB),
