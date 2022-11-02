@@ -2,9 +2,10 @@ package config
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/lib/pq"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"time"
 
 	"github.com/pkg/errors"
 	"gitlab.com/distributed_lab/figure"
@@ -23,6 +24,7 @@ type DBConnection struct {
 type Databaser interface {
 	TrackerDB() *DBConnection
 	GeneratorDB() *DBConnection
+	BookDB() *DBConnection
 }
 
 type databaser struct {
@@ -39,6 +41,7 @@ func NewDatabaser(getter kv.Getter) Databaser {
 type databaserCfg struct {
 	TrackerService   DatabaserFields `fig:"tracker-svc"`
 	GeneratorService DatabaserFields `fig:"generator-svc"`
+	BookService      DatabaserFields `fig:"book-svc"`
 }
 
 type DatabaserFields struct {
@@ -60,6 +63,7 @@ func (d *databaser) readConfig() databaserCfg {
 	cfg := databaserCfg{
 		TrackerService:   defaultFields,
 		GeneratorService: defaultFields,
+		BookService:      defaultFields,
 	}
 
 	if err := figure.
@@ -113,5 +117,14 @@ func (d *databaser) GeneratorDB() *DBConnection {
 		DB:       cfg.GeneratorService.DB(),
 		RawDB:    cfg.GeneratorService.RawDB(),
 		Listener: cfg.GeneratorService.NewListener(),
+	}
+}
+
+func (d *databaser) BookDB() *DBConnection {
+	cfg := d.readConfig()
+	return &DBConnection{
+		DB:       cfg.BookService.DB(),
+		RawDB:    cfg.BookService.RawDB(),
+		Listener: cfg.BookService.NewListener(),
 	}
 }

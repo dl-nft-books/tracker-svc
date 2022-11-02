@@ -12,21 +12,22 @@ require (
 	github.com/lib/pq v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/rubenv/sql-migrate v1.2.0
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.8.1
+	github.com/wealdtech/go-ipfs-provider v1.1.0
 	github.com/wealdtech/go-ipfs-provider-pinata v1.1.0
 	gitlab.com/distributed_lab/ape v1.7.1
 	gitlab.com/distributed_lab/figure v2.1.0+incompatible
-	gitlab.com/distributed_lab/json-api-connector v0.2.4
 	gitlab.com/distributed_lab/kit v1.11.1
 	gitlab.com/distributed_lab/logan v3.8.1+incompatible
 	gitlab.com/distributed_lab/running v1.6.0
-	gitlab.com/tokend/connectors v0.1.9
+	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221102115043-8fc374c84afc
 )
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/aws/aws-sdk-go v1.44.114 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20200211180108-c7c1fbc02894 // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/getsentry/sentry-go v0.7.0 // indirect
@@ -48,6 +50,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/ipfs/go-cid v0.0.7 // indirect
 	github.com/ipfs/go-ipfs-files v0.0.9 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
@@ -84,11 +87,14 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
-	github.com/wealdtech/go-ipfs-provider v1.1.0 // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c // indirect
+	gitlab.com/distributed_lab/json-api-connector v0.2.4 // indirect
 	gitlab.com/distributed_lab/lorem v0.2.0 // indirect
+	gitlab.com/tokend/connectors v0.1.9 // indirect
 	gitlab.com/tokend/go v3.15.0+incompatible // indirect
 	gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312 // indirect
+	gitlab.com/tokend/nft-books/doorman v0.1.0-rc.1.0.20221024153252-83b51d5f1691 // indirect
+	gitlab.com/tokend/nft-books/go-sdk v0.1.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect

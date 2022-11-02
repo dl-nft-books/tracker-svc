@@ -2,21 +2,27 @@ package runners
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/kit/pgdb"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
+	s3connector "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/helpers"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/models"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
-	"strconv"
 )
 
-const mintKVTrackerPage = "mint_tracker_page"
+const (
+	mintKVTrackerPage = "mint_tracker_page"
+	baseURI           = "https://ipfs.io/ipfs/"
+)
 
 type MintTracker struct {
 	log        *logan.Entry
@@ -26,11 +32,14 @@ type MintTracker struct {
 
 	trackerDB data.TrackerDB
 	tasksQ    data.TasksQ
+	booksQ    data.BookQ
 
 	name          string
 	capacity      uint64
 	iterationSize uint64
 	runnerCfg     config.Runner
+
+	documenterConnector *s3connector.Connector
 }
 
 func NewMintTracker(cfg config.Config) *MintTracker {
@@ -42,10 +51,13 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 
 		trackerDB: postgres.NewTrackerDB(cfg.TrackerDB().DB),
 		tasksQ:    postgres.NewTasksQ(cfg.GeneratorDB().DB),
+		booksQ:    postgres.NewBooksQ(cfg.BookDB().DB),
 
 		name:          cfg.MintTracker().Name,
 		iterationSize: cfg.MintTracker().IterationSize,
 		runnerCfg:     cfg.MintTracker().Runner,
+
+		documenterConnector: cfg.DocumenterConnector(),
 	}
 }
 
@@ -140,41 +152,79 @@ func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, 
 }
 
 func (t *MintTracker) ProcessEvent(event eth_reader.TokenMintedEvent) error {
-	ipfsHash := t.ipfsLoader.GetHashOutUri(event.Uri)
-
 	return t.trackerDB.Transaction(func() error {
-		task, err := t.tasksQ.GetByHash(ipfsHash)
+		// updating book db
+		t.booksQ = t.booksQ.New()
+
+		// event.Uri is actually metadata hash
+		task, err := t.tasksQ.GetByHash(event.Uri)
 		if err != nil {
 			return errors.Wrap(err, "failed to get task by ipfs hash")
 		}
 		if task == nil {
-			t.log.Warnf("Could not find task with a hash of %s", ipfsHash)
+			t.log.Warnf("Could not find task with a hash of %s", event.Uri)
 			return nil
 		}
 
+		// getting book
+		book, err := t.booksQ.FilterActual().FilterByID(task.BookId).Get()
+		if err != nil {
+			return errors.Wrap(err, "failed to get book by task id")
+		}
+		if book == nil {
+			t.log.Warnf("Could not find book with id %d", task.BookId)
+			return nil
+		}
+
+		// parsing banner key
+		bannerKey, err := helpers.GetDocumentKey(book.Banner)
+		if err != nil {
+			return err
+		}
+		if bannerKey == nil {
+			return errors.Wrap(err, "failed to get document key")
+		}
+
+		// getting nft banner img link
+		bannerLink, err := t.documenterConnector.GetReadableLink(*bannerKey)
+		if err != nil {
+			return err
+		}
+
+		// updating status to loading on IPFS
 		if err = t.tasksQ.UpdateStatus(resources.TaskUploading, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update status", logan.F{
 				"task_id": task.Id,
 			})
 		}
 
-		if err = t.ipfsLoader.Load(event.Uri); err != nil {
+		// uploading metadata
+		if err = t.ipfsLoader.UploadMetadata(models.Metadata{
+			Name:        book.Title,
+			Description: book.Description,
+			Image:       bannerLink.Data.Attributes.Url,
+			FileURL:     baseURI + task.FileIpfsHash,
+		}); err != nil {
+			return errors.Wrap(err, "failed to load metadata to the ipfs")
+		}
+
+		// uploading file
+		if err = t.ipfsLoader.UploadFile(task.FileIpfsHash); err != nil {
 			return errors.Wrap(err, "failed to load file to the ipfs")
 		}
 
-		if err = t.tasksQ.UpdateIpfsHash(ipfsHash, task.Id); err != nil {
-			return errors.Wrap(err, "failed to update ipfs hash")
-		}
-
+		// updating tokenID
 		if err = t.tasksQ.UpdateTokenId(event.TokenId, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update token id")
 		}
 
+		// updating status to fully processed task
 		if err = t.tasksQ.UpdateStatus(resources.TaskFinishedUploading, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update status", logan.F{
 				"task_id": task.Id,
 			})
 		}
+
 		return nil
 	})
 }

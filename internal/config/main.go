@@ -5,10 +5,11 @@ import (
 	"gitlab.com/distributed_lab/kit/copus"
 	"gitlab.com/distributed_lab/kit/copus/types"
 	"gitlab.com/distributed_lab/kit/kv"
+	s3api "gitlab.com/tokend/nft-books/blob-svc/connector/api"
+	s3config "gitlab.com/tokend/nft-books/blob-svc/connector/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader/pinata"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/s3_connector"
 )
 
 type Config interface {
@@ -20,7 +21,7 @@ type Config interface {
 	Databaser
 
 	IpfsLoader() ipfs_loader.LoaderImplementation
-	DocumenterConnector() *s3_connector.Connector
+	DocumenterConnector() *s3api.Connector
 	FactoryTracker() FactoryTracker
 	MintTracker() MintTracker
 	EtherClient() EtherClient
@@ -30,7 +31,7 @@ type config struct {
 	comfig.Logger
 	types.Copuser
 	comfig.Listenerer
-	s3_connector.Documenter
+	s3config.Documenter
 	infura.Infurer
 	pinata.Pinater
 	Databaser
@@ -49,7 +50,7 @@ func New(getter kv.Getter) Config {
 		Copuser:    copus.NewCopuser(getter),
 		Listenerer: comfig.NewListenerer(getter),
 		Logger:     comfig.NewLogger(getter, comfig.LoggerOpts{}),
-		Documenter: s3_connector.NewDocumenter(getter),
+		Documenter: s3config.NewDocumenter(getter),
 		Infurer:    infura.NewInfurer(getter),
 		Pinater:    pinata.NewPinater(getter),
 	}

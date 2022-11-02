@@ -1,20 +1,23 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
-	"gitlab.com/distributed_lab/logan/v3"
-	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/s3_connector"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"gitlab.com/distributed_lab/logan/v3"
+	"gitlab.com/distributed_lab/logan/v3/errors"
+	s3connector "gitlab.com/tokend/nft-books/blob-svc/connector/api"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/models"
 )
 
 type IpfsLoader struct {
 	implementation ipfs_loader.LoaderImplementation
-	documenter     *s3_connector.Connector
+	documenter     *s3connector.Connector
 	logger         *logan.Entry
 }
 
@@ -26,10 +29,10 @@ func NewIpfsLoader(cfg config.Config) *IpfsLoader {
 	}
 }
 
-func (l *IpfsLoader) Load(uri string) error {
+func (l *IpfsLoader) UploadFile(uri string) error {
 	l.logger.Debugf("Caught request to process uri %s", uri)
 
-	fileName := fmt.Sprintf("%s.pdf", l.GetHashOutUri(uri))
+	fileName := fmt.Sprintf("%s.pdf", uri)
 
 	l.logger.Debugf("Trying to find file %s", fileName)
 
@@ -48,7 +51,7 @@ func (l *IpfsLoader) Load(uri string) error {
 
 	l.logger.Debug("Downloaded document. Trying to load it on the IPFS")
 
-	response, err := l.implementation.Load(l.GetHashOutUri(uri), downloadedDocument)
+	response, err := l.implementation.Load(uri, downloadedDocument)
 	if err != nil {
 		return errors.Wrap(err, "failed to add file to the ipfs")
 	}
@@ -57,7 +60,32 @@ func (l *IpfsLoader) Load(uri string) error {
 	if _, err = l.documenter.DeleteDocument(fileName); err != nil {
 		return errors.Wrap(err, "failed to delete document")
 	}
-	l.logger.Debug("Successfully removed document")
+	l.logger.Debug("Successfully removed document from S3")
+
+	l.logger.Debug("Request was successfully processed")
+
+	return nil
+}
+
+func (l *IpfsLoader) UploadMetadata(info models.Metadata) error {
+	l.logger.Debugf("Caught request to process metadata")
+
+	l.logger.Debug("Marshalling metadata...")
+	raw, err := json.Marshal(info)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal metadata")
+	}
+	l.logger.Debug("Metadata marshalled successfully")
+
+	l.logger.Debug("Loading metadata to IPFS...")
+	metadataFileName := l.GetHashOutUri(info.FileURL) + "-meta"
+	response, err := l.implementation.Load(metadataFileName, raw)
+	if err != nil {
+		return errors.Wrap(err, "failed to add metadata to the ipfs")
+	}
+	l.logger.Debugf("Metadata was successfully loaded to IPFS. Response:\n%s\n", response)
+
+	l.logger.Debug("Request was successfully processed")
 
 	return nil
 }

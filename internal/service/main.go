@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
 	"net"
 	"net/http"
+
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
 
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 
