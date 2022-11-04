@@ -186,7 +186,7 @@ func (t *MintTracker) ProcessEvent(event eth_reader.TokenMintedEvent) error {
 		}
 
 		// getting nft banner img link
-		bannerLink, err := t.documenterConnector.GetReadableLink(*bannerKey)
+		bannerLink, err := t.documenterConnector.GetDocumentLink(*bannerKey)
 		if err != nil {
 			return err
 		}
