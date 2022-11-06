@@ -6,6 +6,7 @@ type TrackerDB interface {
 
 	KeyValue() KeyValueQ
 	Contracts() ContractsQ
+	Payments() PaymentsQ
 
 	Transaction(func() error) error
 }

@@ -9,19 +9,6 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
 )
 
-var (
-	NoResponseErr    = errors.New("No response received")
-	FailedLoadingErr = errors.New("Failed to load a file")
-	HashNotFound     = errors.New("IPFS Hash was not found in the response")
-)
-
-const (
-	methodField             = "POST"
-	contentTypeField        = "Content-Type"
-	pinataApiKeyField       = "pinata_api_key"
-	pinataApiSecretKeyField = "pinata_secret_api_key"
-)
-
 type PinataLoader struct {
 	provider *pinata.Provider
 }

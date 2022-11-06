@@ -42,7 +42,7 @@ type ITokenFactoryUserNFTsInfo struct {
 
 // TokenfactoryMetaData contains all meta data concerning the Tokenfactory contract.
 var TokenfactoryMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beacon\",\"type\":\"address\"}],\"name\":\"BeaconUpgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newTokenContractAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"adminsArr_\",\"type\":\"address[]\"},{\"internalType\":\"uint8\",\"name\":\"priceDecimals_\",\"type\":\"uint8\"}],\"name\":\"__TokenFactory_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"deployTokenContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAdmins\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"tokenContractsArr_\",\"type\":\"address[]\"}],\"name\":\"getBaseTokenContractsInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"tokenContractAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"}],\"internalType\":\"structITokenFactory.BaseTokenContractInfo[]\",\"name\":\"tokenContractsInfoArr_\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTokenContractsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTokenContractsImpl\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"offset_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit_\",\"type\":\"uint256\"}],\"name\":\"getTokenContractsPart\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserNFTsInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"tokenContractAddr\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs\",\"type\":\"uint256[]\"}],\"internalType\":\"structITokenFactory.UserNFTsInfo[]\",\"name\":\"userNFTsInfoArr_\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"isAdmin\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"poolsBeacon\",\"outputs\":[{\"internalType\":\"contractProxyBeacon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"priceDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation_\",\"type\":\"address\"}],\"name\":\"setNewImplementation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"adminsToUpdate_\",\"type\":\"address[]\"},{\"internalType\":\"bool\",\"name\":\"isAdding_\",\"type\":\"bool\"}],\"name\":\"updateAdmins\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"adminsToUpdate\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isAdding\",\"type\":\"bool\"}],\"name\":\"AdminsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newBaseTokenContractsURI\",\"type\":\"string\"}],\"name\":\"BaseTokenContractsURIUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beacon\",\"type\":\"address\"}],\"name\":\"BeaconUpgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenContractId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newTokenContractAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"adminsArr_\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"baseTokenContractsURI_\",\"type\":\"string\"},{\"internalType\":\"uint8\",\"name\":\"priceDecimals_\",\"type\":\"uint8\"}],\"name\":\"__TokenFactory_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"baseTokenContractsURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenContractId_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"deployTokenContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAdmins\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"tokenContractsArr_\",\"type\":\"address[]\"}],\"name\":\"getBaseTokenContractsInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"tokenContractAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"}],\"internalType\":\"structITokenFactory.BaseTokenContractInfo[]\",\"name\":\"tokenContractsInfoArr_\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTokenContractsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTokenContractsImpl\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"offset_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit_\",\"type\":\"uint256\"}],\"name\":\"getTokenContractsPart\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserNFTsInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"tokenContractAddr\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs\",\"type\":\"uint256[]\"}],\"internalType\":\"structITokenFactory.UserNFTsInfo[]\",\"name\":\"userNFTsInfoArr_\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"isAdmin\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"poolsBeacon\",\"outputs\":[{\"internalType\":\"contractProxyBeacon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"priceDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"baseTokenContractsURI_\",\"type\":\"string\"}],\"name\":\"setBaseTokenContractsURI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation_\",\"type\":\"address\"}],\"name\":\"setNewImplementation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"tokenContractByIndex\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"adminsToUpdate_\",\"type\":\"address[]\"},{\"internalType\":\"bool\",\"name\":\"isAdding_\",\"type\":\"bool\"}],\"name\":\"updateAdmins\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // TokenfactoryABI is the input ABI used to generate the binding from.
@@ -189,6 +189,37 @@ func (_Tokenfactory *TokenfactoryTransactorRaw) Transfer(opts *bind.TransactOpts
 // Transact invokes the (paid) contract method with params as input values.
 func (_Tokenfactory *TokenfactoryTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _Tokenfactory.Contract.contract.Transact(opts, method, params...)
+}
+
+// BaseTokenContractsURI is a free data retrieval call binding the contract method 0x72148c1c.
+//
+// Solidity: function baseTokenContractsURI() view returns(string)
+func (_Tokenfactory *TokenfactoryCaller) BaseTokenContractsURI(opts *bind.CallOpts) (string, error) {
+	var out []interface{}
+	err := _Tokenfactory.contract.Call(opts, &out, "baseTokenContractsURI")
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
+}
+
+// BaseTokenContractsURI is a free data retrieval call binding the contract method 0x72148c1c.
+//
+// Solidity: function baseTokenContractsURI() view returns(string)
+func (_Tokenfactory *TokenfactorySession) BaseTokenContractsURI() (string, error) {
+	return _Tokenfactory.Contract.BaseTokenContractsURI(&_Tokenfactory.CallOpts)
+}
+
+// BaseTokenContractsURI is a free data retrieval call binding the contract method 0x72148c1c.
+//
+// Solidity: function baseTokenContractsURI() view returns(string)
+func (_Tokenfactory *TokenfactoryCallerSession) BaseTokenContractsURI() (string, error) {
+	return _Tokenfactory.Contract.BaseTokenContractsURI(&_Tokenfactory.CallOpts)
 }
 
 // GetAdmins is a free data retrieval call binding the contract method 0x31ae450b.
@@ -532,46 +563,77 @@ func (_Tokenfactory *TokenfactoryCallerSession) ProxiableUUID() ([32]byte, error
 	return _Tokenfactory.Contract.ProxiableUUID(&_Tokenfactory.CallOpts)
 }
 
-// TokenFactoryInit is a paid mutator transaction binding the contract method 0xc1e0f5d0.
+// TokenContractByIndex is a free data retrieval call binding the contract method 0xb7e6a3ec.
 //
-// Solidity: function __TokenFactory_init(address[] adminsArr_, uint8 priceDecimals_) returns()
-func (_Tokenfactory *TokenfactoryTransactor) TokenFactoryInit(opts *bind.TransactOpts, adminsArr_ []common.Address, priceDecimals_ uint8) (*types.Transaction, error) {
-	return _Tokenfactory.contract.Transact(opts, "__TokenFactory_init", adminsArr_, priceDecimals_)
+// Solidity: function tokenContractByIndex(uint256 ) view returns(address)
+func (_Tokenfactory *TokenfactoryCaller) TokenContractByIndex(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
+	var out []interface{}
+	err := _Tokenfactory.contract.Call(opts, &out, "tokenContractByIndex", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
-// TokenFactoryInit is a paid mutator transaction binding the contract method 0xc1e0f5d0.
+// TokenContractByIndex is a free data retrieval call binding the contract method 0xb7e6a3ec.
 //
-// Solidity: function __TokenFactory_init(address[] adminsArr_, uint8 priceDecimals_) returns()
-func (_Tokenfactory *TokenfactorySession) TokenFactoryInit(adminsArr_ []common.Address, priceDecimals_ uint8) (*types.Transaction, error) {
-	return _Tokenfactory.Contract.TokenFactoryInit(&_Tokenfactory.TransactOpts, adminsArr_, priceDecimals_)
+// Solidity: function tokenContractByIndex(uint256 ) view returns(address)
+func (_Tokenfactory *TokenfactorySession) TokenContractByIndex(arg0 *big.Int) (common.Address, error) {
+	return _Tokenfactory.Contract.TokenContractByIndex(&_Tokenfactory.CallOpts, arg0)
 }
 
-// TokenFactoryInit is a paid mutator transaction binding the contract method 0xc1e0f5d0.
+// TokenContractByIndex is a free data retrieval call binding the contract method 0xb7e6a3ec.
 //
-// Solidity: function __TokenFactory_init(address[] adminsArr_, uint8 priceDecimals_) returns()
-func (_Tokenfactory *TokenfactoryTransactorSession) TokenFactoryInit(adminsArr_ []common.Address, priceDecimals_ uint8) (*types.Transaction, error) {
-	return _Tokenfactory.Contract.TokenFactoryInit(&_Tokenfactory.TransactOpts, adminsArr_, priceDecimals_)
+// Solidity: function tokenContractByIndex(uint256 ) view returns(address)
+func (_Tokenfactory *TokenfactoryCallerSession) TokenContractByIndex(arg0 *big.Int) (common.Address, error) {
+	return _Tokenfactory.Contract.TokenContractByIndex(&_Tokenfactory.CallOpts, arg0)
 }
 
-// DeployTokenContract is a paid mutator transaction binding the contract method 0x90051ced.
+// TokenFactoryInit is a paid mutator transaction binding the contract method 0xae13b76e.
 //
-// Solidity: function deployTokenContract(string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_) returns()
-func (_Tokenfactory *TokenfactoryTransactor) DeployTokenContract(opts *bind.TransactOpts, tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Tokenfactory.contract.Transact(opts, "deployTokenContract", tokenName_, tokenSymbol_, pricePerOneToken_)
+// Solidity: function __TokenFactory_init(address[] adminsArr_, string baseTokenContractsURI_, uint8 priceDecimals_) returns()
+func (_Tokenfactory *TokenfactoryTransactor) TokenFactoryInit(opts *bind.TransactOpts, adminsArr_ []common.Address, baseTokenContractsURI_ string, priceDecimals_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.contract.Transact(opts, "__TokenFactory_init", adminsArr_, baseTokenContractsURI_, priceDecimals_)
 }
 
-// DeployTokenContract is a paid mutator transaction binding the contract method 0x90051ced.
+// TokenFactoryInit is a paid mutator transaction binding the contract method 0xae13b76e.
 //
-// Solidity: function deployTokenContract(string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_) returns()
-func (_Tokenfactory *TokenfactorySession) DeployTokenContract(tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Tokenfactory.Contract.DeployTokenContract(&_Tokenfactory.TransactOpts, tokenName_, tokenSymbol_, pricePerOneToken_)
+// Solidity: function __TokenFactory_init(address[] adminsArr_, string baseTokenContractsURI_, uint8 priceDecimals_) returns()
+func (_Tokenfactory *TokenfactorySession) TokenFactoryInit(adminsArr_ []common.Address, baseTokenContractsURI_ string, priceDecimals_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.TokenFactoryInit(&_Tokenfactory.TransactOpts, adminsArr_, baseTokenContractsURI_, priceDecimals_)
 }
 
-// DeployTokenContract is a paid mutator transaction binding the contract method 0x90051ced.
+// TokenFactoryInit is a paid mutator transaction binding the contract method 0xae13b76e.
 //
-// Solidity: function deployTokenContract(string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_) returns()
-func (_Tokenfactory *TokenfactoryTransactorSession) DeployTokenContract(tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Tokenfactory.Contract.DeployTokenContract(&_Tokenfactory.TransactOpts, tokenName_, tokenSymbol_, pricePerOneToken_)
+// Solidity: function __TokenFactory_init(address[] adminsArr_, string baseTokenContractsURI_, uint8 priceDecimals_) returns()
+func (_Tokenfactory *TokenfactoryTransactorSession) TokenFactoryInit(adminsArr_ []common.Address, baseTokenContractsURI_ string, priceDecimals_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.TokenFactoryInit(&_Tokenfactory.TransactOpts, adminsArr_, baseTokenContractsURI_, priceDecimals_)
+}
+
+// DeployTokenContract is a paid mutator transaction binding the contract method 0xda8aa768.
+//
+// Solidity: function deployTokenContract(uint256 tokenContractId_, string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_, bytes32 r_, bytes32 s_, uint8 v_) returns()
+func (_Tokenfactory *TokenfactoryTransactor) DeployTokenContract(opts *bind.TransactOpts, tokenContractId_ *big.Int, tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.contract.Transact(opts, "deployTokenContract", tokenContractId_, tokenName_, tokenSymbol_, pricePerOneToken_, r_, s_, v_)
+}
+
+// DeployTokenContract is a paid mutator transaction binding the contract method 0xda8aa768.
+//
+// Solidity: function deployTokenContract(uint256 tokenContractId_, string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_, bytes32 r_, bytes32 s_, uint8 v_) returns()
+func (_Tokenfactory *TokenfactorySession) DeployTokenContract(tokenContractId_ *big.Int, tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.DeployTokenContract(&_Tokenfactory.TransactOpts, tokenContractId_, tokenName_, tokenSymbol_, pricePerOneToken_, r_, s_, v_)
+}
+
+// DeployTokenContract is a paid mutator transaction binding the contract method 0xda8aa768.
+//
+// Solidity: function deployTokenContract(uint256 tokenContractId_, string tokenName_, string tokenSymbol_, uint256 pricePerOneToken_, bytes32 r_, bytes32 s_, uint8 v_) returns()
+func (_Tokenfactory *TokenfactoryTransactorSession) DeployTokenContract(tokenContractId_ *big.Int, tokenName_ string, tokenSymbol_ string, pricePerOneToken_ *big.Int, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.DeployTokenContract(&_Tokenfactory.TransactOpts, tokenContractId_, tokenName_, tokenSymbol_, pricePerOneToken_, r_, s_, v_)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -593,6 +655,27 @@ func (_Tokenfactory *TokenfactorySession) RenounceOwnership() (*types.Transactio
 // Solidity: function renounceOwnership() returns()
 func (_Tokenfactory *TokenfactoryTransactorSession) RenounceOwnership() (*types.Transaction, error) {
 	return _Tokenfactory.Contract.RenounceOwnership(&_Tokenfactory.TransactOpts)
+}
+
+// SetBaseTokenContractsURI is a paid mutator transaction binding the contract method 0x30dcd8aa.
+//
+// Solidity: function setBaseTokenContractsURI(string baseTokenContractsURI_) returns()
+func (_Tokenfactory *TokenfactoryTransactor) SetBaseTokenContractsURI(opts *bind.TransactOpts, baseTokenContractsURI_ string) (*types.Transaction, error) {
+	return _Tokenfactory.contract.Transact(opts, "setBaseTokenContractsURI", baseTokenContractsURI_)
+}
+
+// SetBaseTokenContractsURI is a paid mutator transaction binding the contract method 0x30dcd8aa.
+//
+// Solidity: function setBaseTokenContractsURI(string baseTokenContractsURI_) returns()
+func (_Tokenfactory *TokenfactorySession) SetBaseTokenContractsURI(baseTokenContractsURI_ string) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.SetBaseTokenContractsURI(&_Tokenfactory.TransactOpts, baseTokenContractsURI_)
+}
+
+// SetBaseTokenContractsURI is a paid mutator transaction binding the contract method 0x30dcd8aa.
+//
+// Solidity: function setBaseTokenContractsURI(string baseTokenContractsURI_) returns()
+func (_Tokenfactory *TokenfactoryTransactorSession) SetBaseTokenContractsURI(baseTokenContractsURI_ string) (*types.Transaction, error) {
+	return _Tokenfactory.Contract.SetBaseTokenContractsURI(&_Tokenfactory.TransactOpts, baseTokenContractsURI_)
 }
 
 // SetNewImplementation is a paid mutator transaction binding the contract method 0xadb3ce92.
@@ -829,6 +912,275 @@ func (_Tokenfactory *TokenfactoryFilterer) WatchAdminChanged(opts *bind.WatchOpt
 func (_Tokenfactory *TokenfactoryFilterer) ParseAdminChanged(log types.Log) (*TokenfactoryAdminChanged, error) {
 	event := new(TokenfactoryAdminChanged)
 	if err := _Tokenfactory.contract.UnpackLog(event, "AdminChanged", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// TokenfactoryAdminsUpdatedIterator is returned from FilterAdminsUpdated and is used to iterate over the raw logs and unpacked data for AdminsUpdated events raised by the Tokenfactory contract.
+type TokenfactoryAdminsUpdatedIterator struct {
+	Event *TokenfactoryAdminsUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *TokenfactoryAdminsUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(TokenfactoryAdminsUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(TokenfactoryAdminsUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *TokenfactoryAdminsUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *TokenfactoryAdminsUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// TokenfactoryAdminsUpdated represents a AdminsUpdated event raised by the Tokenfactory contract.
+type TokenfactoryAdminsUpdated struct {
+	AdminsToUpdate []common.Address
+	IsAdding       bool
+	Raw            types.Log // Blockchain specific contextual infos
+}
+
+// FilterAdminsUpdated is a free log retrieval operation binding the contract event 0x869da43fad8e93387e0f5b58027ae3bdc4c61756fc5219fa85a2e4f44d3ebea4.
+//
+// Solidity: event AdminsUpdated(address[] adminsToUpdate, bool isAdding)
+func (_Tokenfactory *TokenfactoryFilterer) FilterAdminsUpdated(opts *bind.FilterOpts) (*TokenfactoryAdminsUpdatedIterator, error) {
+
+	logs, sub, err := _Tokenfactory.contract.FilterLogs(opts, "AdminsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &TokenfactoryAdminsUpdatedIterator{contract: _Tokenfactory.contract, event: "AdminsUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchAdminsUpdated is a free log subscription operation binding the contract event 0x869da43fad8e93387e0f5b58027ae3bdc4c61756fc5219fa85a2e4f44d3ebea4.
+//
+// Solidity: event AdminsUpdated(address[] adminsToUpdate, bool isAdding)
+func (_Tokenfactory *TokenfactoryFilterer) WatchAdminsUpdated(opts *bind.WatchOpts, sink chan<- *TokenfactoryAdminsUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Tokenfactory.contract.WatchLogs(opts, "AdminsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(TokenfactoryAdminsUpdated)
+				if err := _Tokenfactory.contract.UnpackLog(event, "AdminsUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseAdminsUpdated is a log parse operation binding the contract event 0x869da43fad8e93387e0f5b58027ae3bdc4c61756fc5219fa85a2e4f44d3ebea4.
+//
+// Solidity: event AdminsUpdated(address[] adminsToUpdate, bool isAdding)
+func (_Tokenfactory *TokenfactoryFilterer) ParseAdminsUpdated(log types.Log) (*TokenfactoryAdminsUpdated, error) {
+	event := new(TokenfactoryAdminsUpdated)
+	if err := _Tokenfactory.contract.UnpackLog(event, "AdminsUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// TokenfactoryBaseTokenContractsURIUpdatedIterator is returned from FilterBaseTokenContractsURIUpdated and is used to iterate over the raw logs and unpacked data for BaseTokenContractsURIUpdated events raised by the Tokenfactory contract.
+type TokenfactoryBaseTokenContractsURIUpdatedIterator struct {
+	Event *TokenfactoryBaseTokenContractsURIUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *TokenfactoryBaseTokenContractsURIUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(TokenfactoryBaseTokenContractsURIUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(TokenfactoryBaseTokenContractsURIUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *TokenfactoryBaseTokenContractsURIUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *TokenfactoryBaseTokenContractsURIUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// TokenfactoryBaseTokenContractsURIUpdated represents a BaseTokenContractsURIUpdated event raised by the Tokenfactory contract.
+type TokenfactoryBaseTokenContractsURIUpdated struct {
+	NewBaseTokenContractsURI string
+	Raw                      types.Log // Blockchain specific contextual infos
+}
+
+// FilterBaseTokenContractsURIUpdated is a free log retrieval operation binding the contract event 0x35221ce24b65bb230797e03080154779f50580793d0f60505bb8a6d15c507b80.
+//
+// Solidity: event BaseTokenContractsURIUpdated(string newBaseTokenContractsURI)
+func (_Tokenfactory *TokenfactoryFilterer) FilterBaseTokenContractsURIUpdated(opts *bind.FilterOpts) (*TokenfactoryBaseTokenContractsURIUpdatedIterator, error) {
+
+	logs, sub, err := _Tokenfactory.contract.FilterLogs(opts, "BaseTokenContractsURIUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &TokenfactoryBaseTokenContractsURIUpdatedIterator{contract: _Tokenfactory.contract, event: "BaseTokenContractsURIUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchBaseTokenContractsURIUpdated is a free log subscription operation binding the contract event 0x35221ce24b65bb230797e03080154779f50580793d0f60505bb8a6d15c507b80.
+//
+// Solidity: event BaseTokenContractsURIUpdated(string newBaseTokenContractsURI)
+func (_Tokenfactory *TokenfactoryFilterer) WatchBaseTokenContractsURIUpdated(opts *bind.WatchOpts, sink chan<- *TokenfactoryBaseTokenContractsURIUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Tokenfactory.contract.WatchLogs(opts, "BaseTokenContractsURIUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(TokenfactoryBaseTokenContractsURIUpdated)
+				if err := _Tokenfactory.contract.UnpackLog(event, "BaseTokenContractsURIUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseBaseTokenContractsURIUpdated is a log parse operation binding the contract event 0x35221ce24b65bb230797e03080154779f50580793d0f60505bb8a6d15c507b80.
+//
+// Solidity: event BaseTokenContractsURIUpdated(string newBaseTokenContractsURI)
+func (_Tokenfactory *TokenfactoryFilterer) ParseBaseTokenContractsURIUpdated(log types.Log) (*TokenfactoryBaseTokenContractsURIUpdated, error) {
+	event := new(TokenfactoryBaseTokenContractsURIUpdated)
+	if err := _Tokenfactory.contract.UnpackLog(event, "BaseTokenContractsURIUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1335,6 +1687,7 @@ func (it *TokenfactoryTokenContractDeployedIterator) Close() error {
 
 // TokenfactoryTokenContractDeployed represents a TokenContractDeployed event raised by the Tokenfactory contract.
 type TokenfactoryTokenContractDeployed struct {
+	TokenContractId      *big.Int
 	NewTokenContractAddr common.Address
 	PricePerOneToken     *big.Int
 	TokenName            string
@@ -1342,9 +1695,9 @@ type TokenfactoryTokenContractDeployed struct {
 	Raw                  types.Log // Blockchain specific contextual infos
 }
 
-// FilterTokenContractDeployed is a free log retrieval operation binding the contract event 0x5eac822089d832f08d2327766bc9e6f85be691583ae0dd0e43322a3c1105e2ce.
+// FilterTokenContractDeployed is a free log retrieval operation binding the contract event 0x8412389c512c8db70cea087e4ae10396c0fc6d2f2fe1efff6fedd9dc87fc228f.
 //
-// Solidity: event TokenContractDeployed(address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
+// Solidity: event TokenContractDeployed(uint256 tokenContractId, address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
 func (_Tokenfactory *TokenfactoryFilterer) FilterTokenContractDeployed(opts *bind.FilterOpts) (*TokenfactoryTokenContractDeployedIterator, error) {
 
 	logs, sub, err := _Tokenfactory.contract.FilterLogs(opts, "TokenContractDeployed")
@@ -1354,9 +1707,9 @@ func (_Tokenfactory *TokenfactoryFilterer) FilterTokenContractDeployed(opts *bin
 	return &TokenfactoryTokenContractDeployedIterator{contract: _Tokenfactory.contract, event: "TokenContractDeployed", logs: logs, sub: sub}, nil
 }
 
-// WatchTokenContractDeployed is a free log subscription operation binding the contract event 0x5eac822089d832f08d2327766bc9e6f85be691583ae0dd0e43322a3c1105e2ce.
+// WatchTokenContractDeployed is a free log subscription operation binding the contract event 0x8412389c512c8db70cea087e4ae10396c0fc6d2f2fe1efff6fedd9dc87fc228f.
 //
-// Solidity: event TokenContractDeployed(address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
+// Solidity: event TokenContractDeployed(uint256 tokenContractId, address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
 func (_Tokenfactory *TokenfactoryFilterer) WatchTokenContractDeployed(opts *bind.WatchOpts, sink chan<- *TokenfactoryTokenContractDeployed) (event.Subscription, error) {
 
 	logs, sub, err := _Tokenfactory.contract.WatchLogs(opts, "TokenContractDeployed")
@@ -1391,9 +1744,9 @@ func (_Tokenfactory *TokenfactoryFilterer) WatchTokenContractDeployed(opts *bind
 	}), nil
 }
 
-// ParseTokenContractDeployed is a log parse operation binding the contract event 0x5eac822089d832f08d2327766bc9e6f85be691583ae0dd0e43322a3c1105e2ce.
+// ParseTokenContractDeployed is a log parse operation binding the contract event 0x8412389c512c8db70cea087e4ae10396c0fc6d2f2fe1efff6fedd9dc87fc228f.
 //
-// Solidity: event TokenContractDeployed(address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
+// Solidity: event TokenContractDeployed(uint256 tokenContractId, address newTokenContractAddr, uint256 pricePerOneToken, string tokenName, string tokenSymbol)
 func (_Tokenfactory *TokenfactoryFilterer) ParseTokenContractDeployed(log types.Log) (*TokenfactoryTokenContractDeployed, error) {
 	event := new(TokenfactoryTokenContractDeployed)
 	if err := _Tokenfactory.contract.UnpackLog(event, "TokenContractDeployed", log); err != nil {

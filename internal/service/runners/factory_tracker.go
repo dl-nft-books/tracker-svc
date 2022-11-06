@@ -72,7 +72,7 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 
 	t.log.Debugf("Trying to iterate from block %d to %d...", previousBlock, previousBlock+t.iterationSize)
 
-	events, _, err := t.reader.GetEvents(t.address, previousBlock, previousBlock+t.iterationSize)
+	events, _, err := t.reader.GetContractCreatedEvents(t.address, previousBlock, previousBlock+t.iterationSize)
 	if err != nil {
 		return errors.Wrap(err, "failed to get events")
 	}

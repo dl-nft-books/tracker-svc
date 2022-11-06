@@ -30,7 +30,7 @@ var (
 
 // ItokencontractMetaData contains all meta data concerning the Itokencontract contract.
 var ItokencontractMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenPrice\",\"type\":\"uint256\"}],\"name\":\"PaymentSuccessful\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"name\":\"TokenMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"}],\"name\":\"updatePricePerOneToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenPrice\",\"type\":\"uint256\"}],\"name\":\"PaymentSuccessful\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"name\":\"TokenMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ItokencontractABI is the input ABI used to generate the binding from.
@@ -387,25 +387,192 @@ func (_Itokencontract *ItokencontractTransactorSession) Unpause() (*types.Transa
 	return _Itokencontract.Contract.Unpause(&_Itokencontract.TransactOpts)
 }
 
-// UpdatePricePerOneToken is a paid mutator transaction binding the contract method 0x79881a2e.
+// UpdateTokenContractParams is a paid mutator transaction binding the contract method 0x541a738c.
 //
-// Solidity: function updatePricePerOneToken(uint256 newPrice_) returns()
-func (_Itokencontract *ItokencontractTransactor) UpdatePricePerOneToken(opts *bind.TransactOpts, newPrice_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.contract.Transact(opts, "updatePricePerOneToken", newPrice_)
+// Solidity: function updateTokenContractParams(uint256 newPrice_, string newTokenName_, string newTokenSymbol_) returns()
+func (_Itokencontract *ItokencontractTransactor) UpdateTokenContractParams(opts *bind.TransactOpts, newPrice_ *big.Int, newTokenName_ string, newTokenSymbol_ string) (*types.Transaction, error) {
+	return _Itokencontract.contract.Transact(opts, "updateTokenContractParams", newPrice_, newTokenName_, newTokenSymbol_)
 }
 
-// UpdatePricePerOneToken is a paid mutator transaction binding the contract method 0x79881a2e.
+// UpdateTokenContractParams is a paid mutator transaction binding the contract method 0x541a738c.
 //
-// Solidity: function updatePricePerOneToken(uint256 newPrice_) returns()
-func (_Itokencontract *ItokencontractSession) UpdatePricePerOneToken(newPrice_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.Contract.UpdatePricePerOneToken(&_Itokencontract.TransactOpts, newPrice_)
+// Solidity: function updateTokenContractParams(uint256 newPrice_, string newTokenName_, string newTokenSymbol_) returns()
+func (_Itokencontract *ItokencontractSession) UpdateTokenContractParams(newPrice_ *big.Int, newTokenName_ string, newTokenSymbol_ string) (*types.Transaction, error) {
+	return _Itokencontract.Contract.UpdateTokenContractParams(&_Itokencontract.TransactOpts, newPrice_, newTokenName_, newTokenSymbol_)
 }
 
-// UpdatePricePerOneToken is a paid mutator transaction binding the contract method 0x79881a2e.
+// UpdateTokenContractParams is a paid mutator transaction binding the contract method 0x541a738c.
 //
-// Solidity: function updatePricePerOneToken(uint256 newPrice_) returns()
-func (_Itokencontract *ItokencontractTransactorSession) UpdatePricePerOneToken(newPrice_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.Contract.UpdatePricePerOneToken(&_Itokencontract.TransactOpts, newPrice_)
+// Solidity: function updateTokenContractParams(uint256 newPrice_, string newTokenName_, string newTokenSymbol_) returns()
+func (_Itokencontract *ItokencontractTransactorSession) UpdateTokenContractParams(newPrice_ *big.Int, newTokenName_ string, newTokenSymbol_ string) (*types.Transaction, error) {
+	return _Itokencontract.Contract.UpdateTokenContractParams(&_Itokencontract.TransactOpts, newPrice_, newTokenName_, newTokenSymbol_)
+}
+
+// WithdrawPaidTokens is a paid mutator transaction binding the contract method 0xd3fd39aa.
+//
+// Solidity: function withdrawPaidTokens(address tokenAddr_, address recipient_) returns()
+func (_Itokencontract *ItokencontractTransactor) WithdrawPaidTokens(opts *bind.TransactOpts, tokenAddr_ common.Address, recipient_ common.Address) (*types.Transaction, error) {
+	return _Itokencontract.contract.Transact(opts, "withdrawPaidTokens", tokenAddr_, recipient_)
+}
+
+// WithdrawPaidTokens is a paid mutator transaction binding the contract method 0xd3fd39aa.
+//
+// Solidity: function withdrawPaidTokens(address tokenAddr_, address recipient_) returns()
+func (_Itokencontract *ItokencontractSession) WithdrawPaidTokens(tokenAddr_ common.Address, recipient_ common.Address) (*types.Transaction, error) {
+	return _Itokencontract.Contract.WithdrawPaidTokens(&_Itokencontract.TransactOpts, tokenAddr_, recipient_)
+}
+
+// WithdrawPaidTokens is a paid mutator transaction binding the contract method 0xd3fd39aa.
+//
+// Solidity: function withdrawPaidTokens(address tokenAddr_, address recipient_) returns()
+func (_Itokencontract *ItokencontractTransactorSession) WithdrawPaidTokens(tokenAddr_ common.Address, recipient_ common.Address) (*types.Transaction, error) {
+	return _Itokencontract.Contract.WithdrawPaidTokens(&_Itokencontract.TransactOpts, tokenAddr_, recipient_)
+}
+
+// ItokencontractPaidTokensWithdrawnIterator is returned from FilterPaidTokensWithdrawn and is used to iterate over the raw logs and unpacked data for PaidTokensWithdrawn events raised by the Itokencontract contract.
+type ItokencontractPaidTokensWithdrawnIterator struct {
+	Event *ItokencontractPaidTokensWithdrawn // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ItokencontractPaidTokensWithdrawnIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ItokencontractPaidTokensWithdrawn)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ItokencontractPaidTokensWithdrawn)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ItokencontractPaidTokensWithdrawnIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ItokencontractPaidTokensWithdrawnIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ItokencontractPaidTokensWithdrawn represents a PaidTokensWithdrawn event raised by the Itokencontract contract.
+type ItokencontractPaidTokensWithdrawn struct {
+	TokenAddr common.Address
+	Recipient common.Address
+	Amount    *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterPaidTokensWithdrawn is a free log retrieval operation binding the contract event 0xae2408273a2b19d84df6e31c6b33cda24768f5e01118d06cbe3b098e231868f1.
+//
+// Solidity: event PaidTokensWithdrawn(address indexed tokenAddr, address recipient, uint256 amount)
+func (_Itokencontract *ItokencontractFilterer) FilterPaidTokensWithdrawn(opts *bind.FilterOpts, tokenAddr []common.Address) (*ItokencontractPaidTokensWithdrawnIterator, error) {
+
+	var tokenAddrRule []interface{}
+	for _, tokenAddrItem := range tokenAddr {
+		tokenAddrRule = append(tokenAddrRule, tokenAddrItem)
+	}
+
+	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "PaidTokensWithdrawn", tokenAddrRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ItokencontractPaidTokensWithdrawnIterator{contract: _Itokencontract.contract, event: "PaidTokensWithdrawn", logs: logs, sub: sub}, nil
+}
+
+// WatchPaidTokensWithdrawn is a free log subscription operation binding the contract event 0xae2408273a2b19d84df6e31c6b33cda24768f5e01118d06cbe3b098e231868f1.
+//
+// Solidity: event PaidTokensWithdrawn(address indexed tokenAddr, address recipient, uint256 amount)
+func (_Itokencontract *ItokencontractFilterer) WatchPaidTokensWithdrawn(opts *bind.WatchOpts, sink chan<- *ItokencontractPaidTokensWithdrawn, tokenAddr []common.Address) (event.Subscription, error) {
+
+	var tokenAddrRule []interface{}
+	for _, tokenAddrItem := range tokenAddr {
+		tokenAddrRule = append(tokenAddrRule, tokenAddrItem)
+	}
+
+	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "PaidTokensWithdrawn", tokenAddrRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ItokencontractPaidTokensWithdrawn)
+				if err := _Itokencontract.contract.UnpackLog(event, "PaidTokensWithdrawn", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePaidTokensWithdrawn is a log parse operation binding the contract event 0xae2408273a2b19d84df6e31c6b33cda24768f5e01118d06cbe3b098e231868f1.
+//
+// Solidity: event PaidTokensWithdrawn(address indexed tokenAddr, address recipient, uint256 amount)
+func (_Itokencontract *ItokencontractFilterer) ParsePaidTokensWithdrawn(log types.Log) (*ItokencontractPaidTokensWithdrawn, error) {
+	event := new(ItokencontractPaidTokensWithdrawn)
+	if err := _Itokencontract.contract.UnpackLog(event, "PaidTokensWithdrawn", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }
 
 // ItokencontractPaymentSuccessfulIterator is returned from FilterPaymentSuccessful and is used to iterate over the raw logs and unpacked data for PaymentSuccessful events raised by the Itokencontract contract.
@@ -548,6 +715,142 @@ func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind
 func (_Itokencontract *ItokencontractFilterer) ParsePaymentSuccessful(log types.Log) (*ItokencontractPaymentSuccessful, error) {
 	event := new(ItokencontractPaymentSuccessful)
 	if err := _Itokencontract.contract.UnpackLog(event, "PaymentSuccessful", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ItokencontractTokenContractParamsUpdatedIterator is returned from FilterTokenContractParamsUpdated and is used to iterate over the raw logs and unpacked data for TokenContractParamsUpdated events raised by the Itokencontract contract.
+type ItokencontractTokenContractParamsUpdatedIterator struct {
+	Event *ItokencontractTokenContractParamsUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ItokencontractTokenContractParamsUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ItokencontractTokenContractParamsUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ItokencontractTokenContractParamsUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ItokencontractTokenContractParamsUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ItokencontractTokenContractParamsUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ItokencontractTokenContractParamsUpdated represents a TokenContractParamsUpdated event raised by the Itokencontract contract.
+type ItokencontractTokenContractParamsUpdated struct {
+	NewPrice    *big.Int
+	TokenName   string
+	TokenSymbol string
+	Raw         types.Log // Blockchain specific contextual infos
+}
+
+// FilterTokenContractParamsUpdated is a free log retrieval operation binding the contract event 0x3419ca7e094a7b9d428666d41c7b45306d09be116d969b39e10447b02c2ee50f.
+//
+// Solidity: event TokenContractParamsUpdated(uint256 newPrice, string tokenName, string tokenSymbol)
+func (_Itokencontract *ItokencontractFilterer) FilterTokenContractParamsUpdated(opts *bind.FilterOpts) (*ItokencontractTokenContractParamsUpdatedIterator, error) {
+
+	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "TokenContractParamsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &ItokencontractTokenContractParamsUpdatedIterator{contract: _Itokencontract.contract, event: "TokenContractParamsUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchTokenContractParamsUpdated is a free log subscription operation binding the contract event 0x3419ca7e094a7b9d428666d41c7b45306d09be116d969b39e10447b02c2ee50f.
+//
+// Solidity: event TokenContractParamsUpdated(uint256 newPrice, string tokenName, string tokenSymbol)
+func (_Itokencontract *ItokencontractFilterer) WatchTokenContractParamsUpdated(opts *bind.WatchOpts, sink chan<- *ItokencontractTokenContractParamsUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "TokenContractParamsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ItokencontractTokenContractParamsUpdated)
+				if err := _Itokencontract.contract.UnpackLog(event, "TokenContractParamsUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseTokenContractParamsUpdated is a log parse operation binding the contract event 0x3419ca7e094a7b9d428666d41c7b45306d09be116d969b39e10447b02c2ee50f.
+//
+// Solidity: event TokenContractParamsUpdated(uint256 newPrice, string tokenName, string tokenSymbol)
+func (_Itokencontract *ItokencontractFilterer) ParseTokenContractParamsUpdated(log types.Log) (*ItokencontractTokenContractParamsUpdated, error) {
+	event := new(ItokencontractTokenContractParamsUpdated)
+	if err := _Itokencontract.contract.UnpackLog(event, "TokenContractParamsUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
