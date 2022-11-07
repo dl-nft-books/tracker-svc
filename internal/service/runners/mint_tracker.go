@@ -254,13 +254,14 @@ func (t *MintTracker) ProcessMintEvent(event eth_reader.TokenMintedEvent) error 
 
 func (t *MintTracker) ProcessPaymentEvent(event eth_reader.TokenPaymentEvent, contractId int64) error {
 	if _, err := t.trackerDB.Payments().Insert(data.Payment{
-		ContractId:   contractId,
-		PayerAddress: event.PayerAddress.String(),
-		TokenAddress: event.TokenAddress.String(),
-		TokenSymbol:  event.Symbol,
-		TokenName:    event.Name,
-		Amount:       event.Amount,
-		Price:        event.Price,
+		ContractId:        contractId,
+		PayerAddress:      event.PayerAddress.String(),
+		TokenAddress:      event.TokenAddress.String(),
+		TokenSymbol:       event.Symbol,
+		TokenName:         event.Name,
+		Amount:            event.Amount,
+		Price:             event.Price,
+		PurchaseTimestamp: event.PurchaseTimestamp,
 	}); err != nil {
 		return errors.Wrap(err, "failed to add payment to the table")
 	}

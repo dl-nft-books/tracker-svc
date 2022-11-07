@@ -30,7 +30,7 @@ var (
 
 // ItokencontractMetaData contains all meta data concerning the Itokencontract contract.
 var ItokencontractMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenPrice\",\"type\":\"uint256\"}],\"name\":\"PaymentSuccessful\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"name\":\"TokenMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"payerAddr\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenPrice\",\"type\":\"uint256\"}],\"name\":\"PaymentSuccessful\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"name\":\"TokenMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ItokencontractABI is the input ABI used to generate the binding from.
@@ -644,40 +644,49 @@ func (it *ItokencontractPaymentSuccessfulIterator) Close() error {
 
 // ItokencontractPaymentSuccessful represents a PaymentSuccessful event raised by the Itokencontract contract.
 type ItokencontractPaymentSuccessful struct {
+	PayerAddr    common.Address
 	TokenAddress common.Address
 	TokenAmount  *big.Int
 	TokenPrice   *big.Int
 	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterPaymentSuccessful is a free log retrieval operation binding the contract event 0xa056c95b265afa858f1320d1f0aad1aa914254d7fc80f83a8a0132bf2f29edbe.
+// FilterPaymentSuccessful is a free log retrieval operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
 //
-// Solidity: event PaymentSuccessful(address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
-func (_Itokencontract *ItokencontractFilterer) FilterPaymentSuccessful(opts *bind.FilterOpts, tokenAddress []common.Address) (*ItokencontractPaymentSuccessfulIterator, error) {
+// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
+func (_Itokencontract *ItokencontractFilterer) FilterPaymentSuccessful(opts *bind.FilterOpts, payerAddr []common.Address, tokenAddress []common.Address) (*ItokencontractPaymentSuccessfulIterator, error) {
 
+	var payerAddrRule []interface{}
+	for _, payerAddrItem := range payerAddr {
+		payerAddrRule = append(payerAddrRule, payerAddrItem)
+	}
 	var tokenAddressRule []interface{}
 	for _, tokenAddressItem := range tokenAddress {
 		tokenAddressRule = append(tokenAddressRule, tokenAddressItem)
 	}
 
-	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "PaymentSuccessful", tokenAddressRule)
+	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "PaymentSuccessful", payerAddrRule, tokenAddressRule)
 	if err != nil {
 		return nil, err
 	}
 	return &ItokencontractPaymentSuccessfulIterator{contract: _Itokencontract.contract, event: "PaymentSuccessful", logs: logs, sub: sub}, nil
 }
 
-// WatchPaymentSuccessful is a free log subscription operation binding the contract event 0xa056c95b265afa858f1320d1f0aad1aa914254d7fc80f83a8a0132bf2f29edbe.
+// WatchPaymentSuccessful is a free log subscription operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
 //
-// Solidity: event PaymentSuccessful(address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
-func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind.WatchOpts, sink chan<- *ItokencontractPaymentSuccessful, tokenAddress []common.Address) (event.Subscription, error) {
+// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
+func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind.WatchOpts, sink chan<- *ItokencontractPaymentSuccessful, payerAddr []common.Address, tokenAddress []common.Address) (event.Subscription, error) {
 
+	var payerAddrRule []interface{}
+	for _, payerAddrItem := range payerAddr {
+		payerAddrRule = append(payerAddrRule, payerAddrItem)
+	}
 	var tokenAddressRule []interface{}
 	for _, tokenAddressItem := range tokenAddress {
 		tokenAddressRule = append(tokenAddressRule, tokenAddressItem)
 	}
 
-	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "PaymentSuccessful", tokenAddressRule)
+	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "PaymentSuccessful", payerAddrRule, tokenAddressRule)
 	if err != nil {
 		return nil, err
 	}
@@ -709,9 +718,9 @@ func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind
 	}), nil
 }
 
-// ParsePaymentSuccessful is a log parse operation binding the contract event 0xa056c95b265afa858f1320d1f0aad1aa914254d7fc80f83a8a0132bf2f29edbe.
+// ParsePaymentSuccessful is a log parse operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
 //
-// Solidity: event PaymentSuccessful(address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
+// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
 func (_Itokencontract *ItokencontractFilterer) ParsePaymentSuccessful(log types.Log) (*ItokencontractPaymentSuccessful, error) {
 	event := new(ItokencontractPaymentSuccessful)
 	if err := _Itokencontract.contract.UnpackLog(event, "PaymentSuccessful", log); err != nil {

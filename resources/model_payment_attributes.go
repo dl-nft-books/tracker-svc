@@ -11,6 +11,8 @@ type PaymentAttributes struct {
 	PayerAddress string `json:"payer_address"`
 	// Price of a token in $
 	Price string `json:"price"`
+	// Timestamp when the user have purchased a book
+	PurchaseTimestamp string `json:"purchase_timestamp"`
 	// Token metadata information
 	Token Token `json:"token"`
 }

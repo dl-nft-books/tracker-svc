@@ -9,6 +9,8 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/itokencontract"
+	"math/big"
+	"time"
 )
 
 var NullIteratorErr = errors.New("iterator has a nil value")
@@ -91,6 +93,7 @@ type TokenPaymentEvent struct {
 	PayerAddress, TokenAddress  common.Address
 	Amount, Price, Name, Symbol string
 	Status, BlockNumber         uint64
+	PurchaseTimestamp           time.Time
 }
 
 func (r *TokenContractReader) GetPaymentEvents(
@@ -111,7 +114,7 @@ func (r *TokenContractReader) GetPaymentEvents(
 		&bind.FilterOpts{
 			Start: startBlock,
 			End:   &endBlock,
-		}, nil,
+		}, nil, nil,
 	)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to initialize an iterator")
@@ -152,15 +155,21 @@ func (r *TokenContractReader) GetPaymentEvents(
 				return nil, 0, errors.Wrap(err, "failed to read token's symbol from the contract instance")
 			}
 
+			purchaseTimestamp, err := getBlockTimestamp(r.rpc, event.Raw.BlockNumber)
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to get block timestamp")
+			}
+
 			events = append(events, TokenPaymentEvent{
-				PayerAddress: common.Address{}, //TODO: When event will have recipient, add it
-				TokenAddress: event.TokenAddress,
-				Amount:       event.TokenAmount.String(),
-				Price:        event.TokenPrice.String(),
-				Status:       receipt.Status,
-				Name:         tokenName,
-				Symbol:       tokenSymbol,
-				BlockNumber:  event.Raw.BlockNumber,
+				PayerAddress:      event.PayerAddr,
+				TokenAddress:      event.TokenAddress,
+				Amount:            event.TokenAmount.String(),
+				Price:             event.TokenPrice.String(),
+				Status:            receipt.Status,
+				Name:              tokenName,
+				Symbol:            tokenSymbol,
+				BlockNumber:       event.Raw.BlockNumber,
+				PurchaseTimestamp: *purchaseTimestamp,
 			})
 
 			lastBlock = event.Raw.BlockNumber
@@ -168,4 +177,16 @@ func (r *TokenContractReader) GetPaymentEvents(
 	}
 
 	return
+}
+
+func getBlockTimestamp(rpc *ethclient.Client, blockNumber uint64) (*time.Time, error) {
+	// Get header by a block number
+	header, err := rpc.BlockByNumber(context.Background(), new(big.Int).SetUint64(blockNumber))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get block header by its number")
+	}
+
+	// Get timestamp from a block as an uint64 and convert it to time.Time
+	blockTime := time.Unix(int64(header.Time()), 0)
+	return &blockTime, nil
 }

@@ -11,6 +11,7 @@ allOf:
           - amount
           - price
           - token
+          - purchase_timestamp
         properties:
           payer_address:
             type: string
@@ -24,6 +25,10 @@ allOf:
             type: string
             example: "103"
             description: Price of a token in $
+          purchase_timestamp:
+            type: string
+            example: "2006-01-02"
+            description: Timestamp when the user have purchased a book
           token:
             allOf:
               - $ref: '#/components/schemas/Token'
