@@ -2,6 +2,7 @@ package runners
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -224,7 +225,7 @@ func (t *MintTracker) ProcessMintEvent(event eth_reader.TokenMintedEvent) error 
 
 		// uploading metadata
 		if err = t.ipfsLoader.UploadMetadata(models.Metadata{
-			Name:        book.Title,
+			Name:        fmt.Sprintf("%s #%v", book.Title, task.Id),
 			Description: book.Description,
 			Image:       bannerLink.Data.Attributes.Url,
 			FileURL:     baseURI + task.FileIpfsHash,
