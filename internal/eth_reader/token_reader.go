@@ -13,7 +13,13 @@ import (
 	"time"
 )
 
-var NullIteratorErr = errors.New("iterator has a nil value")
+var (
+	NullIteratorErr = errors.New("iterator has a nil value")
+
+	NullAddress   = common.Address{}
+	DefaultName   = "Ethereum"
+	DefaultSymbol = "ETH"
+)
 
 type TokenContractReader struct {
 	rpc *ethclient.Client
@@ -138,6 +144,27 @@ func (r *TokenContractReader) GetPaymentEvents(
 				})
 			}
 
+			purchaseTimestamp, err := getBlockTimestamp(r.rpc, event.Raw.BlockNumber)
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to get block timestamp")
+			}
+
+			if event.TokenAddress == NullAddress {
+				events = append(events, TokenPaymentEvent{
+					PayerAddress:      event.PayerAddr,
+					TokenAddress:      event.TokenAddress,
+					Amount:            event.TokenAmount.String(),
+					Price:             event.TokenPrice.String(),
+					Status:            receipt.Status,
+					Name:              DefaultName,
+					Symbol:            DefaultSymbol,
+					BlockNumber:       event.Raw.BlockNumber,
+					PurchaseTimestamp: *purchaseTimestamp,
+				})
+
+				continue
+			}
+
 			erc20Instance, err := erc20.NewErc20(event.TokenAddress, r.rpc)
 			if err != nil {
 				return nil, 0, errors.Wrap(err, "failed to initialize erc20 instance", logan.F{
@@ -153,11 +180,6 @@ func (r *TokenContractReader) GetPaymentEvents(
 			tokenSymbol, err := erc20Instance.Symbol(&bind.CallOpts{})
 			if err != nil {
 				return nil, 0, errors.Wrap(err, "failed to read token's symbol from the contract instance")
-			}
-
-			purchaseTimestamp, err := getBlockTimestamp(r.rpc, event.Raw.BlockNumber)
-			if err != nil {
-				return nil, 0, errors.Wrap(err, "failed to get block timestamp")
 			}
 
 			events = append(events, TokenPaymentEvent{
