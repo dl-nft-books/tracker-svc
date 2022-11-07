@@ -19,10 +19,10 @@ func (s *service) router() chi.Router {
 	)
 	r.Route("/integrations/token-tracker", func(r chi.Router) {
 		r.Route("/payments", func(r chi.Router) {
-			r.Get("/", handlers.GetPaymentById)
+			r.Get("/", handlers.ListPayments)
 
 			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/", handlers.ListPayments)
+				r.Get("/", handlers.GetPaymentById)
 			})
 		})
 	})
