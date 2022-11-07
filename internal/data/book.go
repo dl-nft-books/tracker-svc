@@ -3,8 +3,10 @@ package data
 type BookQ interface {
 	New() BookQ
 	Get() (*Book, error)
+	Select() ([]Book, error)
 	FilterActual() BookQ
-	FilterByID(id int64) BookQ
+	FilterByID(id ...int64) BookQ
+	FilterByContractAddress(address ...string) BookQ
 }
 
 type Book struct {

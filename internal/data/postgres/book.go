@@ -3,7 +3,6 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-
 	"github.com/Masterminds/squirrel"
 	"gitlab.com/distributed_lab/kit/pgdb"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
@@ -41,12 +40,22 @@ func (b *BooksQ) Get() (*data.Book, error) {
 	return &result, err
 }
 
-func (b *BooksQ) FilterByID(id int64) data.BookQ {
+func (q *BooksQ) Select() (books []data.Book, err error) {
+	err = q.db.Select(&books, q.sql)
+	return
+}
+
+func (b *BooksQ) FilterByID(id ...int64) data.BookQ {
 	b.sql = b.sql.Where(squirrel.Eq{"b.id": id})
 	return b
 }
 
 func (b *BooksQ) FilterActual() data.BookQ {
 	b.sql = b.sql.Where(squirrel.Eq{"b.deleted": "f"})
+	return b
+}
+
+func (b *BooksQ) FilterByContractAddress(address ...string) data.BookQ {
+	b.sql = b.sql.Where(squirrel.Eq{"b.contract_address": address})
 	return b
 }

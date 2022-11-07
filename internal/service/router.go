@@ -17,8 +17,14 @@ func (s *service) router() chi.Router {
 			handlers.CtxLog(s.log),
 		),
 	)
-	r.Route("/integrations/tracker", func(r chi.Router) {
+	r.Route("/integrations/token-tracker", func(r chi.Router) {
+		r.Route("/payments", func(r chi.Router) {
+			r.Get("/", handlers.GetPaymentById)
 
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", handlers.ListPayments)
+			})
+		})
 	})
 
 	return r

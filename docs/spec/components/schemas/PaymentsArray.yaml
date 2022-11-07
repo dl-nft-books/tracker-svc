@@ -1,0 +1,6 @@
+type: array
+description: Array of payments
+items:
+  allOf:
+    - $ref: '#/components/schemas/Payment'
+    - type: object

@@ -13,12 +13,13 @@ import (
 const (
 	paymentsTable = "payments"
 
-	paymentsId           = "id"
-	paymentsContractId   = "contract_id"
-	paymentsPayerAddress = "payer_address"
-	paymentsTokenAddress = "token_address"
-	paymentsAmount       = "amount"
-	paymentsPrice        = "price"
+	paymentsId              = "id"
+	paymentsContractId      = "contract_id"
+	paymentsContractAddress = "contract_address"
+	paymentsPayerAddress    = "payer_address"
+	paymentsTokenAddress    = "token_address"
+	paymentsAmount          = "amount"
+	paymentsPrice           = "price"
 )
 
 type paymentsQ struct {
@@ -67,6 +68,11 @@ func (q *paymentsQ) FilterByTokenAddress(tokenAddress ...string) data.PaymentsQ 
 
 func (q *paymentsQ) FilterByContractId(contractId ...int64) data.PaymentsQ {
 	q.selector = q.selector.Where(squirrel.Eq{paymentsContractId: contractId})
+	return q
+}
+
+func (q *paymentsQ) FilterByContractAddress(contractAddress ...string) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsContractAddress: contractAddress})
 	return q
 }
 

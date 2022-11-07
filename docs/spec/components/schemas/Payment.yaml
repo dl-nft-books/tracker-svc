@@ -1,0 +1,42 @@
+allOf:
+  - $ref: '#/components/schemas/PaymentKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        type: object
+        required:
+          - payer_address
+          - amount
+          - price
+          - token
+        properties:
+          payer_address:
+            type: string
+            example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
+            description: Address of a user who bought a book
+          amount:
+            type: string
+            example: "100500"
+            description: Amount of tokens paid
+          price:
+            type: string
+            example: "103"
+            description: Price of a token in $
+          token:
+            allOf:
+              - $ref: '#/components/schemas/Token'
+              - type: object
+            description: Token metadata information
+      relationships:
+        type: object
+        properties:
+          book:
+            type: object
+            description: Information about related book
+            properties:
+              data:
+                type: object
+                $ref: '#/components/schemas/BookKey'
+
