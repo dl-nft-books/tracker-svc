@@ -104,6 +104,26 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 			return nil
 		}
 
+		paymentEvents, _, err := t.reader.GetPaymentEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
+		if err != nil {
+			return errors.Wrap(err, "failed to get payment events")
+		}
+
+		if len(paymentEvents) == 0 {
+			t.log.Debug("No payment events found")
+		}
+
+		for _, event := range paymentEvents {
+			t.log.Debugf("Found payment event with a block number of %d", event.BlockNumber)
+
+			if err = t.ProcessPaymentEvent(event, contract); err != nil {
+				return errors.Wrap(err, "failed to process payment event", logan.F{
+					"event_block_number": event.BlockNumber,
+					"event_payer":        event.PayerAddress,
+				})
+			}
+		}
+
 		mintEvents, _, err := t.reader.GetMintEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
 		if err != nil {
 			return errors.Wrap(err, "failed to get events")
@@ -120,25 +140,6 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 				return errors.Wrap(err, "failed to process mint event", logan.F{
 					"event_block_number": event.BlockNumber,
 					"event_uri":          event.Uri,
-				})
-			}
-		}
-
-		paymentEvents, _, err := t.reader.GetPaymentEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
-		if err != nil {
-			return errors.Wrap(err, "failed to get payment events")
-		}
-		if len(paymentEvents) == 0 {
-			t.log.Debug("No payment events found")
-		}
-
-		for _, event := range paymentEvents {
-			t.log.Debugf("Found payment event with a block number of %d", event.BlockNumber)
-
-			if err = t.ProcessPaymentEvent(event, contract.Id); err != nil {
-				return errors.Wrap(err, "failed to process payment event", logan.F{
-					"event_block_number": event.BlockNumber,
-					"event_payer":        event.PayerAddress,
 				})
 			}
 		}
@@ -252,9 +253,10 @@ func (t *MintTracker) ProcessMintEvent(event eth_reader.TokenMintedEvent) error 
 	})
 }
 
-func (t *MintTracker) ProcessPaymentEvent(event eth_reader.TokenPaymentEvent, contractId int64) error {
+func (t *MintTracker) ProcessPaymentEvent(event eth_reader.TokenPaymentEvent, contract data.Contract) error {
 	if _, err := t.trackerDB.Payments().Insert(data.Payment{
-		ContractId:        contractId,
+		ContractId:        contract.Id,
+		ContractAddress:   contract.Contract,
 		PayerAddress:      event.PayerAddress.String(),
 		TokenAddress:      event.TokenAddress.String(),
 		TokenSymbol:       event.Symbol,
