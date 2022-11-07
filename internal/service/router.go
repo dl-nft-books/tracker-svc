@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/handlers"
 
 	"github.com/go-chi/chi"
@@ -15,6 +16,8 @@ func (s *service) router() chi.Router {
 		ape.LoganMiddleware(s.log),
 		ape.CtxMiddleware(
 			handlers.CtxLog(s.log),
+			handlers.CtxBooksQ(postgres.NewBooksQ(s.cfg.BookDB().DB)),
+			handlers.CtxTrackerDB(postgres.NewTrackerDB(s.cfg.TrackerDB().DB)),
 		),
 	)
 	r.Route("/integrations/token-tracker", func(r chi.Router) {
