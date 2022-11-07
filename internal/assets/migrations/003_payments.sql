@@ -11,7 +11,7 @@ create table payments
     token_name         text,
     amount             text,
     price              text,
-    purchase_timestamp text
+    purchase_timestamp timestamp
 );
 
 -- +migrate Down
