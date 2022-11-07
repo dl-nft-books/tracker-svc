@@ -13,6 +13,7 @@ type Task struct {
 	Signature        string               `db:"signature" structs:"signature"`
 	FileIpfsHash     string               `db:"file_ipfs_hash" structs:"file_ipfs_hash"`
 	MetadataIpfsHash string               `db:"metadata_ipfs_hash" structs:"metadata_ipfs_hash"`
+	Uri              string               `db:"uri" structs:"uri"`
 	Status           resources.TaskStatus `db:"status" structs:"status"`
 }
 
