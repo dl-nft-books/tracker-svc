@@ -24,7 +24,7 @@ func (db *db) KeyValue() data.KeyValueQ {
 }
 
 func (db *db) Contracts() data.ContractsQ {
-	return NewTokensQ(db.raw)
+	return NewContractsQ(db.raw)
 }
 
 func (db db) Payments() data.PaymentsQ {

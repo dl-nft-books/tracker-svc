@@ -31,9 +31,9 @@ type MintTracker struct {
 	reader     eth_reader.TokenContractReader
 	ipfsLoader *helpers.IpfsLoader
 
-	trackerDB data.TrackerDB
-	tasksQ    data.TasksQ
-	booksQ    data.BookQ
+	trackerDB   data.TrackerDB
+	generatorDB data.GeneratorDB
+	booksQ      data.BookQ
 
 	name          string
 	capacity      uint64
@@ -50,9 +50,9 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 		reader:     eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 
-		trackerDB: postgres.NewTrackerDB(cfg.TrackerDB().DB),
-		tasksQ:    postgres.NewTasksQ(cfg.GeneratorDB().DB),
-		booksQ:    postgres.NewBooksQ(cfg.BookDB().DB),
+		trackerDB:   postgres.NewTrackerDB(cfg.TrackerDB().DB),
+		generatorDB: postgres.NewGeneratorDB(cfg.GeneratorDB().DB),
+		booksQ:      postgres.NewBooksQ(cfg.BookDB().DB),
 
 		name:          cfg.MintTracker().Name,
 		iterationSize: cfg.MintTracker().IterationSize,
@@ -154,10 +154,9 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 	return t.trackerDB.Transaction(func() error {
 		// updating book and tasks db
 		t.booksQ = t.booksQ.New()
-		t.tasksQ = t.tasksQ.New()
 
 		// event.Uri is actually metadata hash
-		task, err := t.tasksQ.GetByHash(event.Uri)
+		task, err := t.generatorDB.Tasks().GetByHash(event.Uri)
 		if err != nil {
 			return errors.Wrap(err, "failed to get task by ipfs hash")
 		}
@@ -192,11 +191,40 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 		}
 
 		// updating status to loading on IPFS
-		if err = t.tasksQ.UpdateStatus(resources.TaskUploading, task.Id); err != nil {
+		if err = t.generatorDB.Tasks().UpdateStatus(resources.TaskUploading, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update status", logan.F{
 				"task_id": task.Id,
 			})
 		}
+
+		// inserting information about payment
+		paymentId, err := t.trackerDB.Payments().Insert(data.Payment{
+			ContractId:        contract.Id,
+			ContractAddress:   contract.Contract,
+			PayerAddress:      event.Recipient.String(),
+			TokenAddress:      event.Erc20Info.TokenAddress.String(),
+			TokenSymbol:       event.Erc20Info.Symbol,
+			TokenName:         event.Erc20Info.Name,
+			TokenDecimals:     event.Erc20Info.Decimals,
+			Amount:            event.Amount.String(),
+			Price:             event.Price.String(),
+			PurchaseTimestamp: event.Timestamp,
+			BookUrl:           baseURI + task.FileIpfsHash,
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed to add payment to the table")
+		}
+
+		// inserting information about token
+		tokenId, err := t.generatorDB.Tokens().Insert(data.Token{
+			Account:     event.Recipient.String(),
+			TokenId:     event.TokenId,
+			BookId:      book.ID,
+			PaymentId:   paymentId,
+			MetadataUri: baseURI + task.MetadataIpfsHash,
+			Signature:   task.Signature,
+			Status:      resources.TokenUploading,
+		})
 
 		// uploading metadata
 		if err = t.ipfsLoader.UploadMetadata(models.Metadata{
@@ -214,32 +242,22 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 		}
 
 		// updating tokenID
-		if err = t.tasksQ.UpdateTokenId(event.TokenId, task.Id); err != nil {
+		if err = t.generatorDB.Tasks().UpdateTokenId(event.TokenId, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update token id")
 		}
 
 		// updating status to fully processed task
-		if err = t.tasksQ.UpdateStatus(resources.TaskFinishedUploading, task.Id); err != nil {
-			return errors.Wrap(err, "failed to update status", logan.F{
+		if err = t.generatorDB.Tasks().UpdateStatus(resources.TaskFinishedUploading, task.Id); err != nil {
+			return errors.Wrap(err, "failed to update task's status", logan.F{
 				"task_id": task.Id,
 			})
 		}
 
-		// inserting information about payment
-		if _, err = t.trackerDB.Payments().Insert(data.Payment{
-			ContractId:        contract.Id,
-			ContractAddress:   contract.Contract,
-			PayerAddress:      event.Recipient.String(),
-			TokenAddress:      event.Erc20Info.TokenAddress.String(),
-			TokenSymbol:       event.Erc20Info.Symbol,
-			TokenName:         event.Erc20Info.Name,
-			TokenDecimals:     event.Erc20Info.Decimals,
-			Amount:            event.Amount.String(),
-			Price:             event.Price.String(),
-			PurchaseTimestamp: event.Timestamp,
-			BookUrl:           baseURI + task.FileIpfsHash,
-		}); err != nil {
-			return errors.Wrap(err, "failed to add payment to the table")
+		// updating status to a token
+		if err = t.generatorDB.Tokens().UpdateStatus(resources.TokenFinishedUploading, tokenId); err != nil {
+			return errors.Wrap(err, "failed to update token's status", logan.F{
+				"token_id": tokenId,
+			})
 		}
 
 		return nil

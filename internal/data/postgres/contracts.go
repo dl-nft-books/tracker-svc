@@ -24,7 +24,7 @@ type contractsQ struct {
 	selector squirrel.SelectBuilder
 }
 
-func NewTokensQ(database *pgdb.DB) data.ContractsQ {
+func NewContractsQ(database *pgdb.DB) data.ContractsQ {
 	return &contractsQ{
 		database: database,
 		selector: squirrel.Select(fmt.Sprintf("%s.*", contractsTable)).From(contractsTable),
@@ -32,7 +32,7 @@ func NewTokensQ(database *pgdb.DB) data.ContractsQ {
 }
 
 func (q *contractsQ) New() data.ContractsQ {
-	return NewTokensQ(q.database.Clone())
+	return NewContractsQ(q.database.Clone())
 }
 
 func (q *contractsQ) Page(page pgdb.OffsetPageParams) data.ContractsQ {
