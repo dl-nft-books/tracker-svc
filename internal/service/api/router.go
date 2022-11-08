@@ -1,8 +1,8 @@
-package service
+package api
 
 import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/handlers"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/handlers"
 
 	"github.com/go-chi/chi"
 	"gitlab.com/distributed_lab/ape"

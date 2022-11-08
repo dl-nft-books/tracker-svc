@@ -12,7 +12,7 @@ import (
 	s3connector "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/models"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/models"
 )
 
 type IpfsLoader struct {
@@ -55,7 +55,7 @@ func (l *IpfsLoader) UploadFile(uri string) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to add file to the ipfs")
 	}
-	l.logger.Debugf("Successfully loaded document. Response:\n%s\n", response)
+	l.logger.Debugf("Successfully loaded document.\nResponse: %s", *response)
 
 	if _, err = l.documenter.DeleteDocument(fileName); err != nil {
 		return errors.Wrap(err, "failed to delete document")
@@ -83,7 +83,7 @@ func (l *IpfsLoader) UploadMetadata(info models.Metadata) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to add metadata to the ipfs")
 	}
-	l.logger.Debugf("Metadata was successfully loaded to IPFS. Response:\n%s\n", response)
+	l.logger.Debugf("Metadata was successfully loaded to IPFS.\nResponse: %s", *response)
 
 	l.logger.Debug("Request was successfully processed")
 

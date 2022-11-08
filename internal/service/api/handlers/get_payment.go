@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"net/http"
+
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/requests"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/requests"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
-	"net/http"
 
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"

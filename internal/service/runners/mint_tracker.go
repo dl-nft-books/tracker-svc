@@ -15,8 +15,8 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/models"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/helpers"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/models"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
 

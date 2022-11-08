@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"context"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"net/http"
+
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	"gitlab.com/distributed_lab/logan/v3"
 )

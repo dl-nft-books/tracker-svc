@@ -1,10 +1,11 @@
 package requests
 
 import (
-	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"net/http"
 	"strconv"
+
+	"gitlab.com/distributed_lab/kit/pgdb"
+	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
 
 const (
