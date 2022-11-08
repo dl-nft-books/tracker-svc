@@ -11,6 +11,7 @@ allOf:
           - amount
           - price
           - token
+          - book_url
           - purchase_timestamp
         properties:
           payer_address:
@@ -29,6 +30,9 @@ allOf:
             type: string
             example: "2006-01-02"
             description: Timestamp when the user have purchased a book
+          book_url:
+            type: string
+            example: "ipfs.io/ipfs/url goes brrrrrrr"
           token:
             allOf:
               - $ref: '#/components/schemas/Token'

@@ -9,8 +9,10 @@ create table payments
     token_address      text,
     token_symbol       text,
     token_name         text,
+    token_decimals     int8,
     amount             text,
     price              text,
+    book_url           text,
     purchase_timestamp timestamp
 );
 

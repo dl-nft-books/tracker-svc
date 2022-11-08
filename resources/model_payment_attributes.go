@@ -6,7 +6,8 @@ package resources
 
 type PaymentAttributes struct {
 	// Amount of tokens paid
-	Amount string `json:"amount"`
+	Amount  string `json:"amount"`
+	BookUrl string `json:"book_url"`
 	// Address of a user who bought a book
 	PayerAddress string `json:"payer_address"`
 	// Price of a token in $

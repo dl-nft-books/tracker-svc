@@ -16,9 +16,13 @@ import (
 var (
 	NullIteratorErr = errors.New("iterator has a nil value")
 
-	NullAddress   = common.Address{}
-	DefaultName   = "Ethereum"
-	DefaultSymbol = "ETH"
+	NullAddress      = common.Address{}
+	DefaultErc20Info = Erc20Info{
+		TokenAddress: common.Address{},
+		Name:         "Ethereum",
+		Symbol:       "ETH",
+		Decimals:     18,
+	}
 )
 
 type TokenContractReader struct {
@@ -95,12 +99,21 @@ func (r *TokenContractReader) GetMintEvents(
 	return
 }
 
+type Erc20Info struct {
+	TokenAddress common.Address
+	Name         string
+	Symbol       string
+	Decimals     uint8
+}
+
 type TokenPaymentEvent struct {
-	PayerAddress, TokenAddress common.Address
-	Name, Symbol               string
-	Amount, Price              *big.Int
-	Status, BlockNumber        uint64
-	PurchaseTimestamp          time.Time
+	PayerAddress      common.Address
+	Erc20Info         Erc20Info
+	Amount            *big.Int
+	Price             *big.Int
+	Status            uint64
+	BlockNumber       uint64
+	PurchaseTimestamp time.Time
 }
 
 func (r *TokenContractReader) GetPaymentEvents(
@@ -153,12 +166,10 @@ func (r *TokenContractReader) GetPaymentEvents(
 			if event.TokenAddress == NullAddress {
 				events = append(events, TokenPaymentEvent{
 					PayerAddress:      event.PayerAddr,
-					TokenAddress:      event.TokenAddress,
+					Erc20Info:         DefaultErc20Info,
 					Amount:            event.TokenAmount,
 					Price:             event.TokenPrice,
 					Status:            receipt.Status,
-					Name:              DefaultName,
-					Symbol:            DefaultSymbol,
 					BlockNumber:       event.Raw.BlockNumber,
 					PurchaseTimestamp: *purchaseTimestamp,
 				})
@@ -183,14 +194,22 @@ func (r *TokenContractReader) GetPaymentEvents(
 				return nil, 0, errors.Wrap(err, "failed to read token's symbol from the contract instance")
 			}
 
+			tokenDecimals, err := erc20Instance.Decimals(&bind.CallOpts{})
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to get token's decimals")
+			}
+
 			events = append(events, TokenPaymentEvent{
-				PayerAddress:      event.PayerAddr,
-				TokenAddress:      event.TokenAddress,
+				PayerAddress: event.PayerAddr,
+				Erc20Info: Erc20Info{
+					TokenAddress: event.TokenAddress,
+					Name:         tokenName,
+					Symbol:       tokenSymbol,
+					Decimals:     tokenDecimals,
+				},
 				Amount:            event.TokenAmount,
 				Price:             event.TokenPrice,
 				Status:            receipt.Status,
-				Name:              tokenName,
-				Symbol:            tokenSymbol,
 				BlockNumber:       event.Raw.BlockNumber,
 				PurchaseTimestamp: *purchaseTimestamp,
 			})

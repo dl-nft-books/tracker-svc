@@ -24,8 +24,10 @@ type Payment struct {
 	TokenAddress      string    `db:"token_address" structs:"token_address"`
 	TokenSymbol       string    `db:"token_symbol" structs:"token_symbol"`
 	TokenName         string    `db:"token_name" structs:"token_name"`
+	TokenDecimals     uint8     `db:"token_decimals" structs:"token_decimals"`
 	Amount            string    `db:"amount" structs:"amount"`
 	Price             string    `db:"price" structs:"price"`
+	BookUrl           string    `db:"book_url" structs:"book_url"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
 }
 
@@ -61,10 +63,12 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 			PayerAddress:      p.PayerAddress,
 			Price:             *bookPrice,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
+			BookUrl:           p.BookUrl,
 			Token: resources.Token{
-				Address: p.TokenAddress,
-				Name:    p.TokenName,
-				Symbol:  p.TokenSymbol,
+				Address:  p.TokenAddress,
+				Name:     p.TokenName,
+				Symbol:   p.TokenSymbol,
+				Decimals: int32(p.TokenDecimals),
 			},
 		},
 	}, nil

@@ -259,12 +259,14 @@ func (t *MintTracker) ProcessPaymentEvent(event eth_reader.TokenPaymentEvent, co
 		ContractId:        contract.Id,
 		ContractAddress:   contract.Contract,
 		PayerAddress:      event.PayerAddress.String(),
-		TokenAddress:      event.TokenAddress.String(),
-		TokenSymbol:       event.Symbol,
-		TokenName:         event.Name,
+		TokenAddress:      event.Erc20Info.TokenAddress.String(),
+		TokenSymbol:       event.Erc20Info.Symbol,
+		TokenName:         event.Erc20Info.Name,
+		TokenDecimals:     event.Erc20Info.Decimals,
 		Amount:            event.Amount.String(),
 		Price:             event.Price.String(),
 		PurchaseTimestamp: event.PurchaseTimestamp,
+		BookUrl:           "",
 	}); err != nil {
 		return errors.Wrap(err, "failed to add payment to the table")
 	}
