@@ -101,47 +101,23 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 		}
 
 		if contract.LastBlock > lastBlock {
-			t.log.Debugf("contract last block exceeded last block in the blockchain")
 			return nil
 		}
 
-		paymentEvents, _, err := t.reader.GetPaymentEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
+		successfulMintEvents, _, err := t.reader.GetSuccessfulMintEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
 		if err != nil {
-			return errors.Wrap(err, "failed to get payment events")
+			return errors.Wrap(err, "failed to get successful mint events")
 		}
 
-		if len(paymentEvents) == 0 {
-			t.log.Debug("No payment events found")
+		if len(successfulMintEvents) == 0 {
+			t.log.Debug("No successful events found")
 		}
 
-		for _, event := range paymentEvents {
-			t.log.Debugf("Found payment event with a block number of %d", event.BlockNumber)
+		for _, event := range successfulMintEvents {
+			t.log.Debugf("Found successful mint event with a block number of %d", event.BlockNumber)
 
-			if err = t.ProcessPaymentEvent(event, contract); err != nil {
-				return errors.Wrap(err, "failed to process payment event", logan.F{
-					"event_block_number": event.BlockNumber,
-					"event_payer":        event.PayerAddress,
-				})
-			}
-		}
-
-		mintEvents, _, err := t.reader.GetMintEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
-		if err != nil {
-			return errors.Wrap(err, "failed to get events")
-		}
-
-		if len(mintEvents) == 0 {
-			t.log.Debug("No mint events found")
-		}
-
-		for _, event := range mintEvents {
-			t.log.Debugf("Found mint event with a block number of %d and uri %s", event.BlockNumber, event.Uri)
-
-			if err = t.ProcessMintEvent(event); err != nil {
-				return errors.Wrap(err, "failed to process mint event", logan.F{
-					"event_block_number": event.BlockNumber,
-					"event_uri":          event.Uri,
-				})
+			if err = t.ProcessSuccessfulMintEvent(contract, event); err != nil {
+				return errors.Wrap(err, "failed to process successful mint event")
 			}
 		}
 
@@ -167,8 +143,6 @@ func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, 
 		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
 	}
 
-	t.log.Debugf("Last blockchain block has id of %d", lastBlockchainBlock)
-
 	if previousBlock+iterationSize+1 > lastBlockchainBlock {
 		return lastBlockchainBlock + 1, nil
 	}
@@ -176,10 +150,11 @@ func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, 
 	return previousBlock + iterationSize + 1, nil
 }
 
-func (t *MintTracker) ProcessMintEvent(event eth_reader.TokenMintedEvent) error {
+func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event eth_reader.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
-		// updating book db
+		// updating book and tasks db
 		t.booksQ = t.booksQ.New()
+		t.tasksQ = t.tasksQ.New()
 
 		// event.Uri is actually metadata hash
 		task, err := t.tasksQ.GetByHash(event.Uri)
@@ -250,28 +225,25 @@ func (t *MintTracker) ProcessMintEvent(event eth_reader.TokenMintedEvent) error 
 			})
 		}
 
+		// inserting information about payment
+		if _, err = t.trackerDB.Payments().Insert(data.Payment{
+			ContractId:        contract.Id,
+			ContractAddress:   contract.Contract,
+			PayerAddress:      event.Recipient.String(),
+			TokenAddress:      event.Erc20Info.TokenAddress.String(),
+			TokenSymbol:       event.Erc20Info.Symbol,
+			TokenName:         event.Erc20Info.Name,
+			TokenDecimals:     event.Erc20Info.Decimals,
+			Amount:            event.Amount.String(),
+			Price:             event.Price.String(),
+			PurchaseTimestamp: event.Timestamp,
+			BookUrl:           baseURI + task.FileIpfsHash,
+		}); err != nil {
+			return errors.Wrap(err, "failed to add payment to the table")
+		}
+
 		return nil
 	})
-}
-
-func (t *MintTracker) ProcessPaymentEvent(event eth_reader.TokenPaymentEvent, contract data.Contract) error {
-	if _, err := t.trackerDB.Payments().Insert(data.Payment{
-		ContractId:        contract.Id,
-		ContractAddress:   contract.Contract,
-		PayerAddress:      event.PayerAddress.String(),
-		TokenAddress:      event.Erc20Info.TokenAddress.String(),
-		TokenSymbol:       event.Erc20Info.Symbol,
-		TokenName:         event.Erc20Info.Name,
-		TokenDecimals:     event.Erc20Info.Decimals,
-		Amount:            event.Amount.String(),
-		Price:             event.Price.String(),
-		PurchaseTimestamp: event.PurchaseTimestamp,
-		BookUrl:           "",
-	}); err != nil {
-		return errors.Wrap(err, "failed to add payment to the table")
-	}
-
-	return nil
 }
 
 func (t *MintTracker) Select(pageNumber uint64) ([]data.Contract, error) {
@@ -305,7 +277,7 @@ func (t *MintTracker) FormList() ([]data.Contract, error) {
 	}
 
 	if len(contracts) == 0 && pageNumber == 0 {
-		t.log.Warn("contracts table is empty")
+		t.log.Warn("Contracts table is empty")
 		return nil, nil
 	}
 

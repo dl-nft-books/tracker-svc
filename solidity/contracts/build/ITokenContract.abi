@@ -30,29 +30,41 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "payerAddr",
+				"name": "recipient",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "mintedTokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "tokenURI",
+				"type": "string"
 			},
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "tokenAddress",
+				"name": "paymentTokenAddress",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "tokenAmount",
+				"name": "paidTokensAmount",
 				"type": "uint256"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "tokenPrice",
+				"name": "paymentTokenPrice",
 				"type": "uint256"
 			}
 		],
-		"name": "PaymentSuccessful",
+		"name": "SuccessfullyMinted",
 		"type": "event"
 	},
 	{
@@ -78,31 +90,6 @@
 			}
 		],
 		"name": "TokenContractParamsUpdated",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "recipient",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "tokenURI",
-				"type": "string"
-			}
-		],
-		"name": "TokenMinted",
 		"type": "event"
 	},
 	{

@@ -30,7 +30,7 @@ var (
 
 // ItokencontractMetaData contains all meta data concerning the Itokencontract contract.
 var ItokencontractMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"payerAddr\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenPrice\",\"type\":\"uint256\"}],\"name\":\"PaymentSuccessful\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"name\":\"TokenMinted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"mintedTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"paymentTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paidTokensAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice\",\"type\":\"uint256\"}],\"name\":\"SuccessfullyMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ItokencontractABI is the input ABI used to generate the binding from.
@@ -575,9 +575,9 @@ func (_Itokencontract *ItokencontractFilterer) ParsePaidTokensWithdrawn(log type
 	return event, nil
 }
 
-// ItokencontractPaymentSuccessfulIterator is returned from FilterPaymentSuccessful and is used to iterate over the raw logs and unpacked data for PaymentSuccessful events raised by the Itokencontract contract.
-type ItokencontractPaymentSuccessfulIterator struct {
-	Event *ItokencontractPaymentSuccessful // Event containing the contract specifics and raw log
+// ItokencontractSuccessfullyMintedIterator is returned from FilterSuccessfullyMinted and is used to iterate over the raw logs and unpacked data for SuccessfullyMinted events raised by the Itokencontract contract.
+type ItokencontractSuccessfullyMintedIterator struct {
+	Event *ItokencontractSuccessfullyMinted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -591,7 +591,7 @@ type ItokencontractPaymentSuccessfulIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *ItokencontractPaymentSuccessfulIterator) Next() bool {
+func (it *ItokencontractSuccessfullyMintedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -600,7 +600,7 @@ func (it *ItokencontractPaymentSuccessfulIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(ItokencontractPaymentSuccessful)
+			it.Event = new(ItokencontractSuccessfullyMinted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -615,7 +615,7 @@ func (it *ItokencontractPaymentSuccessfulIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(ItokencontractPaymentSuccessful)
+		it.Event = new(ItokencontractSuccessfullyMinted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -631,62 +631,66 @@ func (it *ItokencontractPaymentSuccessfulIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *ItokencontractPaymentSuccessfulIterator) Error() error {
+func (it *ItokencontractSuccessfullyMintedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *ItokencontractPaymentSuccessfulIterator) Close() error {
+func (it *ItokencontractSuccessfullyMintedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// ItokencontractPaymentSuccessful represents a PaymentSuccessful event raised by the Itokencontract contract.
-type ItokencontractPaymentSuccessful struct {
-	PayerAddr    common.Address
-	TokenAddress common.Address
-	TokenAmount  *big.Int
-	TokenPrice   *big.Int
-	Raw          types.Log // Blockchain specific contextual infos
+// ItokencontractSuccessfullyMinted represents a SuccessfullyMinted event raised by the Itokencontract contract.
+type ItokencontractSuccessfullyMinted struct {
+	Recipient           common.Address
+	MintedTokenId       *big.Int
+	TokenURI            string
+	PaymentTokenAddress common.Address
+	PaidTokensAmount    *big.Int
+	PaymentTokenPrice   *big.Int
+	Raw                 types.Log // Blockchain specific contextual infos
 }
 
-// FilterPaymentSuccessful is a free log retrieval operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
+// FilterSuccessfullyMinted is a free log retrieval operation binding the contract event 0x721d10effaf7af25f626be38b71336a7c0a760979ad3e4ad798c059cfc8d3dc7.
 //
-// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
-func (_Itokencontract *ItokencontractFilterer) FilterPaymentSuccessful(opts *bind.FilterOpts, payerAddr []common.Address, tokenAddress []common.Address) (*ItokencontractPaymentSuccessfulIterator, error) {
+// Solidity: event SuccessfullyMinted(address indexed recipient, uint256 mintedTokenId, string tokenURI, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+func (_Itokencontract *ItokencontractFilterer) FilterSuccessfullyMinted(opts *bind.FilterOpts, recipient []common.Address, paymentTokenAddress []common.Address) (*ItokencontractSuccessfullyMintedIterator, error) {
 
-	var payerAddrRule []interface{}
-	for _, payerAddrItem := range payerAddr {
-		payerAddrRule = append(payerAddrRule, payerAddrItem)
-	}
-	var tokenAddressRule []interface{}
-	for _, tokenAddressItem := range tokenAddress {
-		tokenAddressRule = append(tokenAddressRule, tokenAddressItem)
+	var recipientRule []interface{}
+	for _, recipientItem := range recipient {
+		recipientRule = append(recipientRule, recipientItem)
 	}
 
-	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "PaymentSuccessful", payerAddrRule, tokenAddressRule)
+	var paymentTokenAddressRule []interface{}
+	for _, paymentTokenAddressItem := range paymentTokenAddress {
+		paymentTokenAddressRule = append(paymentTokenAddressRule, paymentTokenAddressItem)
+	}
+
+	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "SuccessfullyMinted", recipientRule, paymentTokenAddressRule)
 	if err != nil {
 		return nil, err
 	}
-	return &ItokencontractPaymentSuccessfulIterator{contract: _Itokencontract.contract, event: "PaymentSuccessful", logs: logs, sub: sub}, nil
+	return &ItokencontractSuccessfullyMintedIterator{contract: _Itokencontract.contract, event: "SuccessfullyMinted", logs: logs, sub: sub}, nil
 }
 
-// WatchPaymentSuccessful is a free log subscription operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
+// WatchSuccessfullyMinted is a free log subscription operation binding the contract event 0x721d10effaf7af25f626be38b71336a7c0a760979ad3e4ad798c059cfc8d3dc7.
 //
-// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
-func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind.WatchOpts, sink chan<- *ItokencontractPaymentSuccessful, payerAddr []common.Address, tokenAddress []common.Address) (event.Subscription, error) {
+// Solidity: event SuccessfullyMinted(address indexed recipient, uint256 mintedTokenId, string tokenURI, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+func (_Itokencontract *ItokencontractFilterer) WatchSuccessfullyMinted(opts *bind.WatchOpts, sink chan<- *ItokencontractSuccessfullyMinted, recipient []common.Address, paymentTokenAddress []common.Address) (event.Subscription, error) {
 
-	var payerAddrRule []interface{}
-	for _, payerAddrItem := range payerAddr {
-		payerAddrRule = append(payerAddrRule, payerAddrItem)
-	}
-	var tokenAddressRule []interface{}
-	for _, tokenAddressItem := range tokenAddress {
-		tokenAddressRule = append(tokenAddressRule, tokenAddressItem)
+	var recipientRule []interface{}
+	for _, recipientItem := range recipient {
+		recipientRule = append(recipientRule, recipientItem)
 	}
 
-	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "PaymentSuccessful", payerAddrRule, tokenAddressRule)
+	var paymentTokenAddressRule []interface{}
+	for _, paymentTokenAddressItem := range paymentTokenAddress {
+		paymentTokenAddressRule = append(paymentTokenAddressRule, paymentTokenAddressItem)
+	}
+
+	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "SuccessfullyMinted", recipientRule, paymentTokenAddressRule)
 	if err != nil {
 		return nil, err
 	}
@@ -696,8 +700,8 @@ func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(ItokencontractPaymentSuccessful)
-				if err := _Itokencontract.contract.UnpackLog(event, "PaymentSuccessful", log); err != nil {
+				event := new(ItokencontractSuccessfullyMinted)
+				if err := _Itokencontract.contract.UnpackLog(event, "SuccessfullyMinted", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -718,12 +722,12 @@ func (_Itokencontract *ItokencontractFilterer) WatchPaymentSuccessful(opts *bind
 	}), nil
 }
 
-// ParsePaymentSuccessful is a log parse operation binding the contract event 0xce1c0b4f791565bcc4dd5b6d3bb82642ca9e0e4a3db587f09d221e12f57a295d.
+// ParseSuccessfullyMinted is a log parse operation binding the contract event 0x721d10effaf7af25f626be38b71336a7c0a760979ad3e4ad798c059cfc8d3dc7.
 //
-// Solidity: event PaymentSuccessful(address indexed payerAddr, address indexed tokenAddress, uint256 tokenAmount, uint256 tokenPrice)
-func (_Itokencontract *ItokencontractFilterer) ParsePaymentSuccessful(log types.Log) (*ItokencontractPaymentSuccessful, error) {
-	event := new(ItokencontractPaymentSuccessful)
-	if err := _Itokencontract.contract.UnpackLog(event, "PaymentSuccessful", log); err != nil {
+// Solidity: event SuccessfullyMinted(address indexed recipient, uint256 mintedTokenId, string tokenURI, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+func (_Itokencontract *ItokencontractFilterer) ParseSuccessfullyMinted(log types.Log) (*ItokencontractSuccessfullyMinted, error) {
+	event := new(ItokencontractSuccessfullyMinted)
+	if err := _Itokencontract.contract.UnpackLog(event, "SuccessfullyMinted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -860,152 +864,6 @@ func (_Itokencontract *ItokencontractFilterer) WatchTokenContractParamsUpdated(o
 func (_Itokencontract *ItokencontractFilterer) ParseTokenContractParamsUpdated(log types.Log) (*ItokencontractTokenContractParamsUpdated, error) {
 	event := new(ItokencontractTokenContractParamsUpdated)
 	if err := _Itokencontract.contract.UnpackLog(event, "TokenContractParamsUpdated", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// ItokencontractTokenMintedIterator is returned from FilterTokenMinted and is used to iterate over the raw logs and unpacked data for TokenMinted events raised by the Itokencontract contract.
-type ItokencontractTokenMintedIterator struct {
-	Event *ItokencontractTokenMinted // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *ItokencontractTokenMintedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(ItokencontractTokenMinted)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(ItokencontractTokenMinted)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *ItokencontractTokenMintedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *ItokencontractTokenMintedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// ItokencontractTokenMinted represents a TokenMinted event raised by the Itokencontract contract.
-type ItokencontractTokenMinted struct {
-	Recipient common.Address
-	TokenId   *big.Int
-	TokenURI  string
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterTokenMinted is a free log retrieval operation binding the contract event 0xdf92894dc4675a7333caa5903b69cf5d8e8ec0d3f361c88207b6688e525703bb.
-//
-// Solidity: event TokenMinted(address indexed recipient, uint256 tokenId, string tokenURI)
-func (_Itokencontract *ItokencontractFilterer) FilterTokenMinted(opts *bind.FilterOpts, recipient []common.Address) (*ItokencontractTokenMintedIterator, error) {
-
-	var recipientRule []interface{}
-	for _, recipientItem := range recipient {
-		recipientRule = append(recipientRule, recipientItem)
-	}
-
-	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "TokenMinted", recipientRule)
-	if err != nil {
-		return nil, err
-	}
-	return &ItokencontractTokenMintedIterator{contract: _Itokencontract.contract, event: "TokenMinted", logs: logs, sub: sub}, nil
-}
-
-// WatchTokenMinted is a free log subscription operation binding the contract event 0xdf92894dc4675a7333caa5903b69cf5d8e8ec0d3f361c88207b6688e525703bb.
-//
-// Solidity: event TokenMinted(address indexed recipient, uint256 tokenId, string tokenURI)
-func (_Itokencontract *ItokencontractFilterer) WatchTokenMinted(opts *bind.WatchOpts, sink chan<- *ItokencontractTokenMinted, recipient []common.Address) (event.Subscription, error) {
-
-	var recipientRule []interface{}
-	for _, recipientItem := range recipient {
-		recipientRule = append(recipientRule, recipientItem)
-	}
-
-	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "TokenMinted", recipientRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(ItokencontractTokenMinted)
-				if err := _Itokencontract.contract.UnpackLog(event, "TokenMinted", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTokenMinted is a log parse operation binding the contract event 0xdf92894dc4675a7333caa5903b69cf5d8e8ec0d3f361c88207b6688e525703bb.
-//
-// Solidity: event TokenMinted(address indexed recipient, uint256 tokenId, string tokenURI)
-func (_Itokencontract *ItokencontractFilterer) ParseTokenMinted(log types.Log) (*ItokencontractTokenMinted, error) {
-	event := new(ItokencontractTokenMinted)
-	if err := _Itokencontract.contract.UnpackLog(event, "TokenMinted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
