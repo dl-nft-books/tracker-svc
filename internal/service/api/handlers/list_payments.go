@@ -80,7 +80,11 @@ func formListPaymentsResponse(r *http.Request, request *requests.ListPaymentsReq
 	}
 
 	for _, payment := range paymentsList {
-		paymentResource := payment.Resource()
+		paymentResource, err := payment.Resource()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to convert payment to the resource format")
+		}
+
 		pairDataRelationships, err := getPaymentRelationships(payment, TrackerDB(r), BooksQ(r))
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get payment relationships")
@@ -88,7 +92,7 @@ func formListPaymentsResponse(r *http.Request, request *requests.ListPaymentsReq
 
 		paymentResource.Relationships = pairDataRelationships
 
-		response.Data = append(response.Data, paymentResource)
+		response.Data = append(response.Data, *paymentResource)
 	}
 
 	response.Links = requests.GetOffsetLinksWithSort(r, request.OffsetPageParams, request.Sorts)

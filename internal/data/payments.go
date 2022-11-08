@@ -2,11 +2,19 @@ package data
 
 import (
 	"gitlab.com/distributed_lab/kit/pgdb"
+	"gitlab.com/distributed_lab/logan/v3"
+	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"math/big"
 	"time"
 )
 
-const timestampFormat = "2006-01-02"
+const (
+	timestampFormat = "2006-01-02"
+	base            = 10
+)
+
+var ConversionFromStringToBigIntErr = errors.New("failed to convert string to the big int format")
 
 type Payment struct {
 	Id                int64     `db:"id" structs:"-" json:"-"`
@@ -40,13 +48,18 @@ type PaymentsQ interface {
 	Delete(id int64) error
 }
 
-func (p *Payment) Resource() resources.Payment {
-	return resources.Payment{
+func (p *Payment) Resource() (*resources.Payment, error) {
+	bookPrice, err := p.GetBookPrice()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get book price")
+	}
+
+	return &resources.Payment{
 		Key: resources.NewKeyInt64(p.Id, resources.PAYMENT),
 		Attributes: resources.PaymentAttributes{
 			Amount:            p.Amount,
 			PayerAddress:      p.PayerAddress,
-			Price:             p.Price,
+			Price:             *bookPrice,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
 			Token: resources.Token{
 				Address: p.TokenAddress,
@@ -54,5 +67,28 @@ func (p *Payment) Resource() resources.Payment {
 				Symbol:  p.TokenSymbol,
 			},
 		},
+	}, nil
+}
+
+func (p *Payment) GetBookPrice() (*string, error) {
+	tokenPrice := new(big.Int)
+	tokenPrice, ok := tokenPrice.SetString(p.Price, 10)
+	if !ok {
+		return nil, errors.From(ConversionFromStringToBigIntErr, logan.F{
+			"token_price": p.Price,
+		})
 	}
+
+	tokenAmount := new(big.Int)
+	tokenAmount, ok = tokenAmount.SetString(p.Amount, 10)
+	if !ok {
+		return nil, errors.From(ConversionFromStringToBigIntErr, logan.F{
+			"token_amount": p.Amount,
+		})
+	}
+
+	bookPrice := new(big.Int)
+	bookPrice = bookPrice.Mul(tokenPrice, tokenAmount)
+	bookPriceAsString := bookPrice.String()
+	return &bookPriceAsString, nil
 }

@@ -54,8 +54,12 @@ func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks d
 		return nil, errors.Wrap(err, "failed to get pair relationship")
 	}
 
-	paymentResource := payment.Resource()
+	paymentResource, err := payment.Resource()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get payment as a resource")
+	}
 	paymentResource.Relationships = pairRelationships
+	paymentResponse.Data = *paymentResource
 
 	return &paymentResponse, nil
 }

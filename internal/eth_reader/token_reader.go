@@ -96,10 +96,11 @@ func (r *TokenContractReader) GetMintEvents(
 }
 
 type TokenPaymentEvent struct {
-	PayerAddress, TokenAddress  common.Address
-	Amount, Price, Name, Symbol string
-	Status, BlockNumber         uint64
-	PurchaseTimestamp           time.Time
+	PayerAddress, TokenAddress common.Address
+	Name, Symbol               string
+	Amount, Price              *big.Int
+	Status, BlockNumber        uint64
+	PurchaseTimestamp          time.Time
 }
 
 func (r *TokenContractReader) GetPaymentEvents(
@@ -153,8 +154,8 @@ func (r *TokenContractReader) GetPaymentEvents(
 				events = append(events, TokenPaymentEvent{
 					PayerAddress:      event.PayerAddr,
 					TokenAddress:      event.TokenAddress,
-					Amount:            event.TokenAmount.String(),
-					Price:             event.TokenPrice.String(),
+					Amount:            event.TokenAmount,
+					Price:             event.TokenPrice,
 					Status:            receipt.Status,
 					Name:              DefaultName,
 					Symbol:            DefaultSymbol,
@@ -185,8 +186,8 @@ func (r *TokenContractReader) GetPaymentEvents(
 			events = append(events, TokenPaymentEvent{
 				PayerAddress:      event.PayerAddr,
 				TokenAddress:      event.TokenAddress,
-				Amount:            event.TokenAmount.String(),
-				Price:             event.TokenPrice.String(),
+				Amount:            event.TokenAmount,
+				Price:             event.TokenPrice,
 				Status:            receipt.Status,
 				Name:              tokenName,
 				Symbol:            tokenSymbol,
