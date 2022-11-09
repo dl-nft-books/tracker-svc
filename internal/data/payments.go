@@ -64,7 +64,7 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 			Price:             *bookPrice,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
 			BookUrl:           p.BookUrl,
-			Token: resources.Token{
+			Erc20Data: resources.Erc20Data{
 				Address:  p.TokenAddress,
 				Name:     p.TokenName,
 				Symbol:   p.TokenSymbol,

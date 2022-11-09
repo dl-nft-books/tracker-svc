@@ -10,7 +10,7 @@ allOf:
           - payer_address
           - amount
           - price
-          - token
+          - erc20_data
           - book_url
           - purchase_timestamp
         properties:
@@ -33,9 +33,9 @@ allOf:
           book_url:
             type: string
             example: "ipfs.io/ipfs/url goes brrrrrrr"
-          token:
+          erc20_data:
             allOf:
-              - $ref: '#/components/schemas/Token'
+              - $ref: '#/components/schemas/Erc20Data'
               - type: object
             description: Token metadata information
       relationships:
