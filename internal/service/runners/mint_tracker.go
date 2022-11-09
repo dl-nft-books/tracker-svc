@@ -217,13 +217,13 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 
 		// inserting information about token
 		tokenId, err := t.generatorDB.Tokens().Insert(data.Token{
-			Account:     event.Recipient.String(),
-			TokenId:     event.TokenId,
-			BookId:      book.ID,
-			PaymentId:   paymentId,
-			MetadataUri: baseURI + task.MetadataIpfsHash,
-			Signature:   task.Signature,
-			Status:      resources.TokenUploading,
+			Account:      event.Recipient.String(),
+			TokenId:      event.TokenId,
+			BookId:       book.ID,
+			PaymentId:    paymentId,
+			MetadataHash: task.MetadataIpfsHash,
+			Signature:    task.Signature,
+			Status:       resources.TokenUploading,
 		})
 
 		// uploading metadata

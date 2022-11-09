@@ -13,14 +13,14 @@ import (
 const (
 	tokensTable = "tokens"
 
-	tokensId          = "id"
-	tokensAccount     = "account"
-	tokensTokenId     = "token_id"
-	tokensBookId      = "book_id"
-	tokensPaymentId   = "payment_id"
-	tokensMetadataUri = "metadata_uri"
-	tokensSignature   = "signature"
-	tokensStatus      = "status"
+	tokensId           = "id"
+	tokensAccount      = "account"
+	tokensTokenId      = "token_id"
+	tokensBookId       = "book_id"
+	tokensPaymentId    = "payment_id"
+	tokensMetadataHash = "metadata_hash"
+	tokensSignature    = "signature"
+	tokensStatus       = "status"
 )
 
 type tokensQ struct {

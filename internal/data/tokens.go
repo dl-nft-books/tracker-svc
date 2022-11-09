@@ -6,14 +6,14 @@ import (
 )
 
 type Token struct {
-	Id          int64                 `db:"id" structs:"-" json:"-"`
-	Account     string                `db:"account" structs:"account"`
-	TokenId     int64                 `db:"token_id" structs:"token_id"`
-	BookId      int64                 `db:"book_id" structs:"book_id" json:"book_id"`
-	PaymentId   int64                 `db:"payment_id" structs:"payment_id" json:"payment_id"`
-	MetadataUri string                `db:"metadata_uri" structs:"metadata_uri" json:"metadata_uri"`
-	Signature   string                `db:"signature" structs:"signature" json:"signature"`
-	Status      resources.TokenStatus `db:"status" structs:"status" json:"status"`
+	Id           int64                 `db:"id" structs:"-" json:"-"`
+	Account      string                `db:"account" structs:"account"`
+	TokenId      int64                 `db:"token_id" structs:"token_id"`
+	BookId       int64                 `db:"book_id" structs:"book_id" json:"book_id"`
+	PaymentId    int64                 `db:"payment_id" structs:"payment_id" json:"payment_id"`
+	MetadataHash string                `db:"metadata_hash" structs:"metadata_hash" json:"metadata_hash"`
+	Signature    string                `db:"signature" structs:"signature" json:"signature"`
+	Status       resources.TokenStatus `db:"status" structs:"status" json:"status"`
 }
 
 type TokensQ interface {
