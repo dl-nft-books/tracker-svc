@@ -207,7 +207,8 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			TokenName:         event.Erc20Info.Name,
 			TokenDecimals:     event.Erc20Info.Decimals,
 			Amount:            event.Amount.String(),
-			Price:             event.Price.String(),
+			PriceMinted:       event.MintedTokenPrice.String(),
+			PriceToken:        event.PaymentTokenPrice.String(),
 			PurchaseTimestamp: event.Timestamp,
 			BookUrl:           baseURI + task.FileIpfsHash,
 		})
