@@ -9,7 +9,8 @@ allOf:
         required:
           - payer_address
           - amount
-          - price
+          - payment_token_price
+          - minted_token_price
           - erc20_data
           - book_url
           - purchase_timestamp
@@ -22,10 +23,14 @@ allOf:
             type: string
             example: "100500"
             description: Amount of tokens paid
-          price:
+          minted_token_price:
             type: string
             example: "103"
-            description: Price of a token in $
+            description: Price of a minted token in $
+          payment_token_price:
+            type: string
+            example: "1"
+            description: Price of a payment token (which the minted token was bought by) in $
           purchase_timestamp:
             type: string
             example: "2006-01-02"

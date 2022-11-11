@@ -34,16 +34,27 @@
 				"type": "address"
 			},
 			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerOneToken",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "tokenURI",
+						"type": "string"
+					}
+				],
 				"indexed": false,
-				"internalType": "uint256",
-				"name": "mintedTokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "tokenURI",
-				"type": "string"
+				"internalType": "struct ITokenContract.MintedTokenInfo",
+				"name": "mintedTokenInfo",
+				"type": "tuple"
 			},
 			{
 				"indexed": true,

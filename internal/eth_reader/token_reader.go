@@ -44,15 +44,16 @@ type Erc20Info struct {
 }
 
 type SuccessfulMintEvent struct {
-	Recipient   common.Address
-	TokenId     int64
-	Uri         string
-	Erc20Info   Erc20Info
-	Amount      *big.Int
-	Price       *big.Int
-	Status      uint64
-	BlockNumber uint64
-	Timestamp   time.Time
+	Recipient         common.Address
+	TokenId           int64
+	Uri               string
+	Erc20Info         Erc20Info
+	Amount            *big.Int
+	PaymentTokenPrice *big.Int
+	MintedTokenPrice  *big.Int
+	Status            uint64
+	BlockNumber       uint64
+	Timestamp         time.Time
 }
 
 func (r *TokenContractReader) GetSuccessfulMintEvents(
@@ -104,15 +105,16 @@ func (r *TokenContractReader) GetSuccessfulMintEvents(
 
 			if event.PaymentTokenAddress == NullAddress {
 				events = append(events, SuccessfulMintEvent{
-					Recipient:   event.Recipient,
-					TokenId:     event.MintedTokenId.Int64(),
-					Uri:         event.TokenURI,
-					Erc20Info:   DefaultErc20Info,
-					Amount:      event.PaidTokensAmount,
-					Price:       event.PaymentTokenPrice,
-					Status:      receipt.Status,
-					BlockNumber: event.Raw.BlockNumber,
-					Timestamp:   *purchaseTimestamp,
+					Recipient:         event.Recipient,
+					TokenId:           event.MintedTokenInfo.TokenId.Int64(),
+					Uri:               event.MintedTokenInfo.TokenURI,
+					MintedTokenPrice:  event.MintedTokenInfo.PricePerOneToken,
+					PaymentTokenPrice: event.PaymentTokenPrice,
+					Erc20Info:         DefaultErc20Info,
+					Amount:            event.PaidTokensAmount,
+					Status:            receipt.Status,
+					BlockNumber:       event.Raw.BlockNumber,
+					Timestamp:         *purchaseTimestamp,
 				})
 
 				continue
@@ -124,15 +126,16 @@ func (r *TokenContractReader) GetSuccessfulMintEvents(
 			}
 
 			events = append(events, SuccessfulMintEvent{
-				Recipient:   event.Recipient,
-				TokenId:     event.MintedTokenId.Int64(),
-				Uri:         event.TokenURI,
-				Erc20Info:   *erc20Data,
-				Amount:      event.PaidTokensAmount,
-				Price:       event.PaymentTokenPrice,
-				Status:      receipt.Status,
-				BlockNumber: event.Raw.BlockNumber,
-				Timestamp:   *purchaseTimestamp,
+				Recipient:         event.Recipient,
+				TokenId:           event.MintedTokenInfo.TokenId.Int64(),
+				Uri:               event.MintedTokenInfo.TokenURI,
+				MintedTokenPrice:  event.MintedTokenInfo.PricePerOneToken,
+				Erc20Info:         *erc20Data,
+				Amount:            event.PaidTokensAmount,
+				PaymentTokenPrice: event.PaymentTokenPrice,
+				Status:            receipt.Status,
+				BlockNumber:       event.Raw.BlockNumber,
+				Timestamp:         *purchaseTimestamp,
 			})
 
 			lastBlock = event.Raw.BlockNumber
