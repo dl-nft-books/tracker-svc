@@ -2,6 +2,9 @@ package eth_reader
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -9,8 +12,6 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/itokencontract"
-	"math/big"
-	"time"
 )
 
 var (
@@ -19,8 +20,8 @@ var (
 	NullAddress      = common.Address{}
 	DefaultErc20Info = Erc20Info{
 		TokenAddress: common.Address{},
-		Name:         "Ethereum",
-		Symbol:       "ETH",
+		Name:         "Polygon",
+		Symbol:       "MATIC",
 		Decimals:     18,
 	}
 )
