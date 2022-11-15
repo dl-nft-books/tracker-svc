@@ -103,13 +103,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 			return nil
 		}
 
-		nextBlock := previousBlock + t.iterationSize
-		// Ensuring next block does not exceed last mint block
-		if nextBlock > contract.LastBlock {
-			nextBlock = contract.LastBlock
-		}
-
-		transferEvents, _, err := t.reader.GetTransferEvents(contract.Address(), previousBlock, nextBlock)
+		transferEvents, _, err := t.reader.GetTransferEvents(contract.Address(), previousBlock, previousBlock+t.iterationSize)
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful transfer events")
 		}
@@ -126,7 +120,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 			}
 		}
 
-		newBlock, err := t.GetNewBlock(contract.LastBlock, t.iterationSize, contract.LastBlock)
+		newBlock, err := t.GetNewBlock(previousBlock, t.iterationSize)
 		if err != nil {
 			return errors.Wrap(err, "failed to get new block", logan.F{
 				"current_block": contract.LastBlock,
@@ -181,16 +175,13 @@ func (t *TransferTracker) GetPreviousBlock(contract data.Contract) (uint64, erro
 	return previousBlock, nil
 }
 
-func (t *TransferTracker) GetNewBlock(previousBlock, iterationSize, lastBlock uint64) (uint64, error) {
+func (t *TransferTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, error) {
 	// Retrieving the last blockchain block number
 	lastBlockchainBlock, err := t.rpc.BlockNumber(context.Background())
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
 	}
 
-	if previousBlock+iterationSize+1 > lastBlock {
-		return lastBlock + 1, nil
-	}
 	if previousBlock+iterationSize+1 > lastBlockchainBlock {
 		return lastBlockchainBlock + 1, nil
 	}
