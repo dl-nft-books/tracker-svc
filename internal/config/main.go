@@ -23,6 +23,7 @@ type Config interface {
 	IpfsLoader() ipfs_loader.LoaderImplementation
 	DocumenterConnector() *s3api.Connector
 	FactoryTracker() FactoryTracker
+	TransferTracker() TransferTracker
 	MintTracker() MintTracker
 	EtherClient() EtherClient
 }
@@ -36,11 +37,12 @@ type config struct {
 	pinata.Pinater
 	Databaser
 
-	getter             kv.Getter
-	mintTrackerOnce    comfig.Once
-	factoryTrackerOnce comfig.Once
-	ethererOnce        comfig.Once
-	ipfsLoaderOnce     comfig.Once
+	getter              kv.Getter
+	mintTrackerOnce     comfig.Once
+	factoryTrackerOnce  comfig.Once
+	transferTrackerOnce comfig.Once
+	ethererOnce         comfig.Once
+	ipfsLoaderOnce      comfig.Once
 }
 
 func New(getter kv.Getter) Config {

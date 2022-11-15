@@ -36,6 +36,15 @@ mint_tracker:
     min_abnormal_period: 10s
     max_abnormal_period: 10s
 
+transfer_tracker:
+  name: transfer_tracker # Name to be displayed in logs
+  capacity: 1
+  iteration_size: 100
+  runner: # Periods settings
+    normal_period: 10s
+    min_abnormal_period: 10s
+    max_abnormal_period: 10s
+
 documenter:
   url: http://localhost:8000
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHg0MDk3NDhkZmIzMWNhMTQyNGQxMzE2NjM5MThjN2E0NWYyZWE2NTA3IiwicHVycG9zZSI6InNlc3Npb24iLCJleHAiOjMyODY4MDU0NzR9.5Z7FBn4UrgjaNNOGSy0j98cb3M9san4A8kvGzq98Fsg

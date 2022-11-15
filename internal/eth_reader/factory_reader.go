@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
@@ -20,19 +21,12 @@ func NewFactoryContractReader(rpc *ethclient.Client) FactoryContractReader {
 	}
 }
 
-type ContractCreatedEvent struct {
-	Address      common.Address
-	BlockNumber  uint64
-	Name, Symbol string
-	Status       uint64
-}
-
 func (r *FactoryContractReader) GetContractCreatedEvents(
 	contract common.Address,
 	startBlock,
 	endBlock uint64,
 ) (
-	events []ContractCreatedEvent,
+	events []ethereum.ContractCreatedEvent,
 	lastBlock uint64,
 	err error,
 ) {
@@ -68,7 +62,7 @@ func (r *FactoryContractReader) GetContractCreatedEvents(
 				})
 			}
 
-			events = append(events, ContractCreatedEvent{
+			events = append(events, ethereum.ContractCreatedEvent{
 				Address:     event.NewTokenContractAddr,
 				BlockNumber: event.Raw.BlockNumber,
 				Name:        event.TokenName,

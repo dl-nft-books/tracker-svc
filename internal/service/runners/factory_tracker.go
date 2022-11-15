@@ -9,6 +9,7 @@ import (
 	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
 	"strconv"
@@ -143,7 +144,7 @@ func (t *FactoryTracker) GetNewBlock(previousBlock, iterationSize uint64) (int64
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
 	}
-	
+
 	if previousBlock+iterationSize+1 > lastBlockchainBlock {
 		return int64(lastBlockchainBlock + 1), nil
 	}
@@ -151,7 +152,7 @@ func (t *FactoryTracker) GetNewBlock(previousBlock, iterationSize uint64) (int64
 	return int64(previousBlock + iterationSize + 1), nil
 }
 
-func (t *FactoryTracker) InsertEvent(event eth_reader.ContractCreatedEvent) error {
+func (t *FactoryTracker) InsertEvent(event ethereum.ContractCreatedEvent) error {
 	_, err := t.database.Contracts().Insert(data.Contract{
 		Contract:  event.Address.String(),
 		Name:      event.Name,

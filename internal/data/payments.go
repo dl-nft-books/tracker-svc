@@ -2,17 +2,11 @@ package data
 
 import (
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"time"
 )
 
-const (
-	timestampFormat = "2006-01-02"
-	base            = 10
-)
-
-var ConversionFromStringToBigIntErr = errors.New("failed to convert string to the big int format")
+const timestampFormat = "2006-01-02"
 
 type Payment struct {
 	Id                int64     `db:"id" structs:"-" json:"-"`

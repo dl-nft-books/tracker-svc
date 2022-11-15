@@ -3,6 +3,7 @@ package runners
 import (
 	"context"
 	"fmt"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -150,7 +151,7 @@ func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, 
 	return previousBlock + iterationSize + 1, nil
 }
 
-func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event eth_reader.SuccessfulMintEvent) error {
+func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event ethereum.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
 		// updating book and tasks db
 		t.booksQ = t.booksQ.New()

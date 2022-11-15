@@ -7,8 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/itokencontract"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 	"math/big"
 	"time"
 )
@@ -17,7 +19,7 @@ var (
 	NullIteratorErr = errors.New("iterator has a nil value")
 
 	NullAddress      = common.Address{}
-	DefaultErc20Info = Erc20Info{
+	DefaultErc20Info = ethereum.Erc20Info{
 		TokenAddress: common.Address{},
 		Name:         "Ethereum",
 		Symbol:       "ETH",
@@ -35,32 +37,12 @@ func NewTokenContractReader(rpc *ethclient.Client) TokenContractReader {
 	}
 }
 
-type Erc20Info struct {
-	TokenAddress common.Address
-	Name         string
-	Symbol       string
-	Decimals     uint8
-}
-
-type SuccessfulMintEvent struct {
-	Recipient         common.Address
-	TokenId           int64
-	Uri               string
-	Erc20Info         Erc20Info
-	Amount            *big.Int
-	PaymentTokenPrice *big.Int
-	MintedTokenPrice  *big.Int
-	Status            uint64
-	BlockNumber       uint64
-	Timestamp         time.Time
-}
-
 func (r *TokenContractReader) GetSuccessfulMintEvents(
 	contract common.Address,
 	startBlock,
 	endBlock uint64,
 ) (
-	events []SuccessfulMintEvent,
+	events []ethereum.SuccessfulMintEvent,
 	lastBlock uint64,
 	err error,
 ) {
@@ -103,7 +85,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents(
 			}
 
 			if event.PaymentTokenAddress == NullAddress {
-				events = append(events, SuccessfulMintEvent{
+				events = append(events, ethereum.SuccessfulMintEvent{
 					Recipient:         event.Recipient,
 					TokenId:           event.MintedTokenInfo.TokenId.Int64(),
 					Uri:               event.MintedTokenInfo.TokenURI,
@@ -124,7 +106,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents(
 				return nil, 0, errors.Wrap(err, "failed to get erc20 data from the contract")
 			}
 
-			events = append(events, SuccessfulMintEvent{
+			events = append(events, ethereum.SuccessfulMintEvent{
 				Recipient:         event.Recipient,
 				TokenId:           event.MintedTokenInfo.TokenId.Int64(),
 				Uri:               event.MintedTokenInfo.TokenURI,
@@ -135,6 +117,55 @@ func (r *TokenContractReader) GetSuccessfulMintEvents(
 				Status:            receipt.Status,
 				BlockNumber:       event.Raw.BlockNumber,
 				Timestamp:         *purchaseTimestamp,
+			})
+
+			lastBlock = event.Raw.BlockNumber
+		}
+	}
+
+	return
+}
+
+func (r *TokenContractReader) GetTransferEvents(
+	contract common.Address,
+	startBlock,
+	endBlock uint64,
+) (
+	events []ethereum.TransferEvent,
+	lastBlock uint64,
+	err error,
+) {
+	instance, err := tokencontract.NewTokencontract(contract, r.rpc)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create token contract instance")
+	}
+
+	iterator, err := instance.FilterTransfer(
+		&bind.FilterOpts{
+			Start: startBlock,
+			End:   &endBlock,
+		}, nil, nil, nil,
+	)
+	if iterator == nil {
+		return nil, 0, errors.From(NullIteratorErr, logan.F{
+			"contract": contract.String(),
+		})
+	}
+
+	defer iterator.Close()
+
+	for iterator.Next() {
+		event := iterator.Event
+
+		if event != nil {
+			if event.To == NullAddress || event.From == NullAddress {
+				continue
+			}
+
+			events = append(events, ethereum.TransferEvent{
+				From:    event.From,
+				To:      event.To,
+				TokenId: event.TokenId.Uint64(),
 			})
 
 			lastBlock = event.Raw.BlockNumber
@@ -156,7 +187,7 @@ func (r *TokenContractReader) getBlockTimestamp(blockNumber uint64) (*time.Time,
 	return &blockTime, nil
 }
 
-func (r *TokenContractReader) GetErc20Data(address common.Address) (*Erc20Info, error) {
+func (r *TokenContractReader) GetErc20Data(address common.Address) (*ethereum.Erc20Info, error) {
 	erc20Instance, err := erc20.NewErc20(address, r.rpc)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize erc20 instance", logan.F{
@@ -179,7 +210,7 @@ func (r *TokenContractReader) GetErc20Data(address common.Address) (*Erc20Info, 
 		return nil, errors.Wrap(err, "failed to get token's decimals")
 	}
 
-	return &Erc20Info{
+	return &ethereum.Erc20Info{
 		TokenAddress: address,
 		Name:         tokenName,
 		Symbol:       tokenSymbol,

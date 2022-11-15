@@ -36,4 +36,5 @@ type TokensQ interface {
 	Transaction(fn func(q TokensQ) error) error
 
 	UpdateStatus(newStatus resources.TokenStatus, id int64) error
+	UpdateAccount(account string, id int64) error
 }

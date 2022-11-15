@@ -27,8 +27,12 @@ func (db *db) Contracts() data.ContractsQ {
 	return NewContractsQ(db.raw)
 }
 
-func (db db) Payments() data.PaymentsQ {
+func (db *db) Payments() data.PaymentsQ {
 	return NewPaymentsQ(db.raw)
+}
+
+func (db *db) Blocks() data.BlocksQ {
+	return NewBlocksQ(db.raw)
 }
 
 func (db *db) Transaction(fn func() error) error {

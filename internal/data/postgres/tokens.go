@@ -118,3 +118,10 @@ func (q *tokensQ) UpdateStatus(newStatus resources.TokenStatus, id int64) error 
 		Where(squirrel.Eq{tokensId: id})
 	return q.database.Exec(statement)
 }
+
+func (q *tokensQ) UpdateAccount(account string, id int64) error {
+	statement := squirrel.Update(tokensTable).
+		Set(tokensAccount, account).
+		Where(squirrel.Eq{tokensId: id})
+	return q.database.Exec(statement)
+}
