@@ -115,11 +115,11 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 		}
 
 		if len(transferEvents) == 0 {
-			t.log.Debug("No successful events found")
+			t.log.Debug("No transfer events found")
 		}
 
 		for _, event := range transferEvents {
-			t.log.Debugf("Found successful transfer event from %s to %s", event.From.String(), event.To.String())
+			t.log.Debugf("Found transfer events from %s to %s", event.From.String(), event.To.String())
 
 			if err = t.ProcessTransferEvent(event); err != nil {
 				return errors.Wrap(err, "failed to process transfer event")
