@@ -5,23 +5,25 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
 )
 
-const (
-	ipfsLoaderYamlKey = "ipfs_loader"
-
-	infuraMode = "infura"
-	pinataMode = "pinata"
-)
+const ipfsLoaderYamlKey = "uploader"
 
 var ModeNotIdentified = errors.New("specified mode does not exist")
+
+func (c *config) implementationsMap() map[string]uploader.Uploader {
+	return map[string]uploader.Uploader{
+		"infura": c.InfuraImplementation(),
+		"pinata": c.PinataImplementation(),
+	}
+}
 
 type IpfsLoader struct {
 	Mode string `fig:"mode,required"`
 }
 
-func (c *config) IpfsLoader() ipfs_loader.LoaderImplementation {
+func (c *config) IpfsLoader() uploader.Uploader {
 	return c.ipfsLoaderOnce.Do(func() interface{} {
 		var cfg IpfsLoader
 
@@ -33,15 +35,13 @@ func (c *config) IpfsLoader() ipfs_loader.LoaderImplementation {
 			panic(errors.Wrap(err, "failed to figure out mint tracker config"))
 		}
 
-		switch cfg.Mode {
-		case pinataMode:
-			return c.PinataImplementation()
-		case infuraMode:
-			return c.InfuraImplementation()
-		default:
+		implementation, ok := c.implementationsMap()[cfg.Mode]
+		if !ok {
 			panic(errors.From(ModeNotIdentified, logan.F{
 				"mode": cfg.Mode,
 			}))
 		}
-	}).(ipfs_loader.LoaderImplementation)
+
+		return implementation
+	}).(uploader.Uploader)
 }

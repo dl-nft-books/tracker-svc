@@ -9,16 +9,14 @@ import (
 	"gitlab.com/distributed_lab/kit/pgdb"
 )
 
-const keyValueTable = "key_value"
-
 const (
+	keyValueTable = "key_value"
+
 	keyColumn   = "key"
 	valueColumn = "value"
 )
 
-var (
-	keyValueSelect = sq.Select("*").From(keyValueTable)
-)
+var keyValueSelect = sq.Select("*").From(keyValueTable)
 
 type keyValueQ struct {
 	db *pgdb.DB

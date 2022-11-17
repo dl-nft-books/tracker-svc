@@ -18,10 +18,10 @@ func TestIpfsLoader(t *testing.T) {
 	file, err := ioutil.ReadFile(pathToFile)
 	assert.Nil(t, err, "failed to open file")
 	if len(file) == 0 {
-		t.Error("File not found")
+		t.Error("file not found")
 	}
 
-	output, err := implementation.Load("test", file)
+	output, err := implementation.Upload("test", file)
 	assert.Nil(t, err, "failed to upload file")
 
 	t.Log(*output)

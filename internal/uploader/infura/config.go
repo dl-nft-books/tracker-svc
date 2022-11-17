@@ -5,7 +5,7 @@ import (
 	"gitlab.com/distributed_lab/figure"
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ type InfuraConfig struct {
 }
 
 type Infurer interface {
-	InfuraImplementation() ipfs_loader.LoaderImplementation
+	InfuraImplementation() uploader.Uploader
 }
 
 type infurer struct {
@@ -29,7 +29,7 @@ func NewInfurer(getter kv.Getter) Infurer {
 	return &infurer{getter: getter}
 }
 
-func (i *infurer) InfuraImplementation() ipfs_loader.LoaderImplementation {
+func (i *infurer) InfuraImplementation() uploader.Uploader {
 	mapData := kv.MustGetStringMap(i.getter, infuraConnectorYamlKey)
 
 	var cfg InfuraConfig

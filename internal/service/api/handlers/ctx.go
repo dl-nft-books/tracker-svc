@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"net/http"
 
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
@@ -23,7 +24,7 @@ func CtxLog(entry *logan.Entry) func(context.Context) context.Context {
 	}
 }
 
-func CtxBooksQ(q data.BookQ) func(context.Context) context.Context {
+func CtxBooksQ(q external.BookQ) func(context.Context) context.Context {
 	return func(ctx context.Context) context.Context {
 		return context.WithValue(ctx, booksQCtxKey, q)
 	}
@@ -39,8 +40,8 @@ func Log(r *http.Request) *logan.Entry {
 	return r.Context().Value(logCtxKey).(*logan.Entry)
 }
 
-func BooksQ(r *http.Request) data.BookQ {
-	return r.Context().Value(booksQCtxKey).(data.BookQ).New()
+func BooksQ(r *http.Request) external.BookQ {
+	return r.Context().Value(booksQCtxKey).(external.BookQ).New()
 }
 
 func TrackerDB(r *http.Request) data.TrackerDB {

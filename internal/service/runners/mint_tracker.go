@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -15,9 +19,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/models"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
 
@@ -26,20 +28,18 @@ const (
 	baseURI           = "https://ipfs.io/ipfs/"
 )
 
+var bannerNotFoundErr = errors.New("specified banner key was not found")
+
 type MintTracker struct {
 	log        *logan.Entry
 	rpc        *ethclient.Client
-	reader     eth_reader.TokenContractReader
+	reader     reader.TokenReader
 	ipfsLoader *helpers.IpfsLoader
+	cfg        config.ContractTracker
 
 	trackerDB   data.TrackerDB
-	generatorDB data.GeneratorDB
-	booksQ      data.BookQ
-
-	name          string
-	capacity      uint64
-	iterationSize uint64
-	runnerCfg     config.Runner
+	generatorDB external.GeneratorDB
+	booksQ      external.BookQ
 
 	documenterConnector *s3connector.Connector
 }
@@ -48,16 +48,13 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
 		log:        cfg.Log(),
 		rpc:        cfg.EtherClient().Rpc,
-		reader:     eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
+		reader:     ethreader.NewTokenContractReader(cfg),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
+		cfg:        cfg.MintTracker(),
 
 		trackerDB:   postgres.NewTrackerDB(cfg.TrackerDB().DB),
 		generatorDB: postgres.NewGeneratorDB(cfg.GeneratorDB().DB),
 		booksQ:      postgres.NewBooksQ(cfg.BookDB().DB),
-
-		name:          cfg.MintTracker().Name,
-		iterationSize: cfg.MintTracker().IterationSize,
-		runnerCfg:     cfg.MintTracker().Runner,
 
 		documenterConnector: cfg.DocumenterConnector(),
 	}
@@ -67,11 +64,11 @@ func (t *MintTracker) Run(ctx context.Context) {
 	running.WithBackOff(
 		ctx,
 		t.log,
-		t.name,
+		t.cfg.Name,
 		t.Track,
-		t.runnerCfg.NormalPeriod,
-		t.runnerCfg.MinAbnormalPeriod,
-		t.runnerCfg.MaxAbnormalPeriod,
+		t.cfg.Runner.NormalPeriod,
+		t.cfg.Runner.MinAbnormalPeriod,
+		t.cfg.Runner.MaxAbnormalPeriod,
 	)
 }
 
@@ -96,6 +93,7 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 	t.log.Debugf("Processing contract with id of %d", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
+		// Starting block equals to contract.LastBlock
 		lastBlock, err := t.rpc.BlockNumber(context.Background())
 		if err != nil {
 			return errors.Wrap(err, "failed to get last block number")
@@ -105,7 +103,11 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 			return nil
 		}
 
-		successfulMintEvents, _, err := t.reader.GetSuccessfulMintEvents(contract.Address(), contract.LastBlock, contract.LastBlock+t.iterationSize)
+		successfulMintEvents, err := t.reader.
+			From(contract.LastBlock).
+			To(contract.LastBlock + t.cfg.IterationSize).
+			WithAddress(contract.Address()).
+			GetSuccessfulMintEvents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful mint events")
 		}
@@ -115,20 +117,16 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 		}
 
 		for _, event := range successfulMintEvents {
-			t.log.Debugf("Found successful mint event with a block number of %d", event.BlockNumber)
+			t.log.Infof("Found successful mint event with a block number of %d", event.BlockNumber)
 
 			if err = t.ProcessSuccessfulMintEvent(contract, event); err != nil {
 				return errors.Wrap(err, "failed to process successful mint event")
 			}
+
+			t.log.Info("Processed successful mint event")
 		}
 
-		newBlock, err := t.GetNewBlock(contract.LastBlock, t.iterationSize)
-		if err != nil {
-			return errors.Wrap(err, "failed to get new block", logan.F{
-				"current_block": contract.LastBlock,
-			})
-		}
-
+		newBlock := t.GetNewBlock(contract.LastBlock, t.cfg.IterationSize, lastBlock)
 		if err = t.trackerDB.Contracts().UpdateLastBlock(newBlock, contract.Id); err != nil {
 			return errors.Wrap(err, "failed to update last block")
 		}
@@ -137,26 +135,20 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 	})
 }
 
-func (t *MintTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, error) {
-	// Retrieving the last blockchain block number
-	lastBlockchainBlock, err := t.rpc.BlockNumber(context.Background())
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
+func (t *MintTracker) GetNewBlock(startBlock, iterationSize, lastBlock uint64) uint64 {
+	if startBlock+iterationSize+1 > lastBlock {
+		return lastBlock + 1
 	}
 
-	if previousBlock+iterationSize+1 > lastBlockchainBlock {
-		return lastBlockchainBlock + 1, nil
-	}
-
-	return previousBlock + iterationSize + 1, nil
+	return startBlock + iterationSize + 1
 }
 
 func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event ethereum.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
-		// updating book and tasks db
+		// Updating book and tasks db
 		t.booksQ = t.booksQ.New()
 
-		// event.Uri is actually metadata hash
+		// Getting task by hash (uri)
 		task, err := t.generatorDB.Tasks().GetByHash(event.Uri)
 		if err != nil {
 			return errors.Wrap(err, "failed to get task by ipfs hash")
@@ -166,29 +158,29 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			return nil
 		}
 
-		// getting book
+		// Getting book info
 		book, err := t.booksQ.FilterActual().FilterByID(task.BookId).Get()
 		if err != nil {
 			return errors.Wrap(err, "failed to get book by task id")
 		}
 		if book == nil {
-			t.log.Warnf("Could not find book with id %d", task.BookId)
+			t.log.WithFields(logan.F{"book_id": task.BookId}).Warn("Could not find book")
 			return nil
 		}
 
-		// parsing banner key
+		// Parsing banner key
 		bannerKey, err := helpers.GetDocumentKey(book.Banner)
 		if err != nil {
-			return err
-		}
-		if bannerKey == nil {
 			return errors.Wrap(err, "failed to get document key")
 		}
+		if bannerKey == nil {
+			return bannerNotFoundErr
+		}
 
-		// getting nft banner img link
+		// Getting nft banner img link
 		bannerLink, err := t.documenterConnector.GetDocumentLink(*bannerKey)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to get banner image link")
 		}
 
 		// updating status to loading on IPFS
@@ -217,8 +209,8 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			return errors.Wrap(err, "failed to add payment to the table")
 		}
 
-		// inserting information about token
-		tokenId, err := t.generatorDB.Tokens().Insert(data.Token{
+		// Inserting information about token
+		tokenId, err := t.generatorDB.Tokens().Insert(external.Token{
 			Account:      event.Recipient.String(),
 			TokenId:      event.TokenId,
 			BookId:       book.ID,
@@ -228,8 +220,8 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			Status:       resources.TokenUploading,
 		})
 
-		// uploading metadata
-		if err = t.ipfsLoader.UploadMetadata(models.Metadata{
+		// Uploading metadata
+		if err = t.ipfsLoader.UploadMetadata(opensea.Metadata{
 			Name:        fmt.Sprintf("%s #%v", book.Title, task.Id),
 			Description: book.Description,
 			Image:       bannerLink.Data.Attributes.Url,
@@ -238,24 +230,24 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			return errors.Wrap(err, "failed to load metadata to the ipfs")
 		}
 
-		// uploading file
+		// Uploading file
 		if err = t.ipfsLoader.UploadFile(task.FileIpfsHash); err != nil {
 			return errors.Wrap(err, "failed to load file to the ipfs")
 		}
 
-		// updating tokenID
+		// Updating tokenID
 		if err = t.generatorDB.Tasks().UpdateTokenId(event.TokenId, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update token id")
 		}
 
-		// updating status to fully processed task
+		// Updating status to fully processed task
 		if err = t.generatorDB.Tasks().UpdateStatus(resources.TaskFinishedUploading, task.Id); err != nil {
 			return errors.Wrap(err, "failed to update task's status", logan.F{
 				"task_id": task.Id,
 			})
 		}
 
-		// updating status to a token
+		// Updating status to a token
 		if err = t.generatorDB.Tokens().UpdateStatus(resources.TokenFinishedUploading, tokenId); err != nil {
 			return errors.Wrap(err, "failed to update token's status", logan.F{
 				"token_id": tokenId,
@@ -268,7 +260,7 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 
 func (t *MintTracker) Select(pageNumber uint64) ([]data.Contract, error) {
 	cutQ := t.trackerDB.Contracts().Page(pgdb.OffsetPageParams{
-		Limit:      t.capacity,
+		Limit:      t.cfg.Capacity,
 		PageNumber: pageNumber})
 
 	return cutQ.Select()

@@ -1,4 +1,4 @@
-package data
+package external
 
 type GeneratorDB interface {
 	New() GeneratorDB

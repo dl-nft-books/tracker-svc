@@ -6,7 +6,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
 
@@ -28,23 +28,23 @@ type tokensQ struct {
 	selector squirrel.SelectBuilder
 }
 
-func NewTokensQ(database *pgdb.DB) data.TokensQ {
+func NewTokensQ(database *pgdb.DB) external.TokensQ {
 	return &tokensQ{
 		database: database,
 		selector: squirrel.Select(fmt.Sprintf("%s.*", tokensTable)).From(tokensTable),
 	}
 }
 
-func (q *tokensQ) New() data.TokensQ {
+func (q *tokensQ) New() external.TokensQ {
 	return NewTokensQ(q.database.Clone())
 }
 
-func (q *tokensQ) Page(page pgdb.OffsetPageParams) data.TokensQ {
+func (q *tokensQ) Page(page pgdb.OffsetPageParams) external.TokensQ {
 	q.selector = page.ApplyTo(q.selector, "id")
 	return q
 }
 
-func (q *tokensQ) Sort(sort pgdb.Sorts) data.TokensQ {
+func (q *tokensQ) Sort(sort pgdb.Sorts) external.TokensQ {
 	q.selector = sort.ApplyTo(q.selector, map[string]string{
 		"id": "id",
 	})
@@ -52,43 +52,43 @@ func (q *tokensQ) Sort(sort pgdb.Sorts) data.TokensQ {
 	return q
 }
 
-func (q *tokensQ) FilterById(id ...int64) data.TokensQ {
+func (q *tokensQ) FilterById(id ...int64) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensId: id})
 	return q
 }
 
-func (q *tokensQ) FilterByStatus(status ...resources.TokenStatus) data.TokensQ {
+func (q *tokensQ) FilterByStatus(status ...resources.TokenStatus) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensStatus: status})
 	return q
 }
 
-func (q *tokensQ) FilterByAccount(account ...string) data.TokensQ {
+func (q *tokensQ) FilterByAccount(account ...string) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensAccount: account})
 	return q
 }
 
-func (q *tokensQ) FilterByTokenId(tokenId ...int64) data.TokensQ {
+func (q *tokensQ) FilterByTokenId(tokenId ...int64) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensTokenId: tokenId})
 	return q
 }
 
-func (q *tokensQ) FilterByBookId(bookId ...int64) data.TokensQ {
+func (q *tokensQ) FilterByBookId(bookId ...int64) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensBookId: bookId})
 	return q
 }
 
-func (q *tokensQ) FilterByPaymentId(paymentId ...int64) data.TokensQ {
+func (q *tokensQ) FilterByPaymentId(paymentId ...int64) external.TokensQ {
 	q.selector = q.selector.Where(squirrel.Eq{tokensPaymentId: paymentId})
 	return q
 }
 
-func (q *tokensQ) Select() (tokens []data.Token, err error) {
+func (q *tokensQ) Select() (tokens []external.Token, err error) {
 	err = q.database.Select(&tokens, q.selector)
 	return
 }
 
-func (q *tokensQ) Get() (*data.Token, error) {
-	var token data.Token
+func (q *tokensQ) Get() (*external.Token, error) {
+	var token external.Token
 	err := q.database.Get(&token, q.selector)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -97,7 +97,7 @@ func (q *tokensQ) Get() (*data.Token, error) {
 	return &token, err
 }
 
-func (q *tokensQ) Insert(token data.Token) (id int64, err error) {
+func (q *tokensQ) Insert(token external.Token) (id int64, err error) {
 	statement := squirrel.Insert(tokensTable).
 		Suffix("returning id").
 		SetMap(structs.Map(&token))
@@ -106,7 +106,7 @@ func (q *tokensQ) Insert(token data.Token) (id int64, err error) {
 	return id, err
 }
 
-func (q *tokensQ) Transaction(fn func(q data.TokensQ) error) (err error) {
+func (q *tokensQ) Transaction(fn func(q external.TokensQ) error) (err error) {
 	return q.database.Transaction(func() error {
 		return fn(q)
 	})

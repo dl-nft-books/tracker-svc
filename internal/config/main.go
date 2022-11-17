@@ -7,9 +7,10 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	s3api "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	s3config "gitlab.com/tokend/nft-books/blob-svc/connector/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader/infura"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader/pinata"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/infura"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/pinata"
 )
 
 type Config interface {
@@ -20,12 +21,13 @@ type Config interface {
 	pinata.Pinater
 	Databaser
 
-	IpfsLoader() ipfs_loader.LoaderImplementation
+	IpfsLoader() uploader.Uploader
 	DocumenterConnector() *s3api.Connector
 	FactoryTracker() FactoryTracker
-	TransferTracker() TransferTracker
-	MintTracker() MintTracker
+	TransferTracker() ContractTracker
+	MintTracker() ContractTracker
 	EtherClient() EtherClient
+	NativeToken() ethereum.Erc20Info
 }
 
 type config struct {
@@ -39,8 +41,9 @@ type config struct {
 
 	getter              kv.Getter
 	mintTrackerOnce     comfig.Once
-	factoryTrackerOnce  comfig.Once
 	transferTrackerOnce comfig.Once
+	factoryTrackerOnce  comfig.Once
+	nativeTokenOnce     comfig.Once
 	ethererOnce         comfig.Once
 	ipfsLoaderOnce      comfig.Once
 }

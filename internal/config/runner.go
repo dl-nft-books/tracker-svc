@@ -8,8 +8,10 @@ type Runner struct {
 	MaxAbnormalPeriod time.Duration `fig:"normal_period"`
 }
 
+const defaultRunnerPeriod = time.Minute
+
 var defaultRunner = Runner{
-	NormalPeriod:      time.Minute,
-	MinAbnormalPeriod: time.Minute,
-	MaxAbnormalPeriod: time.Minute,
+	NormalPeriod:      defaultRunnerPeriod,
+	MinAbnormalPeriod: defaultRunnerPeriod,
+	MaxAbnormalPeriod: defaultRunnerPeriod,
 }

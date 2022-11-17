@@ -1,4 +1,4 @@
-package data
+package external
 
 import (
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"

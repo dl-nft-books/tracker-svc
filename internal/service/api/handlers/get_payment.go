@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"net/http"
 
 	"gitlab.com/distributed_lab/logan/v3"
@@ -46,7 +47,7 @@ func GetPaymentById(w http.ResponseWriter, r *http.Request) {
 	ape.Render(w, *paymentResponse)
 }
 
-func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks data.BookQ) (*resources.PaymentResponse, error) {
+func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*resources.PaymentResponse, error) {
 	var paymentResponse resources.PaymentResponse
 
 	pairRelationships, err := getPaymentRelationships(payment, trackerDB, qBooks)
@@ -64,7 +65,7 @@ func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks d
 	return &paymentResponse, nil
 }
 
-func getPaymentRelationships(payment data.Payment, trackerDB data.TrackerDB, qBooks data.BookQ) (*resources.PaymentRelationships, error) {
+func getPaymentRelationships(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*resources.PaymentRelationships, error) {
 	bookId, err := getBookIdFromPayment(payment, trackerDB, qBooks)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get book id from payment")
@@ -79,7 +80,7 @@ func getPaymentRelationships(payment data.Payment, trackerDB data.TrackerDB, qBo
 	}, nil
 }
 
-func getBookIdFromPayment(payment data.Payment, trackerDB data.TrackerDB, qBooks data.BookQ) (*int64, error) {
+func getBookIdFromPayment(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*int64, error) {
 	contract, err := trackerDB.Contracts().New().Get(payment.ContractId)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get book contract from the database")

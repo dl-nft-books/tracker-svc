@@ -3,6 +3,9 @@ package runners
 import (
 	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -13,41 +16,33 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/eth_reader"
 )
 
-const (
-	transferKVTrackerPage = "transfer_tracker_page"
-)
+// transferKVTrackerPage is a key that corresponds to the value
+// of a page to select contracts according to
+const transferKVTrackerPage = "transfer_tracker_page"
 
 var TokenNotFoundErr = errors.New("specified token was not found")
 
 type TransferTracker struct {
 	log    *logan.Entry
 	rpc    *ethclient.Client
-	reader eth_reader.TokenContractReader
+	reader reader.TokenReader
+	cfg    config.ContractTracker
 
 	trackerDB   data.TrackerDB
-	generatorDB data.GeneratorDB
-
-	name          string
-	capacity      uint64
-	iterationSize uint64
-	runnerCfg     config.Runner
+	generatorDB external.GeneratorDB
 }
 
 func NewTransferTracker(cfg config.Config) *TransferTracker {
 	return &TransferTracker{
 		log:    cfg.Log(),
 		rpc:    cfg.EtherClient().Rpc,
-		reader: eth_reader.NewTokenContractReader(cfg.EtherClient().Rpc),
+		reader: ethreader.NewTokenContractReader(cfg),
+		cfg:    cfg.TransferTracker(),
 
 		trackerDB:   postgres.NewTrackerDB(cfg.TrackerDB().DB),
 		generatorDB: postgres.NewGeneratorDB(cfg.GeneratorDB().DB),
-
-		name:          cfg.FactoryTracker().Name,
-		iterationSize: cfg.FactoryTracker().IterationSize,
-		runnerCfg:     cfg.FactoryTracker().Runner,
 	}
 }
 
@@ -55,11 +50,11 @@ func (t *TransferTracker) Run(ctx context.Context) {
 	running.WithBackOff(
 		ctx,
 		t.log,
-		t.name,
+		t.cfg.Name,
 		t.Track,
-		t.runnerCfg.NormalPeriod,
-		t.runnerCfg.MinAbnormalPeriod,
-		t.runnerCfg.MaxAbnormalPeriod,
+		t.cfg.Runner.NormalPeriod,
+		t.cfg.Runner.MinAbnormalPeriod,
+		t.cfg.Runner.MaxAbnormalPeriod,
 	)
 }
 
@@ -81,29 +76,30 @@ func (t *TransferTracker) Track(ctx context.Context) error {
 }
 
 func (t *TransferTracker) ProcessContract(contract data.Contract) error {
-	t.log.Debugf("Processing contract with id of %d", contract.Id)
+	t.log.Debugf("Processing contract with id of %d...", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
-		previousBlock, err := t.GetPreviousBlock(contract)
-		if err != nil {
-			return errors.Wrap(err, "failed to get previous block number")
-		}
-
 		lastBlock, err := t.rpc.BlockNumber(context.Background())
 		if err != nil {
 			return errors.Wrap(err, "failed to get last block number")
 		}
 
-		// Ensuring contract previous block does not exceed last block in the blockchain
-		if previousBlock > lastBlock {
-			return nil
+		startBlock, err := t.GetStartBlock(contract)
+		if err != nil {
+			return errors.Wrap(err, "failed to get previous block number")
 		}
-		// Ensuring previous block does not exceed last mint block
-		if previousBlock > contract.LastBlock {
+
+		// Ensuring contract previous block does not exceed last block in the blockchain
+		if startBlock >= lastBlock {
+			t.log.Debug("Starting block exceeded last block, omitting")
 			return nil
 		}
 
-		transferEvents, _, err := t.reader.GetTransferEvents(contract.Address(), previousBlock, previousBlock+t.iterationSize)
+		transferEvents, err := t.reader.
+			From(startBlock).
+			To(startBlock + t.cfg.IterationSize).
+			WithAddress(contract.Address()).
+			GetTransferEvents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful transfer events")
 		}
@@ -113,14 +109,16 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 		}
 
 		for _, event := range transferEvents {
-			t.log.Debugf("Found transfer events from %s to %s", event.From.String(), event.To.String())
+			t.log.Infof("Found transfer events from %s to %s", event.From.String(), event.To.String())
 
 			if err = t.ProcessTransferEvent(event); err != nil {
 				return errors.Wrap(err, "failed to process transfer event")
 			}
+
+			t.log.Info("Processed transfer event")
 		}
 
-		newBlock, err := t.GetNewBlock(previousBlock, t.iterationSize)
+		newBlock, err := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
 		if err != nil {
 			return errors.Wrap(err, "failed to get new block", logan.F{
 				"current_block": contract.LastBlock,
@@ -146,9 +144,10 @@ func (t *TransferTracker) ProcessTransferEvent(event ethereum.TransferEvent) err
 		return errors.Wrap(err, "failed to get token from the database")
 	}
 	if token == nil {
-		return errors.From(TokenNotFoundErr, logan.F{
+		t.log.WithFields(logan.F{
 			"token_id": event.TokenId,
-		})
+		}).Warn("token from the event was not found")
+		return nil
 	}
 
 	if err = t.generatorDB.Tokens().UpdateAccount(event.To.String(), token.Id); err != nil {
@@ -161,37 +160,31 @@ func (t *TransferTracker) ProcessTransferEvent(event ethereum.TransferEvent) err
 	return nil
 }
 
-func (t *TransferTracker) GetPreviousBlock(contract data.Contract) (uint64, error) {
-	previousBlock := uint64(0)
+func (t *TransferTracker) GetStartBlock(contract data.Contract) (uint64, error) {
+	startBlock := uint64(0)
 
 	block, err := t.trackerDB.Blocks().FilterByContractId(contract.Id).Get()
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to filter by contract id")
 	}
 	if block != nil {
-		previousBlock = block.TransferBlock
+		startBlock = block.TransferBlock
 	}
 
-	return previousBlock, nil
+	return startBlock, nil
 }
 
-func (t *TransferTracker) GetNewBlock(previousBlock, iterationSize uint64) (uint64, error) {
-	// Retrieving the last blockchain block number
-	lastBlockchainBlock, err := t.rpc.BlockNumber(context.Background())
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to get the last block in the blockchain")
+func (t *TransferTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) (uint64, error) {
+	if startBlock+iterationSize+1 > lastBlock {
+		return lastBlock + 1, nil
 	}
 
-	if previousBlock+iterationSize+1 > lastBlockchainBlock {
-		return lastBlockchainBlock + 1, nil
-	}
-
-	return previousBlock + iterationSize + 1, nil
+	return startBlock + iterationSize + 1, nil
 }
 
 func (t *TransferTracker) Select(pageNumber uint64) ([]data.Contract, error) {
 	cutQ := t.trackerDB.Contracts().Page(pgdb.OffsetPageParams{
-		Limit:      t.capacity,
+		Limit:      t.cfg.Capacity,
 		PageNumber: pageNumber})
 
 	return cutQ.Select()

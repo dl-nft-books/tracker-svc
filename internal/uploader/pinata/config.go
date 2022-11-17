@@ -4,13 +4,13 @@ import (
 	"gitlab.com/distributed_lab/figure"
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs_loader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
 )
 
 const pinataConnectorYamlKey = "pinata_connector"
 
 type Pinater interface {
-	PinataImplementation() ipfs_loader.LoaderImplementation
+	PinataImplementation() uploader.Uploader
 }
 
 type PinataConfig struct {
@@ -27,7 +27,7 @@ func NewPinater(getter kv.Getter) Pinater {
 	return &pinater{getter: getter}
 }
 
-func (p *pinater) PinataImplementation() ipfs_loader.LoaderImplementation {
+func (p *pinater) PinataImplementation() uploader.Uploader {
 	mapData := kv.MustGetStringMap(p.getter, pinataConnectorYamlKey)
 
 	var cfg PinataConfig

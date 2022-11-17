@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"net/http"
 
 	"gitlab.com/distributed_lab/ape"
@@ -44,7 +45,7 @@ func ListPayments(w http.ResponseWriter, r *http.Request) {
 	ape.Render(w, response)
 }
 
-func applyQFiltersPayments(qPayments data.PaymentsQ, qBooks data.BookQ, request *requests.ListPaymentsRequest) (*data.PaymentsQ, error) {
+func applyQFiltersPayments(qPayments data.PaymentsQ, qBooks external.BookQ, request *requests.ListPaymentsRequest) (*data.PaymentsQ, error) {
 	if len(request.Id) > 0 {
 		qPayments = qPayments.FilterById(request.Id...)
 	}
