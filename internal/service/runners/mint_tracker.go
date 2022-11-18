@@ -145,6 +145,12 @@ func (t *MintTracker) GetNewBlock(startBlock, iterationSize, lastBlock uint64) u
 
 func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event ethereum.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
+		// FIXME: Make the following actions via connectors:
+		// 1. Get task info using event uri
+		// 2. Get book info using retrieved from step 1 (e.g., via included)
+		// 3. Insert new token into generator table
+		// 4. Update status of a task
+
 		// Updating book and tasks db
 		t.booksQ = t.booksQ.New()
 

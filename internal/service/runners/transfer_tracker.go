@@ -144,6 +144,7 @@ func (t *TransferTracker) ProcessTransferEvent(event ethereum.TransferEvent) err
 		return nil
 	}
 
+	// FIXME: Update owner via connector with generator service
 	token, err := t.generatorDB.Tokens().FilterByTokenId(int64(event.TokenId)).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get token from the database")
