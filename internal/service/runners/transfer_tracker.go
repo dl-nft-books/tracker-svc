@@ -139,6 +139,11 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 }
 
 func (t *TransferTracker) ProcessTransferEvent(event ethereum.TransferEvent) error {
+	if event.From == ethereum.NullAddress || event.To == ethereum.NullAddress {
+		t.log.Info("Received transfer event with one address being null, omitting")
+		return nil
+	}
+
 	token, err := t.generatorDB.Tokens().FilterByTokenId(int64(event.TokenId)).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get token from the database")

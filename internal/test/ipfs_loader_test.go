@@ -9,19 +9,20 @@ import (
 )
 
 const (
-	pathToFile = "./files/test_2.rtf"
+	pathToFile   = "./files/test_2.rtf"
+	configKey    = "test_config.yaml"
+	fileTestName = "test"
 )
 
 func TestIpfsLoader(t *testing.T) {
-	cfg := config.New(kv.NewViperFile("test_config.yaml"))
+	cfg := config.New(kv.NewViperFile(configKey))
 	implementation := cfg.IpfsLoader()
+
 	file, err := ioutil.ReadFile(pathToFile)
 	assert.Nil(t, err, "failed to open file")
-	if len(file) == 0 {
-		t.Error("file not found")
-	}
+	assert.NotEqual(t, len(file), 0, "file not found")
 
-	output, err := implementation.Upload("test", file)
+	output, err := implementation.Upload(fileTestName, file)
 	assert.Nil(t, err, "failed to upload file")
 
 	t.Log(*output)
