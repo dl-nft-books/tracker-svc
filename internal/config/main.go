@@ -11,6 +11,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/pinata"
+	networkerCfg "gitlab.com/tokend/nft-books/network-svc/connector/config"
 )
 
 type Config interface {
@@ -20,6 +21,7 @@ type Config interface {
 	infura.Infurer
 	pinata.Pinater
 	Databaser
+	networkerCfg.NetworkConfigurator
 
 	IpfsLoader() uploader.Uploader
 	DocumenterConnector() *s3api.Connector
@@ -38,6 +40,7 @@ type config struct {
 	infura.Infurer
 	pinata.Pinater
 	Databaser
+	networkerCfg.NetworkConfigurator
 
 	getter              kv.Getter
 	mintTrackerOnce     comfig.Once
@@ -50,13 +53,14 @@ type config struct {
 
 func New(getter kv.Getter) Config {
 	return &config{
-		getter:     getter,
-		Databaser:  NewDatabaser(getter),
-		Copuser:    copus.NewCopuser(getter),
-		Listenerer: comfig.NewListenerer(getter),
-		Logger:     comfig.NewLogger(getter, comfig.LoggerOpts{}),
-		Documenter: s3config.NewDocumenter(getter),
-		Infurer:    infura.NewInfurer(getter),
-		Pinater:    pinata.NewPinater(getter),
+		getter:              getter,
+		Databaser:           NewDatabaser(getter),
+		Copuser:             copus.NewCopuser(getter),
+		Listenerer:          comfig.NewListenerer(getter),
+		Logger:              comfig.NewLogger(getter, comfig.LoggerOpts{}),
+		Documenter:          s3config.NewDocumenter(getter),
+		Infurer:             infura.NewInfurer(getter),
+		Pinater:             pinata.NewPinater(getter),
+		NetworkConfigurator: networkerCfg.NewNetworkConfigurator(getter),
 	}
 }

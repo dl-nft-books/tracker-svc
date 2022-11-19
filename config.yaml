@@ -54,6 +54,10 @@ documenter:
   url: http://localhost:8000
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHg0MDk3NDhkZmIzMWNhMTQyNGQxMzE2NjM5MThjN2E0NWYyZWE2NTA3IiwicHVycG9zZSI6InNlc3Npb24iLCJleHAiOjMyODY4MDU0NzR9.5Z7FBn4UrgjaNNOGSy0j98cb3M9san4A8kvGzq98Fsg
 
+networker:
+  url:
+  token:
+
 uploader:
   mode: pinata # Either 'infura' or 'pinata'
 
