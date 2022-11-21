@@ -19,11 +19,15 @@ type FactoryContractReader struct {
 	from    *uint64
 	to      *uint64
 	address *common.Address
+
+	// instancesCache is a map storing already initialized instances of contracts
+	instancesCache map[common.Address]*tokenfactory.Tokenfactory
 }
 
 func NewFactoryContractReader(cfg config.Config) reader.FactoryReader {
 	return &FactoryContractReader{
-		rpc: cfg.EtherClient().Rpc,
+		rpc:            cfg.EtherClient().Rpc,
+		instancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
 	}
 }
 
@@ -63,9 +67,9 @@ func (r *FactoryContractReader) GetContractCreatedEvents() ([]ethereum.ContractC
 		return nil, err
 	}
 
-	instance, err := tokenfactory.NewTokenfactory(*r.address, r.rpc)
+	instance, err := r.getInstance(*r.address)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize token factory instance")
+		return nil, errors.Wrap(err, "failed to get instance")
 	}
 
 	iterator, err := instance.FilterTokenContractDeployed(
@@ -106,4 +110,21 @@ func (r *FactoryContractReader) GetContractCreatedEvents() ([]ethereum.ContractC
 	}
 
 	return events, nil
+}
+
+func (r *FactoryContractReader) getInstance(address common.Address) (*tokenfactory.Tokenfactory, error) {
+	cacheInstance, ok := r.instancesCache[address]
+	if ok {
+		return cacheInstance, nil
+	}
+
+	newInstance, err := tokenfactory.NewTokenfactory(address, r.rpc)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize token factory instance for given address", logan.F{
+			"address": address,
+		})
+	}
+
+	r.instancesCache[address] = newInstance
+	return newInstance, nil
 }

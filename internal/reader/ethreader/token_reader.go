@@ -28,6 +28,8 @@ type TokenContractReader struct {
 	from    *uint64
 	to      *uint64
 	address *common.Address
+
+	instancesCache map[common.Address]*tokencontract.Tokencontract
 }
 
 func NewTokenContractReader(cfg config.Config) reader.TokenReader {
@@ -144,7 +146,7 @@ func (r *TokenContractReader) GetTransferEvents() ([]ethereum.TransferEvent, err
 		return nil, err
 	}
 
-	instance, err := tokencontract.NewTokencontract(*r.address, r.rpc)
+	instance, err := r.getInstance(*r.address)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create token contract instance")
 	}
@@ -230,4 +232,21 @@ func (r *TokenContractReader) GetErc20Data(address common.Address) (*ethereum.Er
 		Symbol:       tokenSymbol,
 		Decimals:     tokenDecimals,
 	}, nil
+}
+
+func (r *TokenContractReader) getInstance(address common.Address) (*tokencontract.Tokencontract, error) {
+	cacheInstance, ok := r.instancesCache[address]
+	if ok {
+		return cacheInstance, nil
+	}
+
+	newInstance, err := tokencontract.NewTokencontract(address, r.rpc)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize token factory instance for given address", logan.F{
+			"address": address,
+		})
+	}
+
+	r.instancesCache[address] = newInstance
+	return newInstance, nil
 }
