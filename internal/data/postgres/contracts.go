@@ -51,12 +51,14 @@ func (q *contractsQ) Get(id int64) (*data.Contract, error) {
 	return &token, err
 }
 
-func (q *contractsQ) Insert(token data.Contract) (id int64, err error) {
-	statement := squirrel.Insert(contractsTable).
-		Suffix("returning id").
-		SetMap(structs.Map(&token))
+func (q *contractsQ) Insert(contracts ...data.Contract) (id []int64, err error) {
+	query := squirrel.Insert(contractsTable).Columns(structs.Names(contracts)...)
+	for _, contract := range contracts {
+		query = query.Values(structs.Values(contract)...)
+	}
 
-	err = q.database.Get(&id, statement)
+	query = query.Suffix("returning id")
+	err = q.database.Select(&id, query)
 	return
 }
 

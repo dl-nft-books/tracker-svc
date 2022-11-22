@@ -73,26 +73,28 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 		return errors.Wrap(err, "failed to get events")
 	}
 
-	for _, event := range events {
-		t.log.Infof("Caught newly deployed contract with block number %d", event.BlockNumber)
-
-		if err = t.InsertEvent(event); err != nil {
+	if err = t.database.Transaction(func() error {
+		if _, err = t.database.Contracts().Insert(formContractsBatch(events)...); err != nil {
 			return errors.Wrap(err, "failed to insert event into the database")
 		}
 
-		t.log.Debugf("Successfully inserted contract into the database")
-	}
+		t.log.Debugf("Successfully inserted contract batch into the database")
 
-	nextBlock, err := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
-	if err != nil {
-		return errors.Wrap(err, "failed to get new block")
-	}
+		nextBlock, err := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
+		if err != nil {
+			return errors.Wrap(err, "failed to get new block")
+		}
 
-	if err = t.database.KeyValue().Upsert(data.KeyValue{
-		Key:   factoryTrackerCursor,
-		Value: strconv.FormatInt(nextBlock, 10),
+		if err = t.database.KeyValue().Upsert(data.KeyValue{
+			Key:   factoryTrackerCursor,
+			Value: strconv.FormatInt(nextBlock, 10),
+		}); err != nil {
+			return errors.Wrap(err, "failed to upsert new value")
+		}
+
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "failed to upsert new value")
+		return errors.Wrap(err, "failed to execute the tx to insert contract batch and update KV value")
 	}
 
 	return nil
@@ -132,13 +134,15 @@ func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint6
 	return int64(startBlock + iterationSize + 1), nil
 }
 
-func (t *FactoryTracker) InsertEvent(event ethereum.ContractCreatedEvent) error {
-	_, err := t.database.Contracts().Insert(data.Contract{
-		Contract:  event.Address.String(),
-		Name:      event.Name,
-		Symbol:    event.Symbol,
-		LastBlock: event.BlockNumber,
-	})
+func formContractsBatch(events []ethereum.ContractCreatedEvent) (batch []data.Contract) {
+	for _, event := range events {
+		batch = append(batch, data.Contract{
+			Contract:  event.Address.String(),
+			Name:      event.Name,
+			Symbol:    event.Symbol,
+			LastBlock: event.BlockNumber,
+		})
+	}
 
-	return errors.Wrap(err, "failed to insert contract into the database")
+	return
 }
