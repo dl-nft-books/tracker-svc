@@ -79,7 +79,7 @@ func (t *MintTracker) Track(ctx context.Context) error {
 	}
 
 	for _, contract := range contracts {
-		if err = t.ProcessContract(contract); err != nil {
+		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
 				"contract_id": contract.Id,
 			})
@@ -89,8 +89,8 @@ func (t *MintTracker) Track(ctx context.Context) error {
 	return nil
 }
 
-func (t *MintTracker) ProcessContract(contract data.Contract) error {
-	t.log.Debugf("Processing contract with id of %d", contract.Id)
+func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Context) error {
+	t.log.Debugf("Processing contract with id of %d...", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
 		// Starting block equals to contract.LastBlock
@@ -107,6 +107,7 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 			From(contract.LastBlock).
 			To(contract.LastBlock + t.cfg.IterationSize).
 			WithAddress(contract.Address()).
+			WithCtx(ctx).
 			GetSuccessfulMintEvents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful mint events")
@@ -126,8 +127,8 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 			t.log.Info("Processed successful mint event")
 		}
 
-		newBlock := t.GetNewBlock(contract.LastBlock, t.cfg.IterationSize, lastBlock)
-		if err = t.trackerDB.Contracts().UpdateLastBlock(newBlock, contract.Id); err != nil {
+		nextBlock := t.GetNextBlock(contract.LastBlock, t.cfg.IterationSize, lastBlock)
+		if err = t.trackerDB.Contracts().UpdateLastBlock(nextBlock, contract.Id); err != nil {
 			return errors.Wrap(err, "failed to update last block")
 		}
 
@@ -135,7 +136,7 @@ func (t *MintTracker) ProcessContract(contract data.Contract) error {
 	})
 }
 
-func (t *MintTracker) GetNewBlock(startBlock, iterationSize, lastBlock uint64) uint64 {
+func (t *MintTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) uint64 {
 	if startBlock+iterationSize+1 > lastBlock {
 		return lastBlock + 1
 	}

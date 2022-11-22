@@ -19,6 +19,7 @@ type FactoryContractReader struct {
 	from    *uint64
 	to      *uint64
 	address *common.Address
+	ctx     context.Context
 
 	// instancesCache is a map storing already initialized instances of contracts
 	instancesCache map[common.Address]*tokenfactory.Tokenfactory
@@ -27,6 +28,7 @@ type FactoryContractReader struct {
 func NewFactoryContractReader(cfg config.Config) reader.FactoryReader {
 	return &FactoryContractReader{
 		rpc:            cfg.EtherClient().Rpc,
+		ctx:            context.Background(),
 		instancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
 	}
 }
@@ -46,6 +48,11 @@ func (r *FactoryContractReader) WithAddress(address common.Address) reader.Facto
 	return r
 }
 
+func (r *FactoryContractReader) WithCtx(ctx context.Context) reader.FactoryReader {
+	r.ctx = ctx
+	return r
+}
+
 func (r *FactoryContractReader) validateParameters() error {
 	if r.from == nil {
 		return reader.FromNotSpecifiedErr
@@ -60,10 +67,8 @@ func (r *FactoryContractReader) validateParameters() error {
 // GetContractCreatedEvents returns the deploy contract events
 // in the form of ethereum.ContractCreatedEvent array
 // based on contract, start and end blocks to search through
-func (r *FactoryContractReader) GetContractCreatedEvents() ([]ethereum.ContractCreatedEvent, error) {
-	events := make([]ethereum.ContractCreatedEvent, 0)
-
-	if err := r.validateParameters(); err != nil {
+func (r *FactoryContractReader) GetContractCreatedEvents() (events []ethereum.ContractCreatedEvent, err error) {
+	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
 
@@ -87,12 +92,16 @@ func (r *FactoryContractReader) GetContractCreatedEvents() ([]ethereum.ContractC
 		})
 	}
 
-	defer iterator.Close()
+	defer func(iterator *tokenfactory.TokenfactoryTokenContractDeployedIterator) {
+		if tempErr := iterator.Close(); tempErr != nil {
+			err = tempErr
+		}
+	}(iterator)
 
 	for iterator.Next() {
 		event := iterator.Event
 		if event != nil {
-			receipt, err := r.rpc.TransactionReceipt(context.Background(), event.Raw.TxHash)
+			receipt, err := r.rpc.TransactionReceipt(r.ctx, event.Raw.TxHash)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
 					"tx_hash": event.Raw.TxHash.String(),

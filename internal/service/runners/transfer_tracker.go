@@ -65,7 +65,7 @@ func (t *TransferTracker) Track(ctx context.Context) error {
 	}
 
 	for _, contract := range contracts {
-		if err = t.ProcessContract(contract); err != nil {
+		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
 				"contract_id": contract.Id,
 			})
@@ -75,7 +75,7 @@ func (t *TransferTracker) Track(ctx context.Context) error {
 	return nil
 }
 
-func (t *TransferTracker) ProcessContract(contract data.Contract) error {
+func (t *TransferTracker) ProcessContract(contract data.Contract, ctx context.Context) error {
 	t.log.Debugf("Processing contract with id of %d...", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
@@ -99,6 +99,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 			From(startBlock).
 			To(startBlock + t.cfg.IterationSize).
 			WithAddress(contract.Address()).
+			WithCtx(ctx).
 			GetTransferEvents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful transfer events")
@@ -118,19 +119,14 @@ func (t *TransferTracker) ProcessContract(contract data.Contract) error {
 			t.log.Info("Processed transfer event")
 		}
 
-		newBlock, err := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
-		if err != nil {
-			return errors.Wrap(err, "failed to get new block", logan.F{
-				"current_block": contract.LastBlock,
-			})
-		}
+		nextBlock := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
 
 		if err = t.trackerDB.Blocks().Upsert(data.Blocks{
 			ContractId:    contract.Id,
-			TransferBlock: newBlock,
+			TransferBlock: nextBlock,
 		}); err != nil {
 			return errors.Wrap(err, "failed to upsert transfer block", logan.F{
-				"transfer_block": newBlock,
+				"transfer_block": nextBlock,
 			})
 		}
 
@@ -180,12 +176,12 @@ func (t *TransferTracker) GetStartBlock(contract data.Contract) (uint64, error) 
 	return startBlock, nil
 }
 
-func (t *TransferTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) (uint64, error) {
+func (t *TransferTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) uint64 {
 	if startBlock+iterationSize+1 > lastBlock {
-		return lastBlock + 1, nil
+		return lastBlock + 1
 	}
 
-	return startBlock + iterationSize + 1, nil
+	return startBlock + iterationSize + 1
 }
 
 func (t *TransferTracker) Select(pageNumber uint64) ([]data.Contract, error) {

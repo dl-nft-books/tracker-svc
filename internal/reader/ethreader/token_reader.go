@@ -28,6 +28,7 @@ type TokenContractReader struct {
 	from    *uint64
 	to      *uint64
 	address *common.Address
+	ctx     context.Context
 
 	instancesCache map[common.Address]*tokencontract.Tokencontract
 }
@@ -35,6 +36,7 @@ type TokenContractReader struct {
 func NewTokenContractReader(cfg config.Config) reader.TokenReader {
 	return &TokenContractReader{
 		rpc:             cfg.EtherClient().Rpc,
+		ctx:             context.Background(),
 		nativeTokenInfo: cfg.NativeToken(),
 	}
 }
@@ -54,6 +56,11 @@ func (r *TokenContractReader) WithAddress(address common.Address) reader.TokenRe
 	return r
 }
 
+func (r *TokenContractReader) WithCtx(ctx context.Context) reader.TokenReader {
+	r.ctx = ctx
+	return r
+}
+
 func (r *TokenContractReader) validateParameters() error {
 	if r.from == nil {
 		return reader.FromNotSpecifiedErr
@@ -68,10 +75,8 @@ func (r *TokenContractReader) validateParameters() error {
 // GetSuccessfulMintEvents returns the successful mint events
 // in the form of ethereum.SuccessfulMintEvent array
 // based on contract, start and end blocks to search through
-func (r *TokenContractReader) GetSuccessfulMintEvents() ([]ethereum.SuccessfulMintEvent, error) {
-	events := make([]ethereum.SuccessfulMintEvent, 0)
-
-	if err := r.validateParameters(); err != nil {
+func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.SuccessfulMintEvent, err error) {
+	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
 
@@ -95,13 +100,17 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() ([]ethereum.SuccessfulMi
 		})
 	}
 
-	defer iterator.Close()
+	defer func(iterator *itokencontract.ItokencontractSuccessfullyMintedIterator) {
+		if tempErr := iterator.Close(); tempErr != nil {
+			err = tempErr
+		}
+	}(iterator)
 
 	for iterator.Next() {
 		event := iterator.Event
 
 		if event != nil {
-			receipt, err := r.rpc.TransactionReceipt(context.Background(), event.Raw.TxHash)
+			receipt, err := r.rpc.TransactionReceipt(r.ctx, event.Raw.TxHash)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
 					"tx_hash": event.Raw.TxHash.String(),
@@ -139,10 +148,8 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() ([]ethereum.SuccessfulMi
 // GetTransferEvents returns the transfer events
 // in the form of ethereum.TransferEvent array
 // based on contract, start and end blocks to search through
-func (r *TokenContractReader) GetTransferEvents() ([]ethereum.TransferEvent, error) {
-	events := make([]ethereum.TransferEvent, 0)
-
-	if err := r.validateParameters(); err != nil {
+func (r *TokenContractReader) GetTransferEvents() (events []ethereum.TransferEvent, err error) {
+	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
 
@@ -163,7 +170,11 @@ func (r *TokenContractReader) GetTransferEvents() ([]ethereum.TransferEvent, err
 		})
 	}
 
-	defer iterator.Close()
+	defer func(iterator *tokencontract.TokencontractTransferIterator) {
+		if tempErr := iterator.Close(); tempErr != nil {
+			err = tempErr
+		}
+	}(iterator)
 
 	for iterator.Next() {
 		event := iterator.Event
