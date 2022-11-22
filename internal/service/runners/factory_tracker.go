@@ -74,22 +74,20 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 	}
 
 	if err = t.database.Transaction(func() error {
-		if _, err = t.database.Contracts().Insert(formContractsBatch(events)...); err != nil {
-			return errors.Wrap(err, "failed to insert event into the database")
+		contractsBatch := formContractsBatch(events)
+		if _, err = t.database.Contracts().Insert(contractsBatch...); err != nil {
+			return errors.Wrap(err, "failed to insert contracts batch into the database")
 		}
 
-		t.log.Debugf("Successfully inserted contract batch into the database")
+		t.log.Debug("Successfully inserted contract batch into the database")
 
-		nextBlock, err := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
-		if err != nil {
-			return errors.Wrap(err, "failed to get new block")
-		}
+		nextBlock := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
 
 		if err = t.database.KeyValue().Upsert(data.KeyValue{
 			Key:   factoryTrackerCursor,
 			Value: strconv.FormatInt(nextBlock, 10),
 		}); err != nil {
-			return errors.Wrap(err, "failed to upsert new value")
+			return errors.Wrap(err, "failed to upsert new cursor value")
 		}
 
 		return nil
@@ -126,12 +124,12 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 	return t.cfg.FirstBlock, nil
 }
 
-func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) (int64, error) {
+func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) int64 {
 	if startBlock+iterationSize+1 > lastBlock {
-		return int64(lastBlock + 1), nil
+		return int64(lastBlock + 1)
 	}
 
-	return int64(startBlock + iterationSize + 1), nil
+	return int64(startBlock + iterationSize + 1)
 }
 
 func formContractsBatch(events []ethereum.ContractCreatedEvent) (batch []data.Contract) {
