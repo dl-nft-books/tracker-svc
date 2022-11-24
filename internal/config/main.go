@@ -28,7 +28,6 @@ type Config interface {
 	FactoryTracker() FactoryTracker
 	TransferTracker() ContractTracker
 	MintTracker() ContractTracker
-	EtherClient() EtherClient
 	NativeToken() ethereum.Erc20Info
 }
 
@@ -47,7 +46,6 @@ type config struct {
 	transferTrackerOnce comfig.Once
 	factoryTrackerOnce  comfig.Once
 	nativeTokenOnce     comfig.Once
-	ethererOnce         comfig.Once
 	ipfsLoaderOnce      comfig.Once
 }
 

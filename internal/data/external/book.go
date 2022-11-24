@@ -1,8 +1,9 @@
 package external
 
 import (
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"time"
+
+	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
 
 type BookQ interface {
@@ -27,6 +28,7 @@ type Book struct {
 	Banner          string                 `db:"banner" structs:"banner"`
 	File            string                 `db:"file" structs:"file"`
 	Deleted         bool                   `db:"deleted" structs:"-"`
+	ChainID         int64                  `db:"chain_id" structs:"chain_id"`
 	TokenId         int64                  `db:"token_id" structs:"token_id"`
 	DeployStatus    resources.DeployStatus `db:"deploy_status" structs:"deploy_status"`
 	LastBlock       uint64                 `db:"last_block" structs:"last_block"`

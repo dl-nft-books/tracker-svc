@@ -24,7 +24,6 @@ native_token: # Info about native token
 
 factory_tracker:
   name: factory_tracker # Name to be displayed in logs
-  address: 0x63B703318fbcD1F319a5C0036F9bcd6573c483ba
   runner: # Periods settings
     normal_period: 10s
     min_abnormal_period: 10s

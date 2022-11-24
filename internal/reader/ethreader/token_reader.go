@@ -2,6 +2,7 @@ package ethreader
 
 import (
 	"context"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -11,8 +12,9 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/itokencontract"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
+	networkConnector "gitlab.com/tokend/nft-books/network-svc/connector/api"
+
 	"math/big"
 	"time"
 )
@@ -30,14 +32,21 @@ type TokenContractReader struct {
 	address *common.Address
 	ctx     context.Context
 
-	instancesCache map[common.Address]*tokencontract.Tokencontract
+	// contractInstancesCache is a map storing already initialized instances of contracts
+	contractInstancesCache map[common.Address]*tokencontract.Tokencontract
+
+	// rpcInstancesCache is a map storing already initialized instances of RPC connections
+	rpcInstancesCache map[int64]*ethclient.Client
+
+	networker *networkConnector.Connector
 }
 
 func NewTokenContractReader(cfg config.Config) reader.TokenReader {
 	return &TokenContractReader{
-		rpc:             cfg.EtherClient().Rpc,
-		ctx:             context.Background(),
-		nativeTokenInfo: cfg.NativeToken(),
+		contractInstancesCache: map[common.Address]*tokencontract.Tokencontract{},
+		rpcInstancesCache:      map[int64]*ethclient.Client{},
+		ctx:                    context.Background(),
+		nativeTokenInfo:        cfg.NativeToken(),
 	}
 }
 
@@ -61,12 +70,22 @@ func (r *TokenContractReader) WithCtx(ctx context.Context) reader.TokenReader {
 	return r
 }
 
+func (r *TokenContractReader) WithRPC(rpc *ethclient.Client) reader.TokenReader {
+	r.rpc = rpc
+	return r
+}
+
 func (r *TokenContractReader) validateParameters() error {
+	//TODO: SHOULD WE VALIDATE `TO` PARAM?
+
 	if r.from == nil {
 		return reader.FromNotSpecifiedErr
 	}
 	if r.address == nil {
 		return reader.AddressNotSpecifiedErr
+	}
+	if r.rpc == nil {
+		return reader.RPCNotSpecifiedErr
 	}
 
 	return nil
@@ -80,7 +99,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.Succe
 		return nil, err
 	}
 
-	instance, err := itokencontract.NewItokencontract(*r.address, r.rpc)
+	instance, err := r.getContractInstance(*r.address)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize a contract instance")
 	}
@@ -100,7 +119,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.Succe
 		})
 	}
 
-	defer func(iterator *itokencontract.ItokencontractSuccessfullyMintedIterator) {
+	defer func(iterator *tokencontract.TokencontractSuccessfullyMintedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -153,7 +172,7 @@ func (r *TokenContractReader) GetTransferEvents() (events []ethereum.TransferEve
 		return nil, err
 	}
 
-	instance, err := r.getInstance(*r.address)
+	instance, err := r.getContractInstance(*r.address)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create token contract instance")
 	}
@@ -196,7 +215,7 @@ func (r *TokenContractReader) GetTransferEvents() (events []ethereum.TransferEve
 // when a block with specified blockNumber was initialized
 func (r *TokenContractReader) getBlockTimestamp(blockNumber uint64) (*time.Time, error) {
 	// Get header by a block number
-	header, err := r.rpc.BlockByNumber(context.Background(), new(big.Int).SetUint64(blockNumber))
+	header, err := r.rpc.BlockByNumber(r.ctx, new(big.Int).SetUint64(blockNumber))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get block header by its number")
 	}
@@ -245,19 +264,58 @@ func (r *TokenContractReader) GetErc20Data(address common.Address) (*ethereum.Er
 	}, nil
 }
 
-func (r *TokenContractReader) getInstance(address common.Address) (*tokencontract.Tokencontract, error) {
-	cacheInstance, ok := r.instancesCache[address]
+func (r *TokenContractReader) GetRPCInstance(chainID int64) (*ethclient.Client, error) {
+	// Searching RPC instance in cache, if not found -- create new and store
+	cacheInstance, ok := r.rpcInstancesCache[chainID]
 	if ok {
 		return cacheInstance, nil
 	}
 
-	newInstance, err := tokencontract.NewTokencontract(address, r.rpc)
+	// if specific chain is not cached yet -- getting network from connector
+	// getting from connector moved here for reducing the great amount
+	// of requests to network-svc
+	// unlike FactoryReader, we can do requests to network-svc
+	// only if chain was not found in cache; in FactoryReader we should always
+	// pull all list of available networks
+
+	network, err := r.networker.GetNetworkByChainID(chainID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get network by id", logan.F{
+			"chain_id": chainID,
+		})
+	}
+	if network == nil {
+		return nil, errors.From(errors.New("network is nil"), logan.F{
+			"chain_id": chainID,
+		})
+	}
+
+	newInstance, err := ethclient.Dial(network.Data.Attributes.RpcUrl)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert value into eth client", logan.F{
+			"raw_url": network.Data.Attributes.RpcUrl,
+		})
+	}
+
+	r.rpcInstancesCache[chainID] = newInstance
+	return newInstance, nil
+
+}
+
+func (r *TokenContractReader) getContractInstance(address common.Address) (*tokencontract.Tokencontract, error) {
+	// Searching contract instance in cache, if not found -- create new and store
+	cacheInstance, ok := r.contractInstancesCache[address]
+	if ok {
+		return cacheInstance, nil
+	}
+
+	newInstance, err := tokencontract.NewTokencontract(*r.address, r.rpc)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize token factory instance for given address", logan.F{
 			"address": address,
 		})
 	}
 
-	r.instancesCache[address] = newInstance
+	r.contractInstancesCache[address] = newInstance
 	return newInstance, nil
 }

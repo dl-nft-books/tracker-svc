@@ -2,11 +2,12 @@ package runners
 
 import (
 	"context"
+	"strconv"
+
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -37,7 +38,6 @@ type TransferTracker struct {
 func NewTransferTracker(cfg config.Config) *TransferTracker {
 	return &TransferTracker{
 		log:    cfg.Log(),
-		rpc:    cfg.EtherClient().Rpc,
 		reader: ethreader.NewTokenContractReader(cfg),
 		cfg:    cfg.TransferTracker(),
 
@@ -65,6 +65,24 @@ func (t *TransferTracker) Track(ctx context.Context) error {
 	}
 
 	for _, contract := range contracts {
+		// setting specific network params before tracking
+
+		// setting new rpc connection according to network params
+		rpc, err := t.reader.GetRPCInstance(contract.ChainID)
+		if err != nil {
+			return errors.Wrap(err, "failed to get rpc connection", logan.F{
+				"contract_id": contract.Id,
+				"chain_id":    contract.ChainID,
+			})
+		}
+		t.rpc = rpc
+
+		// setting new reader according to new rpc and token address
+		t.reader = t.reader.
+			WithAddress(contract.Address()).
+			WithRPC(t.rpc).
+			WithCtx(ctx)
+
 		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
 				"contract_id": contract.Id,
@@ -79,7 +97,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract, ctx context.Co
 	t.log.Debugf("Processing contract with id of %d...", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
-		lastBlock, err := t.rpc.BlockNumber(context.Background())
+		lastBlock, err := t.rpc.BlockNumber(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to get last block number")
 		}

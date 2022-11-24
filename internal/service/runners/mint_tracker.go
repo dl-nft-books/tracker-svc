@@ -3,12 +3,13 @@ package runners
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -47,7 +48,6 @@ type MintTracker struct {
 func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
 		log:        cfg.Log(),
-		rpc:        cfg.EtherClient().Rpc,
 		reader:     ethreader.NewTokenContractReader(cfg),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 		cfg:        cfg.MintTracker(),
@@ -79,11 +79,30 @@ func (t *MintTracker) Track(ctx context.Context) error {
 	}
 
 	for _, contract := range contracts {
+		// setting specific network params before tracking
+
+		// setting new rpc connection according to network params
+		rpc, err := t.reader.GetRPCInstance(contract.ChainID)
+		if err != nil {
+			return errors.Wrap(err, "failed to get rpc connection", logan.F{
+				"contract_id": contract.Id,
+				"chain_id":    contract.ChainID,
+			})
+		}
+		t.rpc = rpc
+
+		// setting new reader according to new rpc and token address
+		t.reader = t.reader.
+			WithAddress(contract.Address()).
+			WithRPC(t.rpc).
+			WithCtx(ctx)
+
 		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
 				"contract_id": contract.Id,
 			})
 		}
+
 	}
 
 	return nil
@@ -94,12 +113,13 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 
 	return t.trackerDB.Transaction(func() error {
 		// Starting block equals to contract.LastBlock
-		lastBlock, err := t.rpc.BlockNumber(context.Background())
+		lastBlock, err := t.rpc.BlockNumber(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to get last block number")
 		}
 
 		if contract.LastBlock > lastBlock {
+			t.log.Debug("Starting block exceeded last block, omitting")
 			return nil
 		}
 

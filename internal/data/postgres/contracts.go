@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -17,6 +18,7 @@ const (
 	contractsName      = "name"
 	contractsSymbol    = "symbol"
 	contractsLastBlock = "last_block"
+	contractsChainID   = "chain_id"
 )
 
 type contractsQ struct {

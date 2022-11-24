@@ -2,12 +2,12 @@ package ethreader
 
 import (
 	"context"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
@@ -21,16 +21,38 @@ type FactoryContractReader struct {
 	address *common.Address
 	ctx     context.Context
 
-	// instancesCache is a map storing already initialized instances of contracts
-	instancesCache map[common.Address]*tokenfactory.Tokenfactory
+	// contractInstancesCache is a map storing already initialized instances of contracts
+	contractInstancesCache map[common.Address]*tokenfactory.Tokenfactory
+
+	// rpcInstancesCache is a map storing already initialized instances of RPC connections
+	rpcInstancesCache map[string]*ethclient.Client
 }
 
-func NewFactoryContractReader(cfg config.Config) reader.FactoryReader {
+func NewFactoryContractReader() reader.FactoryReader {
 	return &FactoryContractReader{
-		rpc:            cfg.EtherClient().Rpc,
-		ctx:            context.Background(),
-		instancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
+		ctx:                    context.Background(),
+		rpcInstancesCache:      map[string]*ethclient.Client{},
+		contractInstancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
 	}
+}
+
+func (r *FactoryContractReader) GetRPCInstance(rawURL string) (*ethclient.Client, error) {
+	// Searching RPC instance in cache, if not found -- create new and store
+	cacheInstance, ok := r.rpcInstancesCache[rawURL]
+	if ok {
+		return cacheInstance, nil
+	}
+
+	newInstance, err := ethclient.Dial(rawURL)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert value into eth client", logan.F{
+			"raw_url": rawURL,
+		})
+	}
+
+	r.rpcInstancesCache[rawURL] = newInstance
+	return newInstance, nil
+
 }
 
 func (r *FactoryContractReader) From(from uint64) reader.FactoryReader {
@@ -53,12 +75,22 @@ func (r *FactoryContractReader) WithCtx(ctx context.Context) reader.FactoryReade
 	return r
 }
 
+func (r *FactoryContractReader) WithRPC(rpc *ethclient.Client) reader.FactoryReader {
+	r.rpc = rpc
+	return r
+}
+
 func (r *FactoryContractReader) validateParameters() error {
+	//TODO: SHOULD WE VALIDATE `TO` PARAM?
+
 	if r.from == nil {
 		return reader.FromNotSpecifiedErr
 	}
 	if r.address == nil {
 		return reader.AddressNotSpecifiedErr
+	}
+	if r.rpc == nil {
+		return reader.RPCNotSpecifiedErr
 	}
 
 	return nil
@@ -122,7 +154,7 @@ func (r *FactoryContractReader) GetContractCreatedEvents() (events []ethereum.Co
 }
 
 func (r *FactoryContractReader) getInstance(address common.Address) (*tokenfactory.Tokenfactory, error) {
-	cacheInstance, ok := r.instancesCache[address]
+	cacheInstance, ok := r.contractInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
@@ -134,6 +166,6 @@ func (r *FactoryContractReader) getInstance(address common.Address) (*tokenfacto
 		})
 	}
 
-	r.instancesCache[address] = newInstance
+	r.contractInstancesCache[address] = newInstance
 	return newInstance, nil
 }
