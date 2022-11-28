@@ -16,6 +16,6 @@ type TokenReader interface {
 	WithRPC(rpc *ethclient.Client) TokenReader
 
 	GetRPCInstance(chainID int64) (*ethclient.Client, error)
-	GetSuccessfulMintEvents() ([]ethereum.SuccessfulMintEvent, error)
+	GetSuccessfulMintEvents(chainID int64) ([]ethereum.SuccessfulMintEvent, error)
 	GetTransferEvents() ([]ethereum.TransferEvent, error)
 }

@@ -1,9 +1,10 @@
 package data
 
 import (
+	"time"
+
 	"gitlab.com/distributed_lab/kit/pgdb"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
-	"time"
 )
 
 const timestampFormat = "2006-01-02"
@@ -14,6 +15,7 @@ type Payment struct {
 	ContractAddress   string    `db:"contract_address" structs:"contract_address"`
 	PayerAddress      string    `db:"payer_address" structs:"payer_address"`
 	TokenAddress      string    `db:"token_address" structs:"token_address"`
+	ChainID           int64     `db:"chain_id" structs:"chain_id"`
 	TokenSymbol       string    `db:"token_symbol" structs:"token_symbol"`
 	TokenName         string    `db:"token_name" structs:"token_name"`
 	TokenDecimals     uint8     `db:"token_decimals" structs:"token_decimals"`

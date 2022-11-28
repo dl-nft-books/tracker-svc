@@ -59,6 +59,10 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to form a list of available networks to track")
 	}
+	if networksResponse.Data == nil {
+		t.log.Info("no networks were found")
+		return nil
+	}
 
 	for _, network := range networksResponse.Data {
 
@@ -80,7 +84,10 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 			WithCtx(ctx)
 
 		// processing specified network
-		if err = t.ProcessNetwork(ctx, int64(network.Attributes.ChainId)); err != nil {
+		if err = t.ProcessNetwork(ctx,
+			network.Attributes.ChainId,
+			network.Attributes.FirstBlock,
+		); err != nil {
 			return errors.Wrap(err, "failed to process specified network", logan.F{
 				"network_name": network.Attributes.Name,
 				"chain_id":     network.Attributes.ChainId,
@@ -91,13 +98,13 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 	return nil
 }
 
-func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID int64) error {
+func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID, firstBlock int64) error {
 	lastBlock, err := t.rpc.BlockNumber(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block number")
 	}
 
-	startBlock, err := t.GetStartBlock(chainID)
+	startBlock, err := t.GetStartBlock(chainID, firstBlock)
 	if err != nil {
 		return errors.Wrap(err, "failed to get previous block")
 	}
@@ -143,7 +150,7 @@ func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID int64) erro
 }
 
 // GetStartBlock gets the block to begin with
-func (t *FactoryTracker) GetStartBlock(chainID int64) (uint64, error) {
+func (t *FactoryTracker) GetStartBlock(chainID, firstBlock int64) (uint64, error) {
 	cursorKV, err := t.database.KeyValue().Get(fmt.Sprintf("%s_%v", factoryTrackerCursor, chainID))
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get cursor value")
@@ -160,15 +167,11 @@ func (t *FactoryTracker) GetStartBlock(chainID int64) (uint64, error) {
 		return 0, errors.Wrap(err, "failed to convert cursor value from string to integer")
 	}
 
-	cursorUInt64 := uint64(cursor)
-	return cursorUInt64, nil
+	if cursor > firstBlock {
+		return uint64(cursor), nil
+	}
 
-	// TODO: CONFIGURE FIRST_BLOCK FOR EACH NETWORK
-	//if cursorUInt64 > t.cfg.FirstBlock {
-	//	return cursorUInt64, nil
-	//}
-	//
-	//return t.cfg.FirstBlock, nil
+	return uint64(firstBlock), nil
 }
 
 func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) int64 {

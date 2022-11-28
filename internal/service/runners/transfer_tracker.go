@@ -38,7 +38,7 @@ type TransferTracker struct {
 func NewTransferTracker(cfg config.Config) *TransferTracker {
 	return &TransferTracker{
 		log:    cfg.Log(),
-		reader: ethreader.NewTokenContractReader(cfg),
+		reader: ethreader.NewTokenContractReader(),
 		cfg:    cfg.TransferTracker(),
 
 		trackerDB:   postgres.NewTrackerDB(cfg.TrackerDB().DB),
@@ -80,8 +80,7 @@ func (t *TransferTracker) Track(ctx context.Context) error {
 		// setting new reader according to new rpc and token address
 		t.reader = t.reader.
 			WithAddress(contract.Address()).
-			WithRPC(t.rpc).
-			WithCtx(ctx)
+			WithRPC(t.rpc)
 
 		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{

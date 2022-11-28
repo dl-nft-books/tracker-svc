@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
@@ -24,8 +23,7 @@ var (
 )
 
 type TokenContractReader struct {
-	rpc             *ethclient.Client
-	nativeTokenInfo ethereum.Erc20Info
+	rpc *ethclient.Client
 
 	from    *uint64
 	to      *uint64
@@ -38,15 +36,17 @@ type TokenContractReader struct {
 	// rpcInstancesCache is a map storing already initialized instances of RPC connections
 	rpcInstancesCache map[int64]*ethclient.Client
 
+	// nativeTokenCache is a map storing native token info for specified chain
+	nativeTokenCache map[int64]*ethereum.Erc20Info
+
 	networker *networkConnector.Connector
 }
 
-func NewTokenContractReader(cfg config.Config) reader.TokenReader {
+func NewTokenContractReader() reader.TokenReader {
 	return &TokenContractReader{
 		contractInstancesCache: map[common.Address]*tokencontract.Tokencontract{},
 		rpcInstancesCache:      map[int64]*ethclient.Client{},
 		ctx:                    context.Background(),
-		nativeTokenInfo:        cfg.NativeToken(),
 	}
 }
 
@@ -94,7 +94,7 @@ func (r *TokenContractReader) validateParameters() error {
 // GetSuccessfulMintEvents returns the successful mint events
 // in the form of ethereum.SuccessfulMintEvent array
 // based on contract, start and end blocks to search through
-func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.SuccessfulMintEvent, err error) {
+func (r *TokenContractReader) GetSuccessfulMintEvents(chainID int64) (events []ethereum.SuccessfulMintEvent, err error) {
 	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.Succe
 				return nil, errors.Wrap(err, "failed to get block timestamp")
 			}
 
-			erc20Data, err := r.GetErc20Data(event.PaymentTokenAddress)
+			erc20Data, err := r.GetErc20Data(event.PaymentTokenAddress, chainID)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get erc20 data from the contract")
 			}
@@ -229,9 +229,16 @@ func (r *TokenContractReader) getBlockTimestamp(blockNumber uint64) (*time.Time,
 // address specified in parameters. If address is ethereum.NullAddress, function
 // returns the native erc20 data. Otherwise, contract on the specified
 // address must implement IERC20 interface.
-func (r *TokenContractReader) GetErc20Data(address common.Address) (*ethereum.Erc20Info, error) {
+func (r *TokenContractReader) GetErc20Data(address common.Address, chainID int64) (*ethereum.Erc20Info, error) {
 	if address == ethereum.NullAddress {
-		return &r.nativeTokenInfo, nil
+		ntInfo, ok := r.nativeTokenCache[chainID]
+		if !ok {
+			return nil, errors.From(
+				errors.New("failed to set native token info"),
+				logan.F{"chain_id": chainID})
+		}
+
+		return ntInfo, nil
 	}
 
 	erc20Instance, err := erc20.NewErc20(address, r.rpc)
@@ -298,6 +305,14 @@ func (r *TokenContractReader) GetRPCInstance(chainID int64) (*ethclient.Client, 
 	}
 
 	r.rpcInstancesCache[chainID] = newInstance
+
+	// also saving native Token info for new chain
+	r.nativeTokenCache[chainID] = &ethereum.Erc20Info{
+		TokenAddress: common.Address{},
+		Name:         network.Data.Attributes.TokenName,
+		Symbol:       network.Data.Attributes.TokenSymbol,
+		Decimals:     18, //hardcoded
+	}
 	return newInstance, nil
 
 }

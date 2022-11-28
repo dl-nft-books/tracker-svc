@@ -619,8 +619,8 @@ gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312 h1:u8pxrNw8QKIsrmCl
 gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312/go.mod h1:vdlhN5/oQR7uY8EsGSqPf8bwnmQxxpaq7qrQn5Y3U/w=
 gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221104125850-7e8369e2ce8a h1:VlP5DyUnhpYof6TpsMLGlypRraXqfUFj63IrY0iFOAE=
 gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221104125850-7e8369e2ce8a/go.mod h1:qtlYMAD07JwjHZnOuCDcjg3mGusqbToMrUFBo69bkqA=
-gitlab.com/tokend/nft-books/network-svc v0.0.0-20221121130554-cb4656562f8f h1:Czzo8kn3eIYiVsa3uyb4ppPpVdFybHvtzxQeO8G8sgI=
-gitlab.com/tokend/nft-books/network-svc v0.0.0-20221121130554-cb4656562f8f/go.mod h1:bdkmHRcDz78p8T7sZSNy5Pvk8z4MlhoVj9ftShzsswY=
+gitlab.com/tokend/nft-books/network-svc v0.0.0-20221128140430-36aff79cbc1f h1:JO+4xON0bCck6F2hb0sK5BYZoyGs1zEazFHdl3qE0t0=
+gitlab.com/tokend/nft-books/network-svc v0.0.0-20221128140430-36aff79cbc1f/go.mod h1:bdkmHRcDz78p8T7sZSNy5Pvk8z4MlhoVj9ftShzsswY=
 go.etcd.io/etcd/api/v3 v3.5.0/go.mod h1:cbVKeC6lCfl7j/8jBhAK6aIYO9XOjdptoxU/nLQcPvs=
 go.etcd.io/etcd/client/pkg/v3 v3.5.0/go.mod h1:IJHfcCEKxYu1Os13ZdwCwIUTUVGYTSAM3YSwc9/Ac1g=
 go.etcd.io/etcd/client/v2 v2.305.0/go.mod h1:h9puh54ZTgAKtEbut2oe9P4L/oqKCVB6xsXlzd7alYQ=

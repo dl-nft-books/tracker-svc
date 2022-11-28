@@ -48,7 +48,7 @@ type MintTracker struct {
 func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
 		log:        cfg.Log(),
-		reader:     ethreader.NewTokenContractReader(cfg),
+		reader:     ethreader.NewTokenContractReader(),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 		cfg:        cfg.MintTracker(),
 
@@ -94,8 +94,7 @@ func (t *MintTracker) Track(ctx context.Context) error {
 		// setting new reader according to new rpc and token address
 		t.reader = t.reader.
 			WithAddress(contract.Address()).
-			WithRPC(t.rpc).
-			WithCtx(ctx)
+			WithRPC(t.rpc)
 
 		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
@@ -128,7 +127,7 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 			To(contract.LastBlock + t.cfg.IterationSize).
 			WithAddress(contract.Address()).
 			WithCtx(ctx).
-			GetSuccessfulMintEvents()
+			GetSuccessfulMintEvents(contract.ChainID)
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful mint events")
 		}
@@ -231,6 +230,7 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			PriceToken:        event.PaymentTokenPrice.String(),
 			PurchaseTimestamp: event.Timestamp,
 			BookUrl:           baseURI + task.FileIpfsHash,
+			ChainID:           contract.ChainID,
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to add payment to the table")
@@ -245,6 +245,7 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			MetadataHash: task.MetadataIpfsHash,
 			Signature:    task.Signature,
 			Status:       resources.TokenUploading,
+			ChainID:      contract.ChainID,
 		})
 
 		// Uploading metadata
