@@ -9,6 +9,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	"gitlab.com/distributed_lab/logan/v3"
+	booksConnector "gitlab.com/tokend/nft-books/book-svc/connector/api"
 	networkerConnector "gitlab.com/tokend/nft-books/network-svc/connector/api"
 )
 
@@ -19,6 +20,7 @@ const (
 	booksQCtxKey
 	trackerDBCtxKey
 	networkerConnectorCtxKey
+	bookerConnectorCtxKey
 )
 
 func CtxLog(entry *logan.Entry) func(context.Context) context.Context {
@@ -59,4 +61,14 @@ func CtxNetworkerConnector(entry networkerConnector.Connector) func(context.Cont
 
 func NetworkerConnector(r *http.Request) networkerConnector.Connector {
 	return r.Context().Value(networkerConnectorCtxKey).(networkerConnector.Connector)
+}
+
+func CtxBooksConnector(entry booksConnector.Connector) func(context.Context) context.Context {
+	return func(ctx context.Context) context.Context {
+		return context.WithValue(ctx, bookerConnectorCtxKey, entry)
+	}
+}
+
+func BooksConnector(r *http.Request) booksConnector.Connector {
+	return r.Context().Value(bookerConnectorCtxKey).(booksConnector.Connector)
 }

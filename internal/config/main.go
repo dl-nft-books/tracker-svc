@@ -7,10 +7,12 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	s3api "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	s3config "gitlab.com/tokend/nft-books/blob-svc/connector/config"
+	booksConnector "gitlab.com/tokend/nft-books/book-svc/connector/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/pinata"
+	generatorConnector "gitlab.com/tokend/nft-books/generator-svc/connector/config"
 	networkerCfg "gitlab.com/tokend/nft-books/network-svc/connector/config"
 )
 
@@ -22,6 +24,8 @@ type Config interface {
 	pinata.Pinater
 	Databaser
 	networkerCfg.NetworkConfigurator
+	booksConnector.BooksConnectorConfigurator
+	generatorConnector.GeneratorConfigurator
 
 	IpfsLoader() uploader.Uploader
 	DocumenterConnector() *s3api.Connector
@@ -40,6 +44,8 @@ type config struct {
 	pinata.Pinater
 	Databaser
 	networkerCfg.NetworkConfigurator
+	booksConnector.BooksConnectorConfigurator
+	generatorConnector.GeneratorConfigurator
 
 	getter              kv.Getter
 	mintTrackerOnce     comfig.Once
@@ -51,14 +57,16 @@ type config struct {
 
 func New(getter kv.Getter) Config {
 	return &config{
-		getter:              getter,
-		Databaser:           NewDatabaser(getter),
-		Copuser:             copus.NewCopuser(getter),
-		Listenerer:          comfig.NewListenerer(getter),
-		Logger:              comfig.NewLogger(getter, comfig.LoggerOpts{}),
-		Documenter:          s3config.NewDocumenter(getter),
-		Infurer:             infura.NewInfurer(getter),
-		Pinater:             pinata.NewPinater(getter),
-		NetworkConfigurator: networkerCfg.NewNetworkConfigurator(getter),
+		getter:                     getter,
+		Databaser:                  NewDatabaser(getter),
+		Copuser:                    copus.NewCopuser(getter),
+		Listenerer:                 comfig.NewListenerer(getter),
+		Logger:                     comfig.NewLogger(getter, comfig.LoggerOpts{}),
+		Documenter:                 s3config.NewDocumenter(getter),
+		Infurer:                    infura.NewInfurer(getter),
+		Pinater:                    pinata.NewPinater(getter),
+		NetworkConfigurator:        networkerCfg.NewNetworkConfigurator(getter),
+		BooksConnectorConfigurator: booksConnector.NewBooksConfigurator(getter),
+		GeneratorConfigurator:      generatorConnector.NewGeneratorConfigurator(getter),
 	}
 }

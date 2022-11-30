@@ -20,6 +20,7 @@ func (s *service) router() chi.Router {
 			handlers.CtxTrackerDB(postgres.NewTrackerDB(s.cfg.TrackerDB().DB)),
 
 			handlers.CtxNetworkerConnector(*s.cfg.NetworkConnector()),
+			handlers.CtxBooksConnector(*s.cfg.BooksConnector()),
 		),
 	)
 	r.Route("/integrations/token-tracker", func(r chi.Router) {
