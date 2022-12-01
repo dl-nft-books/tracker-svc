@@ -5,15 +5,15 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader"
 )
 
 const ipfsLoaderYamlKey = "uploader"
 
 var ModeNotIdentified = errors.New("specified mode does not exist")
 
-func (c *config) implementationsMap() map[string]uploader.Uploader {
-	return map[string]uploader.Uploader{
+func (c *config) implementationsMap() map[string]ipfs_uploader.Uploader {
+	return map[string]ipfs_uploader.Uploader{
 		"infura": c.InfuraImplementation(),
 		"pinata": c.PinataImplementation(),
 	}
@@ -23,7 +23,7 @@ type IpfsLoader struct {
 	Mode string `fig:"mode,required"`
 }
 
-func (c *config) IpfsLoader() uploader.Uploader {
+func (c *config) IpfsLoader() ipfs_uploader.Uploader {
 	return c.ipfsLoaderOnce.Do(func() interface{} {
 		var cfg IpfsLoader
 
@@ -43,5 +43,5 @@ func (c *config) IpfsLoader() uploader.Uploader {
 		}
 
 		return implementation
-	}).(uploader.Uploader)
+	}).(ipfs_uploader.Uploader)
 }

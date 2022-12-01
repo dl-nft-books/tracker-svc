@@ -3,21 +3,22 @@ package helpers
 import (
 	"encoding/json"
 	"fmt"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
+
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	s3connector "gitlab.com/tokend/nft-books/blob-svc/connector/api"
+	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader"
 )
 
 type IpfsLoader struct {
-	implementation uploader.Uploader
-	documenter     *s3connector.Connector
+	implementation ipfs_uploader.Uploader
+	documenter     *documenter.Connector
 	logger         *logan.Entry
 }
 

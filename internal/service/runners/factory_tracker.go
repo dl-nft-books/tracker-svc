@@ -2,21 +2,18 @@ package runners
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
-	networkConnector "gitlab.com/tokend/nft-books/network-svc/connector/api"
 )
 
 const factoryTrackerCursor = "factory_tracker_last_block"
@@ -26,19 +23,16 @@ type FactoryTracker struct {
 	rpc      *ethclient.Client
 	cfg      config.FactoryTracker
 	database data.TrackerDB
-	reader   reader.FactoryReader
-
-	networker *networkConnector.Connector
+	reader   contract_reader.TokenFactoryReader
 }
 
 func NewFactoryTracker(cfg config.Config) *FactoryTracker {
 	return &FactoryTracker{
 		log:      cfg.Log(),
+		rpc:      cfg.EtherClient().Rpc,
 		cfg:      cfg.FactoryTracker(),
 		database: postgres.NewTrackerDB(cfg.TrackerDB().DB),
-		reader:   ethreader.NewFactoryContractReader(), //empty reader, set params when process specified network
-
-		networker: cfg.NetworkConnector(),
+		reader:   evm_based_reader.NewFactoryContractReader(cfg).WithAddress(cfg.FactoryTracker().Address),
 	}
 }
 
@@ -55,56 +49,12 @@ func (t *FactoryTracker) Run(ctx context.Context) {
 }
 
 func (t *FactoryTracker) Track(ctx context.Context) error {
-	networksResponse, err := t.networker.GetNetworks()
-	if err != nil {
-		return errors.Wrap(err, "failed to form a list of available networks to track")
-	}
-	if networksResponse.Data == nil {
-		t.log.Info("no networks were found")
-		return nil
-	}
-
-	for _, network := range networksResponse.Data {
-
-		// setting new rpc connection according to network params
-		rpc, err := t.reader.GetRPCInstance(network.Attributes.RpcUrl)
-		if err != nil {
-			return errors.Wrap(err, "failed to get rpc connection", logan.F{
-				"network_name": network.Attributes.Name,
-				"chain_id":     network.Attributes.ChainId,
-			})
-		}
-		t.rpc = rpc
-
-		// setting new reader params according to new rpc and factory address
-		t.reader = t.reader.
-			WithAddress(
-				common.HexToAddress(network.Attributes.FactoryAddress)).
-			WithRPC(t.rpc).
-			WithCtx(ctx)
-
-		// processing specified network
-		if err = t.ProcessNetwork(ctx,
-			network.Attributes.ChainId,
-			network.Attributes.FirstBlock,
-		); err != nil {
-			return errors.Wrap(err, "failed to process specified network", logan.F{
-				"network_name": network.Attributes.Name,
-				"chain_id":     network.Attributes.ChainId,
-			})
-		}
-	}
-
-	return nil
-}
-
-func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID, firstBlock int64) error {
 	lastBlock, err := t.rpc.BlockNumber(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block number")
 	}
 
-	startBlock, err := t.GetStartBlock(chainID, firstBlock)
+	startBlock, err := t.GetStartBlock()
 	if err != nil {
 		return errors.Wrap(err, "failed to get previous block")
 	}
@@ -125,7 +75,7 @@ func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID, firstBlock
 	}
 
 	if err = t.database.Transaction(func() error {
-		contractsBatch := formContractsBatch(events, chainID)
+		contractsBatch := formContractsBatch(events)
 		if _, err = t.database.Contracts().Insert(contractsBatch...); err != nil {
 			return errors.Wrap(err, "failed to insert contracts batch into the database")
 		}
@@ -135,7 +85,7 @@ func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID, firstBlock
 		nextBlock := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
 
 		if err = t.database.KeyValue().Upsert(data.KeyValue{
-			Key:   fmt.Sprintf("%s_%v", factoryTrackerCursor, chainID),
+			Key:   factoryTrackerCursor,
 			Value: strconv.FormatInt(nextBlock, 10),
 		}); err != nil {
 			return errors.Wrap(err, "failed to upsert new cursor value")
@@ -150,14 +100,14 @@ func (t *FactoryTracker) ProcessNetwork(ctx context.Context, chainID, firstBlock
 }
 
 // GetStartBlock gets the block to begin with
-func (t *FactoryTracker) GetStartBlock(chainID, firstBlock int64) (uint64, error) {
-	cursorKV, err := t.database.KeyValue().Get(fmt.Sprintf("%s_%v", factoryTrackerCursor, chainID))
+func (t *FactoryTracker) GetStartBlock() (uint64, error) {
+	cursorKV, err := t.database.KeyValue().Get(factoryTrackerCursor)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get cursor value")
 	}
 	if cursorKV == nil {
 		cursorKV = &data.KeyValue{
-			Key:   fmt.Sprintf("%s_%v", factoryTrackerCursor, chainID),
+			Key:   factoryTrackerCursor,
 			Value: "0",
 		}
 	}
@@ -167,11 +117,12 @@ func (t *FactoryTracker) GetStartBlock(chainID, firstBlock int64) (uint64, error
 		return 0, errors.Wrap(err, "failed to convert cursor value from string to integer")
 	}
 
-	if cursor > firstBlock {
-		return uint64(cursor), nil
+	cursorUInt64 := uint64(cursor)
+	if cursorUInt64 > t.cfg.FirstBlock {
+		return cursorUInt64, nil
 	}
 
-	return uint64(firstBlock), nil
+	return t.cfg.FirstBlock, nil
 }
 
 func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) int64 {
@@ -182,11 +133,10 @@ func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint6
 	return int64(startBlock + iterationSize + 1)
 }
 
-func formContractsBatch(events []ethereum.ContractCreatedEvent, chainID int64) (batch []data.Contract) {
+func formContractsBatch(events []ethereum.ContractCreatedEvent) (batch []data.Contract) {
 	for _, event := range events {
 		batch = append(batch, data.Contract{
 			Contract:  event.Address.String(),
-			ChainID:   chainID,
 			Name:      event.Name,
 			Symbol:    event.Symbol,
 			LastBlock: event.BlockNumber,

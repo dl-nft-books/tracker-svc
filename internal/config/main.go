@@ -5,68 +5,83 @@ import (
 	"gitlab.com/distributed_lab/kit/copus"
 	"gitlab.com/distributed_lab/kit/copus/types"
 	"gitlab.com/distributed_lab/kit/kv"
-	s3api "gitlab.com/tokend/nft-books/blob-svc/connector/api"
-	s3config "gitlab.com/tokend/nft-books/blob-svc/connector/config"
-	booksConnector "gitlab.com/tokend/nft-books/book-svc/connector/config"
+	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
+	booker "gitlab.com/tokend/nft-books/book-svc/connector/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/infura"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/uploader/pinata"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader/infura"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader/pinata"
 	generatorConnector "gitlab.com/tokend/nft-books/generator-svc/connector/config"
-	networkerCfg "gitlab.com/tokend/nft-books/network-svc/connector/config"
 )
 
 type Config interface {
+	// base
 	comfig.Logger
 	types.Copuser
 	comfig.Listenerer
+
+	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
-	Databaser
-	networkerCfg.NetworkConfigurator
-	booksConnector.BooksConnectorConfigurator
-	generatorConnector.GeneratorConfigurator
+	IpfsLoader() ipfs_uploader.Uploader
 
-	IpfsLoader() uploader.Uploader
-	DocumenterConnector() *s3api.Connector
+	// Contract trackers
+	EtherClient() EtherClient
+	NativeToken() ethereum.Erc20Info
+
 	FactoryTracker() FactoryTracker
 	TransferTracker() ContractTracker
 	MintTracker() ContractTracker
-	NativeToken() ethereum.Erc20Info
+
+	// Connectors
+	documenter.Documenter
+	booker.Booker
+	generatorConnector.GeneratorConfigurator
+
+	// Database
+	Databaser
 }
 
 type config struct {
+	// base
 	comfig.Logger
 	types.Copuser
 	comfig.Listenerer
-	s3config.Documenter
+
+	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
-	Databaser
-	networkerCfg.NetworkConfigurator
-	booksConnector.BooksConnectorConfigurator
-	generatorConnector.GeneratorConfigurator
+	ipfsLoaderOnce comfig.Once
 
-	getter              kv.Getter
+	// Contract trackers
 	mintTrackerOnce     comfig.Once
 	transferTrackerOnce comfig.Once
 	factoryTrackerOnce  comfig.Once
 	nativeTokenOnce     comfig.Once
-	ipfsLoaderOnce      comfig.Once
+	ethererOnce         comfig.Once
+
+	// Connectors
+	booker.Booker
+	generatorConnector.GeneratorConfigurator
+	documenter.Documenter
+
+	// Database
+	Databaser
+
+	getter kv.Getter
 }
 
 func New(getter kv.Getter) Config {
 	return &config{
-		getter:                     getter,
-		Databaser:                  NewDatabaser(getter),
-		Copuser:                    copus.NewCopuser(getter),
-		Listenerer:                 comfig.NewListenerer(getter),
-		Logger:                     comfig.NewLogger(getter, comfig.LoggerOpts{}),
-		Documenter:                 s3config.NewDocumenter(getter),
-		Infurer:                    infura.NewInfurer(getter),
-		Pinater:                    pinata.NewPinater(getter),
-		NetworkConfigurator:        networkerCfg.NewNetworkConfigurator(getter),
-		BooksConnectorConfigurator: booksConnector.NewBooksConfigurator(getter),
-		GeneratorConfigurator:      generatorConnector.NewGeneratorConfigurator(getter),
+		getter:                getter,
+		Databaser:             NewDatabaser(getter),
+		Copuser:               copus.NewCopuser(getter),
+		Listenerer:            comfig.NewListenerer(getter),
+		Logger:                comfig.NewLogger(getter, comfig.LoggerOpts{}),
+		Documenter:            documenter.NewDocumenter(getter),
+		Infurer:               infura.NewInfurer(getter),
+		Pinater:               pinata.NewPinater(getter),
+		Booker:                booker.NewBooker(getter),
+		GeneratorConfigurator: generatorConnector.NewGeneratorConfigurator(getter),
 	}
 }

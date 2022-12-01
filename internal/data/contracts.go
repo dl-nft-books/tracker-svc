@@ -8,7 +8,6 @@ import (
 type Contract struct {
 	Id        int64  `db:"id" structs:"-"`
 	Contract  string `db:"contract" structs:"contract"`
-	ChainID   int64  `db:"chain_id" structs:"chain_id"` // chain id of a newly deployed contract
 	Name      string `db:"name" structs:"name"`
 	Symbol    string `db:"symbol" structs:"symbol"`
 	LastBlock uint64 `db:"last_block" structs:"last_block"`

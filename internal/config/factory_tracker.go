@@ -13,14 +13,16 @@ import (
 const factoryTrackerYamlKey = "factory_tracker"
 
 type FactoryTracker struct {
-	Name          string `fig:"name"`
-	Runner        Runner `fig:"runner"`
-	FirstBlock    uint64 `fig:"first_block"`
-	IterationSize uint64 `fig:"iteration_size"`
+	Name          string         `fig:"name"`
+	Address       common.Address `fig:"address"`
+	Runner        Runner         `fig:"runner"`
+	FirstBlock    uint64         `fig:"first_block"`
+	IterationSize uint64         `fig:"iteration_size"`
 }
 
 var defaultFactoryTracker = FactoryTracker{
 	Name:          "factory_tracker",
+	Address:       common.Address{},
 	Runner:        defaultRunner,
 	FirstBlock:    0,
 	IterationSize: 100,

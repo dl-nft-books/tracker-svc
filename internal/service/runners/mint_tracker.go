@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/reader/ethreader"
-
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/kit/pgdb"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
-	s3connector "gitlab.com/tokend/nft-books/blob-svc/connector/api"
+	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
@@ -34,7 +33,7 @@ var bannerNotFoundErr = errors.New("specified banner key was not found")
 type MintTracker struct {
 	log        *logan.Entry
 	rpc        *ethclient.Client
-	reader     reader.TokenReader
+	reader     contract_reader.TokenReader
 	ipfsLoader *helpers.IpfsLoader
 	cfg        config.ContractTracker
 
@@ -42,13 +41,14 @@ type MintTracker struct {
 	generatorDB external.GeneratorDB
 	booksQ      external.BookQ
 
-	documenterConnector *s3connector.Connector
+	documenter *documenter.Connector
 }
 
 func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
 		log:        cfg.Log(),
-		reader:     ethreader.NewTokenContractReader(),
+		rpc:        cfg.EtherClient().Rpc,
+		reader:     evm_based_reader.NewTokenContractReader(cfg),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 		cfg:        cfg.MintTracker(),
 
@@ -56,7 +56,7 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 		generatorDB: postgres.NewGeneratorDB(cfg.GeneratorDB().DB),
 		booksQ:      postgres.NewBooksQ(cfg.BookDB().DB),
 
-		documenterConnector: cfg.DocumenterConnector(),
+		documenter: cfg.DocumenterConnector(),
 	}
 }
 
@@ -79,29 +79,11 @@ func (t *MintTracker) Track(ctx context.Context) error {
 	}
 
 	for _, contract := range contracts {
-		// setting specific network params before tracking
-
-		// setting new rpc connection according to network params
-		rpc, err := t.reader.GetRPCInstance(contract.ChainID)
-		if err != nil {
-			return errors.Wrap(err, "failed to get rpc connection", logan.F{
-				"contract_id": contract.Id,
-				"chain_id":    contract.ChainID,
-			})
-		}
-		t.rpc = rpc
-
-		// setting new reader according to new rpc and token address
-		t.reader = t.reader.
-			WithAddress(contract.Address()).
-			WithRPC(t.rpc)
-
 		if err = t.ProcessContract(contract, ctx); err != nil {
 			return errors.Wrap(err, "failed to process specified contract", logan.F{
 				"contract_id": contract.Id,
 			})
 		}
-
 	}
 
 	return nil
@@ -118,7 +100,6 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 		}
 
 		if contract.LastBlock > lastBlock {
-			t.log.Debug("Starting block exceeded last block, omitting")
 			return nil
 		}
 
@@ -127,7 +108,7 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 			To(contract.LastBlock + t.cfg.IterationSize).
 			WithAddress(contract.Address()).
 			WithCtx(ctx).
-			GetSuccessfulMintEvents(contract.ChainID)
+			GetSuccessfulMintEvents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get successful mint events")
 		}
@@ -204,7 +185,7 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 		}
 
 		// Getting nft banner img link
-		bannerLink, err := t.documenterConnector.GetDocumentLink(*bannerKey)
+		bannerLink, err := t.documenter.GetDocumentLink(*bannerKey)
 		if err != nil {
 			return errors.Wrap(err, "failed to get banner image link")
 		}
@@ -230,7 +211,6 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			PriceToken:        event.PaymentTokenPrice.String(),
 			PurchaseTimestamp: event.Timestamp,
 			BookUrl:           baseURI + task.FileIpfsHash,
-			ChainID:           contract.ChainID,
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to add payment to the table")
@@ -245,7 +225,6 @@ func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event e
 			MetadataHash: task.MetadataIpfsHash,
 			Signature:    task.Signature,
 			Status:       resources.TokenUploading,
-			ChainID:      contract.ChainID,
 		})
 
 		// Uploading metadata
