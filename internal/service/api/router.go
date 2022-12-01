@@ -23,7 +23,7 @@ func (s *service) router() chi.Router {
 			handlers.CtxBooker(*s.cfg.Connector()),
 		),
 	)
-	r.Route("/integrations/token-tracker", func(r chi.Router) {
+	r.Route("/integrations/tracker", func(r chi.Router) {
 		r.Route("/payments", func(r chi.Router) {
 			r.Get("/", handlers.ListPayments)
 
