@@ -12,7 +12,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/factory"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 )
 
@@ -36,6 +36,7 @@ func NewFactoryTracker(cfg config.Config) *FactoryTracker {
 	}
 }
 
+// TODO: ADD PROCESS EVENT TO UPDATE BOOK PARAMS
 func (t *FactoryTracker) Run(ctx context.Context) {
 	running.WithBackOff(
 		ctx,
@@ -48,6 +49,7 @@ func (t *FactoryTracker) Run(ctx context.Context) {
 	)
 }
 
+// TODO: ADD PROCESS EVENT TO UPDATE BOOK PARAMS
 func (t *FactoryTracker) Track(ctx context.Context) error {
 	lastBlock, err := t.rpc.BlockNumber(ctx)
 	if err != nil {
@@ -72,6 +74,10 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 		GetContractCreatedEvents()
 	if err != nil {
 		return errors.Wrap(err, "failed to get events")
+	}
+
+	if len(events) == 0 {
+		t.log.Debug("No deploy events found")
 	}
 
 	if err = t.database.Transaction(func() error {
@@ -133,7 +139,7 @@ func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint6
 	return int64(startBlock + iterationSize + 1)
 }
 
-func formContractsBatch(events []ethereum.ContractCreatedEvent) (batch []data.Contract) {
+func formContractsBatch(events []factory.ContractDeployedEvent) (batch []data.Contract) {
 	for _, event := range events {
 		batch = append(batch, data.Contract{
 			Contract:  event.Address.String(),
@@ -144,4 +150,36 @@ func formContractsBatch(events []ethereum.ContractCreatedEvent) (batch []data.Co
 	}
 
 	return
+}
+
+// TODO: ADD PROCESS EVENT TO UPDATE BOOK PARAMS
+func (t *FactoryTracker) ProcessEvent(event factory.ContractDeployedEvent) error {
+	//book, err := t.database.Books().New().FilterByTokenId(int64(event.TokenId)).Get()
+	//if err != nil {
+	//	return errors.Wrap(err, "failed to get book by token id")
+	//}
+	//if book == nil {
+	//	t.log.Warnf("Book with token id %v was not found", event.TokenId)
+	//	return nil
+	//}
+	//
+	//switch event.Status {
+	//case types.ReceiptStatusSuccessful:
+	//	return t.database.Transaction(
+	//		func() error {
+	//			if err = t.database.Books().UpdateContractAddress(event.Address.String(), book.ID); err != nil {
+	//				return errors.Wrap(err, "failed to update contract address", logan.F{
+	//					"contract_address": event.Address.String(),
+	//				})
+	//			}
+	//
+	//			return t.database.Books().UpdateDeployStatus(resources.DeploySuccessful, book.ID)
+	//		})
+	//case types.ReceiptStatusFailed:
+	//	return t.database.Books().UpdateDeployStatus(resources.DeployFailed, book.ID)
+	//}
+	//
+	return errors.From(errors.New(""), logan.F{
+		"block_number": event.BlockNumber,
+	})
 }

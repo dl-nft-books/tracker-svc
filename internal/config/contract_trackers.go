@@ -10,6 +10,7 @@ import (
 const (
 	mintTrackerYamlKey     = "mint_tracker"
 	transferTrackerYamlKey = "transfer_tracker"
+	updateTrackerYamlKey   = "update_tracker"
 )
 
 type ContractTracker struct {
@@ -46,4 +47,8 @@ func (c *config) MintTracker() ContractTracker {
 
 func (c *config) TransferTracker() ContractTracker {
 	return c.contractTracker(&c.transferTrackerOnce, transferTrackerYamlKey)
+}
+
+func (c *config) UpdateTracker() ContractTracker {
+	return c.contractTracker(&c.updateTrackerOnce, updateTrackerYamlKey)
 }

@@ -15,7 +15,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/token"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
@@ -144,7 +144,7 @@ func (t *MintTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) 
 	return startBlock + iterationSize + 1
 }
 
-func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event ethereum.SuccessfulMintEvent) error {
+func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event token.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
 		// FIXME: Make the following actions via connectors:
 		// 1. Get task info using event uri

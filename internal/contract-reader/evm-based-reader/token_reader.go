@@ -14,6 +14,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/token"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
@@ -77,7 +78,7 @@ func (r *TokenContractReader) validateParameters() error {
 // GetSuccessfulMintEvents returns the successful mint events
 // in the form of ethereum.SuccessfulMintEvent array
 // based on contract, start and end blocks to search through
-func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.SuccessfulMintEvent, err error) {
+func (r *TokenContractReader) GetSuccessfulMintEvents() (events []token.SuccessfulMintEvent, err error) {
 	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
@@ -129,7 +130,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.Succe
 				return nil, errors.Wrap(err, "failed to get erc20 data from the contract")
 			}
 
-			events = append(events, ethereum.SuccessfulMintEvent{
+			events = append(events, token.SuccessfulMintEvent{
 				Recipient:         event.Recipient,
 				TokenId:           event.MintedTokenInfo.TokenId.Int64(),
 				Uri:               event.MintedTokenInfo.TokenURI,
@@ -150,7 +151,7 @@ func (r *TokenContractReader) GetSuccessfulMintEvents() (events []ethereum.Succe
 // GetTransferEvents returns the transfer events
 // in the form of ethereum.TransferEvent array
 // based on contract, start and end blocks to search through
-func (r *TokenContractReader) GetTransferEvents() (events []ethereum.TransferEvent, err error) {
+func (r *TokenContractReader) GetTransferEvents() (events []token.TransferEvent, err error) {
 	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (r *TokenContractReader) GetTransferEvents() (events []ethereum.TransferEve
 		event := iterator.Event
 
 		if event != nil {
-			events = append(events, ethereum.TransferEvent{
+			events = append(events, token.TransferEvent{
 				From:    event.From,
 				To:      event.To,
 				TokenId: event.TokenId.Uint64(),
@@ -263,4 +264,47 @@ func (r *TokenContractReader) getContractInstance(address common.Address) (*toke
 
 	r.contractInstancesCache[address] = newInstance
 	return newInstance, nil
+}
+
+func (r *TokenContractReader) GetUpdateEvents() ([]token.UpdateEvent, error) {
+	if err := r.validateParameters(); err != nil {
+		return nil, err
+	}
+
+	events := make([]token.UpdateEvent, 0)
+
+	instance, err := r.getContractInstance(*r.address)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize a contract instance")
+	}
+
+	iterator, err := instance.FilterTokenContractParamsUpdated(
+		&bind.FilterOpts{
+			Start: *r.from,
+			End:   r.to,
+		},
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize an iterator")
+	}
+	if iterator == nil {
+		return nil, NullIteratorErr
+	}
+
+	defer iterator.Close()
+
+	for iterator.Next() {
+		event := iterator.Event
+
+		if event != nil {
+			events = append(events, token.UpdateEvent{
+				Name:        event.TokenName,
+				Symbol:      event.TokenSymbol,
+				Price:       event.NewPrice.String(),
+				BlockNumber: event.Raw.BlockNumber,
+			})
+		}
+	}
+
+	return events, nil
 }

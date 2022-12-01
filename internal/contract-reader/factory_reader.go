@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/factory"
 )
 
 type TokenFactoryReader interface {
@@ -13,5 +13,5 @@ type TokenFactoryReader interface {
 	WithAddress(address common.Address) TokenFactoryReader
 	WithCtx(ctx context.Context) TokenFactoryReader
 
-	GetContractCreatedEvents() ([]ethereum.ContractCreatedEvent, error)
+	GetContractCreatedEvents() ([]factory.ContractDeployedEvent, error)
 }

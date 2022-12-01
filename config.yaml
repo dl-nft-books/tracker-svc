@@ -40,6 +40,15 @@ mint_tracker:
     min_abnormal_period: 10s
     max_abnormal_period: 10s
 
+update_tracker:
+  name: update_tracker # Name to be displayed in logs
+  capacity: 1
+  iteration_size: 10000
+  runner: # Periods settings
+    normal_period: 10s
+    min_abnormal_period: 10s
+    max_abnormal_period: 10s
+
 transfer_tracker:
   name: transfer_tracker # Name to be displayed in logs
   capacity: 1

@@ -32,6 +32,7 @@ type Config interface {
 	FactoryTracker() FactoryTracker
 	TransferTracker() ContractTracker
 	MintTracker() ContractTracker
+	UpdateTracker() ContractTracker
 
 	// Connectors
 	documenter.Documenter
@@ -59,6 +60,7 @@ type config struct {
 	factoryTrackerOnce  comfig.Once
 	nativeTokenOnce     comfig.Once
 	ethererOnce         comfig.Once
+	updateTrackerOnce   comfig.Once
 
 	// Connectors
 	booker.Booker

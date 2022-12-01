@@ -10,7 +10,7 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/factory"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
@@ -66,9 +66,9 @@ func (r *FactoryContractReader) validateParameters() error {
 }
 
 // GetContractCreatedEvents returns the deploy contract events
-// in the form of ethereum.ContractCreatedEvent array
+// in the form of ethereum.ContractDeployedEvent array
 // based on contract, start and end blocks to search through
-func (r *FactoryContractReader) GetContractCreatedEvents() (events []ethereum.ContractCreatedEvent, err error) {
+func (r *FactoryContractReader) GetContractCreatedEvents() (events []factory.ContractDeployedEvent, err error) {
 	if err = r.validateParameters(); err != nil {
 		return nil, err
 	}
@@ -109,12 +109,13 @@ func (r *FactoryContractReader) GetContractCreatedEvents() (events []ethereum.Co
 				})
 			}
 
-			events = append(events, ethereum.ContractCreatedEvent{
+			events = append(events, factory.ContractDeployedEvent{
 				Address:     event.NewTokenContractAddr,
 				BlockNumber: event.Raw.BlockNumber,
 				Name:        event.TokenName,
 				Symbol:      event.TokenSymbol,
 				Status:      receipt.Status,
+				TokenId:     event.TokenContractId.Uint64(),
 			})
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/token"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -135,7 +136,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract, ctx context.Co
 	})
 }
 
-func (t *TransferTracker) ProcessTransferEvent(event ethereum.TransferEvent) error {
+func (t *TransferTracker) ProcessTransferEvent(event token.TransferEvent) error {
 	if event.From == ethereum.NullAddress || event.To == ethereum.NullAddress {
 		t.log.Info("Received transfer event with one address being null, omitting")
 		return nil
