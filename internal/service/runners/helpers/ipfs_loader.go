@@ -13,11 +13,11 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 )
 
 type IpfsLoader struct {
-	implementation ipfs_uploader.Uploader
+	implementation ipfs.Uploader
 	documenter     *documenter.Connector
 	logger         *logan.Entry
 }

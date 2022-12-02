@@ -1,7 +1,9 @@
 package handlers
 
 import (
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
+	"github.com/spf13/cast"
+	booker "gitlab.com/tokend/nft-books/book-svc/connector"
+	"gitlab.com/tokend/nft-books/book-svc/connector/models"
 	"net/http"
 
 	"gitlab.com/distributed_lab/logan/v3"
@@ -26,7 +28,7 @@ func GetPaymentById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payment, err := TrackerDB(r).Payments().New().FilterById(request.Id).Get()
+	payment, err := DB(r).Payments().New().FilterById(request.Id).Get()
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get payment")
 		ape.RenderErr(w, problems.InternalError())
@@ -37,7 +39,7 @@ func GetPaymentById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paymentResponse, err := getPaymentResponse(*payment, TrackerDB(r), BooksQ(r))
+	paymentResponse, err := getPaymentResponse(*payment, DB(r), Booker(r))
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get payment response")
 		ape.RenderErr(w, problems.InternalError())
@@ -47,10 +49,10 @@ func GetPaymentById(w http.ResponseWriter, r *http.Request) {
 	ape.Render(w, *paymentResponse)
 }
 
-func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*resources.PaymentResponse, error) {
+func getPaymentResponse(payment data.Payment, trackerDB data.DB, booker *booker.Connector) (*resources.PaymentResponse, error) {
 	var paymentResponse resources.PaymentResponse
 
-	pairRelationships, err := getPaymentRelationships(payment, trackerDB, qBooks)
+	pairRelationships, err := getPaymentRelationships(payment, trackerDB, booker)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get pair relationship")
 	}
@@ -65,8 +67,8 @@ func getPaymentResponse(payment data.Payment, trackerDB data.TrackerDB, qBooks e
 	return &paymentResponse, nil
 }
 
-func getPaymentRelationships(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*resources.PaymentRelationships, error) {
-	bookId, err := getBookIdFromPayment(payment, trackerDB, qBooks)
+func getPaymentRelationships(payment data.Payment, db data.DB, booker *booker.Connector) (*resources.PaymentRelationships, error) {
+	bookId, err := getBookIdFromPayment(payment, db, booker)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get book id from payment")
 	}
@@ -80,8 +82,8 @@ func getPaymentRelationships(payment data.Payment, trackerDB data.TrackerDB, qBo
 	}, nil
 }
 
-func getBookIdFromPayment(payment data.Payment, trackerDB data.TrackerDB, qBooks external.BookQ) (*int64, error) {
-	contract, err := trackerDB.Contracts().New().Get(payment.ContractId)
+func getBookIdFromPayment(payment data.Payment, db data.DB, booker *booker.Connector) (*int64, error) {
+	contract, err := db.Contracts().New().Get(payment.ContractId)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get book contract from the database")
 	}
@@ -91,15 +93,19 @@ func getBookIdFromPayment(payment data.Payment, trackerDB data.TrackerDB, qBooks
 		})
 	}
 
-	book, err := qBooks.FilterByContractAddress(contract.Contract).FilterActual().Get()
+	bookResponse, err := booker.ListBooks(models.ListBooksParams{
+		Contract: []string{contract.Contract},
+	})
+
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get book from the database")
+		return nil, errors.Wrap(err, "failed to get book via connector")
 	}
-	if book == nil {
+	if bookResponse == nil {
 		return nil, errors.From(BookNotFoundErr, logan.F{
 			"book_contract_address": contract.Contract,
 		})
 	}
 
-	return &book.ID, nil
+	bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
+	return &bookId, nil
 }

@@ -29,11 +29,14 @@ func GetOffsetLinksWithSort(r *http.Request, params pgdb.OffsetPageParams, sorts
 }
 
 func getOffsetLinkWithSort(r *http.Request, pageNumber, limit uint64, sorts pgdb.Sorts) string {
-	url := r.URL
-	query := url.Query()
+	var (
+		url   = r.URL
+		query = url.Query()
+	)
 
 	query.Set(pageParamNumber, strconv.FormatUint(pageNumber, 10))
 	query.Set(pageParamLimit, strconv.FormatUint(limit, 10))
+
 	if _, ok := query[pageParamSort]; !ok {
 		for _, sort := range sorts {
 			query.Add(pageParamSort, string(sort))
@@ -41,6 +44,5 @@ func getOffsetLinkWithSort(r *http.Request, pageNumber, limit uint64, sorts pgdb
 	}
 
 	url.RawQuery = query.Encode()
-
 	return url.String()
 }

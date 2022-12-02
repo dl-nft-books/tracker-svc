@@ -3,12 +3,7 @@ log:
   disable_sentry: true
 
 database:
-  tracker-svc:
-    url: "postgres://tracker:tracker@localhost:9483/tracker?sslmode=disable"
-  generator-svc:
-    url: "postgres://generator:generator@localhost:9484/generator?sslmode=disable"
-  book-svc:
-    url: "postgres://book:book@localhost:9485/book?sslmode=disable"
+  url: "postgres://tracker:tracker@localhost:9483/tracker?sslmode=disable"
 
 listener:
   addr: :7687

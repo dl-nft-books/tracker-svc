@@ -5,12 +5,13 @@ import (
 	"gitlab.com/distributed_lab/kit/copus"
 	"gitlab.com/distributed_lab/kit/copus/types"
 	"gitlab.com/distributed_lab/kit/kv"
+	"gitlab.com/distributed_lab/kit/pgdb"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
-	booker "gitlab.com/tokend/nft-books/book-svc/connector/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader/infura"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs-uploader/pinata"
+	booker "gitlab.com/tokend/nft-books/book-svc/connector"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
 	generatorConnector "gitlab.com/tokend/nft-books/generator-svc/connector/config"
 )
 
@@ -19,15 +20,16 @@ type Config interface {
 	comfig.Logger
 	types.Copuser
 	comfig.Listenerer
+	pgdb.Databaser
 
 	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
-	IpfsLoader() ipfs_uploader.Uploader
+	IpfsLoader() ipfs.Uploader
 
 	// Contract trackers
 	EtherClient() EtherClient
-	NativeToken() ethereum.Erc20Info
+	NativeToken() etherdata.Erc20Info
 
 	FactoryTracker() FactoryTracker
 	TransferTracker() ContractTracker
@@ -38,9 +40,6 @@ type Config interface {
 	documenter.Documenter
 	booker.Booker
 	generatorConnector.GeneratorConfigurator
-
-	// Database
-	Databaser
 }
 
 type config struct {
@@ -48,6 +47,7 @@ type config struct {
 	comfig.Logger
 	types.Copuser
 	comfig.Listenerer
+	pgdb.Databaser
 
 	// IPFS loaders
 	infura.Infurer
@@ -55,6 +55,8 @@ type config struct {
 	ipfsLoaderOnce comfig.Once
 
 	// Contract trackers
+	getter kv.Getter
+
 	mintTrackerOnce     comfig.Once
 	transferTrackerOnce comfig.Once
 	factoryTrackerOnce  comfig.Once
@@ -66,17 +68,12 @@ type config struct {
 	booker.Booker
 	generatorConnector.GeneratorConfigurator
 	documenter.Documenter
-
-	// Database
-	Databaser
-
-	getter kv.Getter
 }
 
 func New(getter kv.Getter) Config {
 	return &config{
 		getter:                getter,
-		Databaser:             NewDatabaser(getter),
+		Databaser:             pgdb.NewDatabaser(getter),
 		Copuser:               copus.NewCopuser(getter),
 		Listenerer:            comfig.NewListenerer(getter),
 		Logger:                comfig.NewLogger(getter, comfig.LoggerOpts{}),

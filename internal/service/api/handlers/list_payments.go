@@ -1,15 +1,15 @@
 package handlers
 
 import (
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
-	"net/http"
-
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	booker "gitlab.com/tokend/nft-books/book-svc/connector"
+	"gitlab.com/tokend/nft-books/book-svc/connector/models"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/requests"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"net/http"
 )
 
 func ListPayments(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,7 @@ func ListPayments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	qPayments, err := applyQFiltersPayments(TrackerDB(r).Payments(), BooksQ(r), request)
+	qPayments, err := applyQFiltersPayments(DB(r).Payments(), Booker(r), request)
 	if err != nil {
 		Log(r).WithError(err).Error("unable to apply request filters")
 		ape.RenderErr(w, problems.InternalError())
@@ -45,7 +45,7 @@ func ListPayments(w http.ResponseWriter, r *http.Request) {
 	ape.Render(w, response)
 }
 
-func applyQFiltersPayments(qPayments data.PaymentsQ, qBooks external.BookQ, request *requests.ListPaymentsRequest) (*data.PaymentsQ, error) {
+func applyQFiltersPayments(qPayments data.PaymentsQ, booker *booker.Connector, request *requests.ListPaymentsRequest) (*data.PaymentsQ, error) {
 	if len(request.Id) > 0 {
 		qPayments = qPayments.FilterById(request.Id...)
 	}
@@ -53,14 +53,17 @@ func applyQFiltersPayments(qPayments data.PaymentsQ, qBooks external.BookQ, requ
 		qPayments = qPayments.FilterByTokenAddress(request.TokenAddress...)
 	}
 	if len(request.BookId) > 0 {
-		books, err := qBooks.FilterByID(request.BookId...).FilterActual().Select()
+		booksResponse, err := booker.ListBooks(models.ListBooksParams{
+			IDs: request.BookId,
+		})
+
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to select books based on book ids")
 		}
 
 		bookContracts := make([]string, 0)
-		for _, book := range books {
-			bookContracts = append(bookContracts, book.ContractAddress)
+		for _, book := range booksResponse.Data {
+			bookContracts = append(bookContracts, book.Attributes.ContractAddress)
 		}
 
 		qPayments = qPayments.FilterByContractAddress(bookContracts...)
@@ -86,7 +89,7 @@ func formListPaymentsResponse(r *http.Request, request *requests.ListPaymentsReq
 			return nil, errors.Wrap(err, "failed to convert payment to the resource format")
 		}
 
-		pairDataRelationships, err := getPaymentRelationships(payment, TrackerDB(r), BooksQ(r))
+		pairDataRelationships, err := getPaymentRelationships(payment, DB(r), Booker(r))
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get payment relationships")
 		}

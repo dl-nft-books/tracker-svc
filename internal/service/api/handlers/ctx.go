@@ -2,23 +2,20 @@ package handlers
 
 import (
 	"context"
-	"net/http"
-
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
-
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-
 	"gitlab.com/distributed_lab/logan/v3"
-	booksConnector "gitlab.com/tokend/nft-books/book-svc/connector/api"
+	booker "gitlab.com/tokend/nft-books/book-svc/connector/api"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector/api"
+	"net/http"
 )
 
 type ctxKey int
 
 const (
 	logCtxKey ctxKey = iota
-	booksQCtxKey
-	trackerDBCtxKey
+	dbCtxKey
 	bookerCtxKey
+	generatorerCtxKey
 )
 
 func CtxLog(entry *logan.Entry) func(context.Context) context.Context {
@@ -27,36 +24,36 @@ func CtxLog(entry *logan.Entry) func(context.Context) context.Context {
 	}
 }
 
-func CtxBooksQ(q external.BookQ) func(context.Context) context.Context {
-	return func(ctx context.Context) context.Context {
-		return context.WithValue(ctx, booksQCtxKey, q)
-	}
-}
-
-func CtxTrackerDB(db data.TrackerDB) func(context.Context) context.Context {
-	return func(ctx context.Context) context.Context {
-		return context.WithValue(ctx, trackerDBCtxKey, db)
-	}
-}
-
 func Log(r *http.Request) *logan.Entry {
 	return r.Context().Value(logCtxKey).(*logan.Entry)
 }
 
-func BooksQ(r *http.Request) external.BookQ {
-	return r.Context().Value(booksQCtxKey).(external.BookQ).New()
+func CtxDB(db data.DB) func(context.Context) context.Context {
+	return func(ctx context.Context) context.Context {
+		return context.WithValue(ctx, dbCtxKey, db)
+	}
 }
 
-func TrackerDB(r *http.Request) data.TrackerDB {
-	return r.Context().Value(trackerDBCtxKey).(data.TrackerDB).New()
+func DB(r *http.Request) data.DB {
+	return r.Context().Value(dbCtxKey).(data.DB).New()
 }
 
-func CtxBooker(entry booksConnector.Connector) func(context.Context) context.Context {
+func CtxBooker(entry booker.Connector) func(context.Context) context.Context {
 	return func(ctx context.Context) context.Context {
 		return context.WithValue(ctx, bookerCtxKey, entry)
 	}
 }
 
-func Booker(r *http.Request) booksConnector.Connector {
-	return r.Context().Value(bookerCtxKey).(booksConnector.Connector)
+func Booker(r *http.Request) booker.Connector {
+	return r.Context().Value(bookerCtxKey).(booker.Connector)
+}
+
+func CtxGeneratorer(entry generatorer.Connector) func(ctx context.Context) context.Context {
+	return func(ctx context.Context) context.Context {
+		return context.WithValue(ctx, generatorerCtxKey, entry)
+	}
+}
+
+func Generatorer(r *http.Request) generatorer.Connector {
+	return r.Context().Value(generatorerCtxKey).(generatorer.Connector)
 }

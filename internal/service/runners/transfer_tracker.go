@@ -2,13 +2,12 @@ package runners
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"strconv"
 
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/token"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/iterators"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -29,7 +28,7 @@ var TokenNotFoundErr = errors.New("specified token was not found")
 type TransferTracker struct {
 	log    *logan.Entry
 	rpc    *ethclient.Client
-	reader contract_reader.TokenReader
+	reader ethereum.TokenReader
 	cfg    config.ContractTracker
 
 	trackerDB   data.TrackerDB
@@ -40,7 +39,7 @@ func NewTransferTracker(cfg config.Config) *TransferTracker {
 	return &TransferTracker{
 		log:    cfg.Log(),
 		rpc:    cfg.EtherClient().Rpc,
-		reader: evm_based_reader.NewTokenContractReader(cfg),
+		reader: iterators.NewTokenContractReader(cfg),
 		cfg:    cfg.TransferTracker(),
 
 		trackerDB:   postgres.NewTrackerDB(cfg.TrackerDB().DB),
@@ -136,7 +135,7 @@ func (t *TransferTracker) ProcessContract(contract data.Contract, ctx context.Co
 	})
 }
 
-func (t *TransferTracker) ProcessTransferEvent(event token.TransferEvent) error {
+func (t *TransferTracker) ProcessTransferEvent(event etherdata.TransferEvent) error {
 	if event.From == ethereum.NullAddress || event.To == ethereum.NullAddress {
 		t.log.Info("Received transfer event with one address being null, omitting")
 		return nil

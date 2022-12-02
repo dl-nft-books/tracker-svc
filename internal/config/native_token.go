@@ -4,14 +4,14 @@ import (
 	"gitlab.com/distributed_lab/figure"
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 )
 
 const nativeTokenYamlKey = "native_token"
 
-func (c *config) NativeToken() ethereum.Erc20Info {
+func (c *config) NativeToken() etherdata.Erc20Info {
 	return c.nativeTokenOnce.Do(func() interface{} {
-		var nativeTokenInfo ethereum.Erc20Info
+		var nativeTokenInfo etherdata.Erc20Info
 
 		if err := figure.
 			Out(&nativeTokenInfo).
@@ -22,8 +22,8 @@ func (c *config) NativeToken() ethereum.Erc20Info {
 		}
 
 		// This is probably set by default, but just to make sure
-		nativeTokenInfo.TokenAddress = ethereum.NullAddress
+		nativeTokenInfo.TokenAddress = etherdata.NullAddress
 
 		return nativeTokenInfo
-	}).(ethereum.Erc20Info)
+	}).(etherdata.Erc20Info)
 }

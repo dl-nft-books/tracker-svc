@@ -9,7 +9,6 @@ type (
 	// CreateBookParams is a helper struct to be included when calling CreateBook request
 	CreateBookParams struct {
 		Banner      resources.Media
-		ChainId     int32
 		Description string
 		File        resources.Media
 		Price       string
@@ -28,5 +27,5 @@ type (
 	}
 
 	// ListBooksParams is a helper struct to be included when calling ListBooks request
-	ListBooksParams requests.GetBooksRequest
+	ListBooksParams requests.ListBooksRequest
 )

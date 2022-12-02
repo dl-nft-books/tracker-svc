@@ -2,6 +2,7 @@ package runners
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -10,9 +11,9 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	contract_reader "gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
-	evm_based_reader "gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	contract_reader "gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
+	evm_based_reader "gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/iterators"
 )
 
 const updateTrackerKVPage = "update_tracker_page"
@@ -30,7 +31,7 @@ func NewUpdateTracker(cfg config.Config) *UpdateTracker {
 	return &UpdateTracker{
 		log:      cfg.Log(),
 		cfg:      cfg.UpdateTracker(),
-		reader:   evm_based_reader.NewTokenContractReader(cfg), //empty reader, set params when process specified network
+		reader:   evm_based_reader.NewTokenContractReader(cfg), //empty iterators, set params when process specified network
 		database: postgres.NewDB(cfg.DB()),
 	}
 }

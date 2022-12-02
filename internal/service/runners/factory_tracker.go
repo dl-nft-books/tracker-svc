@@ -2,6 +2,8 @@ package runners
 
 import (
 	"context"
+	"github.com/spf13/cast"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -9,11 +11,10 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/factory"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/iterators"
 )
 
 const factoryTrackerCursor = "factory_tracker_last_block"
@@ -22,8 +23,8 @@ type FactoryTracker struct {
 	log      *logan.Entry
 	rpc      *ethclient.Client
 	cfg      config.FactoryTracker
-	database data.TrackerDB
-	reader   contract_reader.TokenFactoryReader
+	database data.DB
+	reader   ethereum.FactoryReader
 }
 
 func NewFactoryTracker(cfg config.Config) *FactoryTracker {
@@ -31,8 +32,8 @@ func NewFactoryTracker(cfg config.Config) *FactoryTracker {
 		log:      cfg.Log(),
 		rpc:      cfg.EtherClient().Rpc,
 		cfg:      cfg.FactoryTracker(),
-		database: postgres.NewTrackerDB(cfg.TrackerDB().DB),
-		reader:   evm_based_reader.NewFactoryContractReader(cfg).WithAddress(cfg.FactoryTracker().Address),
+		database: postgres.NewDB(cfg.DB()),
+		reader:   iterators.NewFactoryContractReader(cfg).WithAddress(cfg.FactoryTracker().Address),
 	}
 }
 
@@ -49,38 +50,24 @@ func (t *FactoryTracker) Run(ctx context.Context) {
 	)
 }
 
-// TODO: ADD PROCESS EVENT TO UPDATE BOOK PARAMS
-func (t *FactoryTracker) Track(ctx context.Context) error {
-	lastBlock, err := t.rpc.BlockNumber(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to get last block number")
-	}
-
+func (t *FactoryTracker) Track(ctx context.Context) (err error) {
 	startBlock, err := t.GetStartBlock()
 	if err != nil {
 		return errors.Wrap(err, "failed to get previous block")
 	}
 
-	if startBlock >= lastBlock {
-		t.log.Debug("Starting block exceeded last block, omitting")
-		return nil
-	}
-
-	t.log.Debugf("Trying to iterate from block %d to %d...", startBlock, startBlock+t.cfg.IterationSize)
-
-	events, err := t.reader.
-		From(startBlock).
-		To(startBlock + t.cfg.IterationSize).
-		GetContractCreatedEvents()
-	if err != nil {
-		return errors.Wrap(err, "failed to get events")
-	}
-
-	if len(events) == 0 {
-		t.log.Debug("No deploy events found")
-	}
+	t.log.Debug("Trying to iterate through blocks...")
 
 	if err = t.database.Transaction(func() error {
+		events, err := t.reader.From(startBlock).GetContractCreatedEvents()
+		if err != nil {
+			return errors.Wrap(err, "failed to get events")
+		}
+
+		if len(events) == 0 {
+			t.log.Debug("No deploy events found")
+		}
+
 		contractsBatch := formContractsBatch(events)
 		if _, err = t.database.Contracts().Insert(contractsBatch...); err != nil {
 			return errors.Wrap(err, "failed to insert contracts batch into the database")
@@ -88,21 +75,32 @@ func (t *FactoryTracker) Track(ctx context.Context) error {
 
 		t.log.Debug("Successfully inserted contract batch into the database")
 
-		nextBlock := t.GetNextBlock(startBlock, t.cfg.IterationSize, lastBlock)
-
-		if err = t.database.KeyValue().Upsert(data.KeyValue{
-			Key:   factoryTrackerCursor,
-			Value: strconv.FormatInt(nextBlock, 10),
-		}); err != nil {
-			return errors.Wrap(err, "failed to upsert new cursor value")
+		// Getting last blockchain block
+		lastChainBlock, err := t.rpc.BlockNumber(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to get last block number")
 		}
 
-		return nil
+		return t.database.KeyValue().Upsert(data.KeyValue{
+			Key:   factoryTrackerCursor,
+			Value: strconv.FormatUint(lastChainBlock, 10),
+		})
 	}); err != nil {
-		return errors.Wrap(err, "failed to execute the tx to insert contract batch and update KV value")
+		return errors.Wrap(err, "failed to perform a database tx")
 	}
 
-	return nil
+	events := make(chan etherdata.ContractDeployedEvent)
+	go func() {
+		if tempErr := t.reader.WatchContractCreatedEvents(events); tempErr != nil {
+			err = tempErr
+			return
+		}
+	}()
+	go func() {
+		for {
+			select {}
+		}
+	}
 }
 
 // GetStartBlock gets the block to begin with
@@ -118,12 +116,7 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 		}
 	}
 
-	cursor, err := strconv.ParseInt(cursorKV.Value, 10, 64)
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to convert cursor value from string to integer")
-	}
-
-	cursorUInt64 := uint64(cursor)
+	cursorUInt64 := cast.ToUint64(cursorKV.Value)
 	if cursorUInt64 > t.cfg.FirstBlock {
 		return cursorUInt64, nil
 	}
@@ -131,15 +124,7 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 	return t.cfg.FirstBlock, nil
 }
 
-func (t *FactoryTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) int64 {
-	if startBlock+iterationSize+1 > lastBlock {
-		return int64(lastBlock + 1)
-	}
-
-	return int64(startBlock + iterationSize + 1)
-}
-
-func formContractsBatch(events []factory.ContractDeployedEvent) (batch []data.Contract) {
+func formContractsBatch(events []etherdata.ContractDeployedEvent) (batch []data.Contract) {
 	for _, event := range events {
 		batch = append(batch, data.Contract{
 			Contract:  event.Address.String(),
@@ -153,7 +138,8 @@ func formContractsBatch(events []factory.ContractDeployedEvent) (batch []data.Co
 }
 
 // TODO: ADD PROCESS EVENT TO UPDATE BOOK PARAMS
-func (t *FactoryTracker) ProcessEvent(event factory.ContractDeployedEvent) error {
+func (t *FactoryTracker) ProcessEvent(event etherdata.ContractDeployedEvent) error {
+
 	//book, err := t.database.Books().New().FilterByTokenId(int64(event.TokenId)).Get()
 	//if err != nil {
 	//	return errors.Wrap(err, "failed to get book by token id")

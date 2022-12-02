@@ -3,6 +3,7 @@ package runners
 import (
 	"context"
 	"fmt"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -12,13 +13,12 @@ import (
 	"gitlab.com/distributed_lab/running"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/api"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/contract-reader/evm-based-reader"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/ethereum/token"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/external"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/iterators"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 )
@@ -33,7 +33,7 @@ var bannerNotFoundErr = errors.New("specified banner key was not found")
 type MintTracker struct {
 	log        *logan.Entry
 	rpc        *ethclient.Client
-	reader     contract_reader.TokenReader
+	reader     ethereum.TokenReader
 	ipfsLoader *helpers.IpfsLoader
 	cfg        config.ContractTracker
 
@@ -48,7 +48,7 @@ func NewMintTracker(cfg config.Config) *MintTracker {
 	return &MintTracker{
 		log:        cfg.Log(),
 		rpc:        cfg.EtherClient().Rpc,
-		reader:     evm_based_reader.NewTokenContractReader(cfg),
+		reader:     iterators.NewTokenContractReader(cfg),
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 		cfg:        cfg.MintTracker(),
 
@@ -93,19 +93,15 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 	t.log.Debugf("Processing contract with id of %d...", contract.Id)
 
 	return t.trackerDB.Transaction(func() error {
-		// Starting block equals to contract.LastBlock
+		// Getting last block in the blockchain
 		lastBlock, err := t.rpc.BlockNumber(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to get last block number")
 		}
 
-		if contract.LastBlock > lastBlock {
-			return nil
-		}
-
 		successfulMintEvents, err := t.reader.
 			From(contract.LastBlock).
-			To(contract.LastBlock + t.cfg.IterationSize).
+			To(lastBlock).
 			WithAddress(contract.Address()).
 			WithCtx(ctx).
 			GetSuccessfulMintEvents()
@@ -127,11 +123,6 @@ func (t *MintTracker) ProcessContract(contract data.Contract, ctx context.Contex
 			t.log.Info("Processed successful mint event")
 		}
 
-		nextBlock := t.GetNextBlock(contract.LastBlock, t.cfg.IterationSize, lastBlock)
-		if err = t.trackerDB.Contracts().UpdateLastBlock(nextBlock, contract.Id); err != nil {
-			return errors.Wrap(err, "failed to update last block")
-		}
-
 		return nil
 	})
 }
@@ -144,7 +135,7 @@ func (t *MintTracker) GetNextBlock(startBlock, iterationSize, lastBlock uint64) 
 	return startBlock + iterationSize + 1
 }
 
-func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event token.SuccessfulMintEvent) error {
+func (t *MintTracker) ProcessSuccessfulMintEvent(contract data.Contract, event etherdata.SuccessfulMintEvent) error {
 	return t.trackerDB.Transaction(func() error {
 		// FIXME: Make the following actions via connectors:
 		// 1. Get task info using event uri
