@@ -1,11 +1,8 @@
 package api
 
 import (
-	"context"
 	"net"
 	"net/http"
-
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
 
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 
@@ -14,32 +11,26 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 )
 
-type service struct {
+type api struct {
 	cfg      config.Config
 	log      *logan.Entry
 	copus    types.Copus
 	listener net.Listener
 }
 
-func (s *service) run() error {
-	s.log.Info("Service started")
-	r := s.router()
+func (a *api) run() error {
+	a.log.Info("Service started")
+	r := a.router()
 
-	if err := s.copus.RegisterChi(r); err != nil {
+	if err := a.copus.RegisterChi(r); err != nil {
 		return errors.Wrap(err, "cop failed")
 	}
 
-	ctx := context.Background()
-
-	if err := runners.Run(s.cfg, ctx); err != nil {
-		return errors.Wrap(err, "failed to initialize runners")
-	}
-
-	return http.Serve(s.listener, r)
+	return http.Serve(a.listener, r)
 }
 
-func newService(cfg config.Config) *service {
-	return &service{
+func newService(cfg config.Config) *api {
+	return &api{
 		cfg:      cfg,
 		log:      cfg.Log(),
 		copus:    cfg.Copus(),
@@ -47,8 +38,10 @@ func newService(cfg config.Config) *service {
 	}
 }
 
-func Run(cfg config.Config) {
+func Run(cfg config.Config) error {
 	if err := newService(cfg).run(); err != nil {
-		panic(errors.Wrap(err, "failed to run new service"))
+		return errors.Wrap(err, "failed to run a new service")
 	}
+
+	return nil
 }

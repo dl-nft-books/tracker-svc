@@ -8,19 +8,19 @@ import (
 	"gitlab.com/distributed_lab/ape"
 )
 
-func (s *service) router() chi.Router {
+func (a *api) router() chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(
-		ape.RecoverMiddleware(s.log),
-		ape.LoganMiddleware(s.log),
+		ape.RecoverMiddleware(a.log),
+		ape.LoganMiddleware(a.log),
 		ape.CtxMiddleware(
 			// base configs
-			handlers.CtxLog(s.log),
-			handlers.CtxDB(postgres.NewDB(s.cfg.DB())),
+			handlers.CtxLog(a.log),
+			handlers.CtxDB(postgres.NewDB(a.cfg.DB())),
 			// connectors
-			handlers.CtxBooker(s.cfg.BookerConnector()),
-			handlers.CtxGeneratorer(*s.cfg.GeneratorConnector()),
+			handlers.CtxBooker(a.cfg.BookerConnector()),
+			handlers.CtxGeneratorer(*a.cfg.GeneratorConnector()),
 		),
 	)
 	r.Route("/integrations/runners", func(r chi.Router) {

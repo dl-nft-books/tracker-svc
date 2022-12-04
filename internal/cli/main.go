@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
 
 	"github.com/alecthomas/kingpin"
 	"gitlab.com/distributed_lab/kit/kv"
@@ -21,16 +23,18 @@ func Run(args []string) bool {
 	cfg := config.New(kv.MustFromEnv())
 	log = cfg.Log()
 
-	app := kingpin.New("", "")
+	// Cli commands
+	var (
+		app = kingpin.New("contract-tracker", "service for tracking contract events")
 
-	runCmd := app.Command("run", "run command")
-	serviceCmd := runCmd.Command("service", "run service") // you can insert custom help
+		runCmd      = app.Command("run", "run command")
+		apiCmd      = runCmd.Command("api", "run api handlers")
+		trackingCmd = runCmd.Command("tracking", "run events tracking")
 
-	migrateCmd := app.Command("migrate", "migrate command")
-	migrateUpCmd := migrateCmd.Command("up", "migrate db up")
-	migrateDownCmd := migrateCmd.Command("down", "migrate db down")
-
-	// custom commands go here...
+		migrateCmd     = app.Command("migrate", "migrate command")
+		migrateUpCmd   = migrateCmd.Command("up", "migrate db up")
+		migrateDownCmd = migrateCmd.Command("down", "migrate db down")
+	)
 
 	cmd, err := app.Parse(args[1:])
 	if err != nil {
@@ -39,13 +43,14 @@ func Run(args []string) bool {
 	}
 
 	switch cmd {
-	case serviceCmd.FullCommand():
-		api.Run(cfg)
+	case apiCmd.FullCommand():
+		err = api.Run(cfg)
+	case trackingCmd.FullCommand():
+		err = runners.Run(cfg, context.Background())
 	case migrateUpCmd.FullCommand():
 		err = MigrateUp(cfg)
 	case migrateDownCmd.FullCommand():
 		err = MigrateDown(cfg)
-	// handle any custom commands here in the same way
 	default:
 		log.Errorf("unknown command %s", cmd)
 		return false
@@ -54,5 +59,6 @@ func Run(args []string) bool {
 		log.WithError(err).Error("failed to exec cmd")
 		return false
 	}
+
 	return true
 }
