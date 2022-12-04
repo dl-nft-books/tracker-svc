@@ -12,6 +12,7 @@ func Run(cfg config.Config, ctx context.Context) error {
 	var (
 		factoryCombiner = combiners.NewFactoryCombiner(cfg, ctx)
 		tokenCombiner   = combiners.NewTokenCombiner(cfg, ctx)
+		logger          = cfg.Log()
 	)
 
 	contracts, err := postgres.NewContractsQ(cfg.DB()).Select()
@@ -19,9 +20,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 		return errors.Wrap(err, "failed to select contracts from the database")
 	}
 	for _, contract := range contracts {
-		tokenCombiner.ProduceAndConsumeMintEvents(contract.Address())
-		tokenCombiner.ProduceAndConsumeUpdateEvents(contract.Address())
-
+		tokenCombiner.ProduceAndConsumeAllEvents(contract.Address())
+		logger.Infof("Initialized all consumers and trackers for contract %d", contract.Id)
 	}
 
 	factoryCombiner.ProduceAndConsumeDeployEvents()

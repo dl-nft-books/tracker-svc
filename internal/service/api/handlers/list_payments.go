@@ -54,7 +54,7 @@ func applyQFiltersPayments(qPayments data.PaymentsQ, booker *booker.Connector, r
 	}
 	if len(request.BookId) > 0 {
 		booksResponse, err := booker.ListBooks(models.ListBooksParams{
-			IDs: request.BookId,
+			Id: request.BookId,
 		})
 
 		if err != nil {

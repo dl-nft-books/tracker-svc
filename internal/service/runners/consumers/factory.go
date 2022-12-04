@@ -71,9 +71,7 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(ch <-chan etherdata.ContractDepl
 						return errors.Wrap(err, "failed to insert contract into the database")
 					}
 
-					c.combiner.ProduceAndConsumeMintEvents(event.Address)
-					c.combiner.ProduceAndConsumeUpdateEvents(event.Address)
-					c.combiner.ProduceAndConsumeTransferEvents(event.Address)
+					c.combiner.ProduceAndConsumeAllEvents(event.Address)
 				}
 			}
 		},

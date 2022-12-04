@@ -15,12 +15,12 @@ func (s *service) router() chi.Router {
 		ape.RecoverMiddleware(s.log),
 		ape.LoganMiddleware(s.log),
 		ape.CtxMiddleware(
+			// base configs
 			handlers.CtxLog(s.log),
-			handlers.CtxBooksQ(postgres.NewBooksQ(s.cfg.BookDB().DB)),
-			handlers.CtxTrackerDB(postgres.NewTrackerDB(s.cfg.TrackerDB().DB)),
-
+			handlers.CtxDB(postgres.NewDB(s.cfg.DB())),
 			// connectors
-			handlers.CtxBooker(*s.cfg.Connector()),
+			handlers.CtxBooker(s.cfg.BookerConnector()),
+			handlers.CtxGeneratorer(*s.cfg.GeneratorConnector()),
 		),
 	)
 	r.Route("/integrations/runners", func(r chi.Router) {
