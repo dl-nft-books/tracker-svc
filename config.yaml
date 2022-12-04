@@ -24,7 +24,7 @@ factory_tracker:
     min_abnormal_period: 10s
     max_abnormal_period: 10s
   first_block: 7832143  # A block to begin from
-  iteration_size: 10000
+  max_depth: 10000
 
 mint_tracker:
   name: mint_tracker # Name to be displayed in logs

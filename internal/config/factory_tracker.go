@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"reflect"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -13,19 +14,19 @@ import (
 const factoryTrackerYamlKey = "factory_tracker"
 
 type FactoryTracker struct {
-	Name          string         `fig:"name"`
-	Address       common.Address `fig:"address"`
-	Runner        Runner         `fig:"runner"`
-	FirstBlock    uint64         `fig:"first_block"`
-	IterationSize uint64         `fig:"iteration_size"`
+	Name       string         `fig:"name"`
+	Address    common.Address `fig:"address"`
+	Runner     Runner         `fig:"runner"`
+	FirstBlock uint64         `fig:"first_block"`
+	MaxDepth   uint64         `fig:"max_depth"`
 }
 
 var defaultFactoryTracker = FactoryTracker{
-	Name:          "factory_tracker",
-	Address:       common.Address{},
-	Runner:        defaultRunner,
-	FirstBlock:    0,
-	IterationSize: 100,
+	Name:       "factory_tracker",
+	Address:    etherdata.NullAddress,
+	Runner:     defaultRunner,
+	FirstBlock: 0,
+	MaxDepth:   5000,
 }
 
 func (c *config) FactoryTracker() FactoryTracker {

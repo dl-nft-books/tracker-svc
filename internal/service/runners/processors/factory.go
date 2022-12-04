@@ -43,7 +43,7 @@ func (p *factoryProcessor) ProcessDeploy(event etherdata.ContractDeployedEvent) 
 		})
 	}
 	if len(bookResponse.Data) == 0 {
-		p.logger.WithFields(logan.F{"token_id": eventTokenId}).Warnf("Book with specified token id was not found")
+		p.logger.WithFields(logan.F{"token_id": eventTokenId}).Warnf("book with specified token id was not found")
 		return nil
 	}
 	var (
