@@ -7,7 +7,7 @@ Service that catches mint events from the smart contract and loads corresponding
 ## Install
 
   ```bash
-  git clone contract-tracker
+  git clone contract-runners
   cd 
   go build main.go
   export KV_VIPER_FILE=./config.yaml

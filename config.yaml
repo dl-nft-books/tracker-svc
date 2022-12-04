@@ -3,7 +3,7 @@ log:
   disable_sentry: true
 
 database:
-  url: "postgres://tracker:tracker@localhost:9483/tracker?sslmode=disable"
+  url: "postgres://runners:runners@localhost:9483/runners?sslmode=disable"
 
 listener:
   addr: :7687

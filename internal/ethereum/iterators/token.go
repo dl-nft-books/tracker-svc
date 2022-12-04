@@ -32,7 +32,7 @@ type tokenIterator struct {
 	contractInstancesCache map[common.Address]*token.Tokencontract
 }
 
-func NewTokenContractReader(cfg config.Config, ctx context.Context) ethereum.TokenIterator {
+func NewTokenIterator(cfg config.Config, ctx context.Context) ethereum.TokenIterator {
 	rpc := cfg.EtherClient().Rpc
 
 	return &tokenIterator{
@@ -153,6 +153,7 @@ func (r *tokenIterator) ProcessTransfers() (err error) {
 	if iterator == nil {
 		return errors.From(NullIteratorErr, logan.F{
 			"contract": r.address.String(),
+			"depth":    *r.to - *r.from,
 		})
 	}
 
@@ -195,7 +196,10 @@ func (r *tokenIterator) ProcessUpdates() (err error) {
 		return errors.Wrap(err, "failed to initialize an iterator")
 	}
 	if iterator == nil {
-		return NullIteratorErr
+		return errors.From(NullIteratorErr, logan.F{
+			"contract": *r.address,
+			"depth":    *r.from - *r.to,
+		})
 	}
 
 	defer func(iterator *token.TokencontractTokenContractParamsUpdatedIterator) {

@@ -37,7 +37,7 @@ func (c *config) FactoryTracker() FactoryTracker {
 			With(figure.BaseHooks, contractHook).
 			From(kv.MustGetStringMap(c.getter, factoryTrackerYamlKey)).
 			Please(); err != nil {
-			panic(errors.Wrap(err, "failed to figure out mint tracker config"))
+			panic(errors.Wrap(err, "failed to figure out mint runners config"))
 		}
 
 		return cfg

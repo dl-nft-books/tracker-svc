@@ -32,7 +32,7 @@ func (c *config) IpfsLoader() ipfs.Uploader {
 			With(figure.BaseHooks).
 			From(kv.MustGetStringMap(c.getter, ipfsLoaderYamlKey)).
 			Please(); err != nil {
-			panic(errors.Wrap(err, "failed to figure out mint tracker config"))
+			panic(errors.Wrap(err, "failed to figure out mint runners config"))
 		}
 
 		implementation, ok := c.implementationsMap()[cfg.Mode]

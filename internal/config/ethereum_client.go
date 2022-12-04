@@ -26,7 +26,7 @@ func (c *config) EtherClient() EtherClient {
 			With(figure.BaseHooks, ethClientHook).
 			From(kv.MustGetStringMap(c.getter, ethererYamlKey)).
 			Please(); err != nil {
-			panic(errors.Wrap(err, "failed to figure out mint tracker config"))
+			panic(errors.Wrap(err, "failed to figure out mint runners config"))
 		}
 
 		return cfg

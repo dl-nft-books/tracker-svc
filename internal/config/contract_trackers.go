@@ -34,7 +34,7 @@ func (c *config) contractTracker(once *comfig.Once, yamlKey string) ContractTrac
 			With(figure.BaseHooks).
 			From(kv.MustGetStringMap(c.getter, yamlKey)).
 			Please(); err != nil {
-			panic(errors.Wrap(err, "failed to figure out contract tracker config"))
+			panic(errors.Wrap(err, "failed to figure out contract runners config"))
 		}
 
 		return cfg

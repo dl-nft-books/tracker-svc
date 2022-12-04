@@ -9,7 +9,7 @@ import (
 	models "gitlab.com/tokend/nft-books/contract-tracker/connector/models"
 )
 
-const paymentsEndpoint = "tracker/payments"
+const paymentsEndpoint = "runners/payments"
 
 func (c *Connector) ListPayments(request models.ListPaymentsParams) (*models.ListPaymentsResponse, error) {
 	var result models.ListPaymentsResponse

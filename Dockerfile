@@ -6,7 +6,7 @@ WORKDIR /go/src/contract-tracker
 COPY vendor .
 COPY . .
 
-RUN GOOS=linux go build  -o /usr/local/bin/ /go/src/contract-tracker
+RUN GOOS=linux go build  -o /usr/local/bin/ /go/src/contract-runners
 
 
 FROM alpine:3.9

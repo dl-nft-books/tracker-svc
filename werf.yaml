@@ -4,10 +4,10 @@ project: 'backend'
 image: builder
 from: golang:1.16.2-stretch
 docker:
-  WORKDIR: /go/src/contract-tracker
+  WORKDIR: /go/src/contract-runners
 git:
 - add: /
-  to: /go/src/contract-tracker
+  to: /go/src/contract-runners
   stageDependencies:
     setup:
     - "**/*"
@@ -16,7 +16,7 @@ shell:
   - export CGO_ENABLED=0
   - export GO111MODULE=off
   - export GOOS=linux
-  - go build  -o /usr/local/bin/  /go/src/contract-tracker
+  - go build  -o /usr/local/bin/  /go/src/contract-runners
 
 ---
 image: service
@@ -28,6 +28,6 @@ shell:
   - apk add --no-cache ca-certificates
 import:
 - image: builder
-  add: /usr/local/bin/contract-tracker
-  to: /usr/local/bin/contract-tracker
+  add: /usr/local/bin/contract-runners
+  to: /usr/local/bin/contract-runners
   after: setup
