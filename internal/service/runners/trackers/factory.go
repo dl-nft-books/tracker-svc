@@ -15,7 +15,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/listeners/factory"
 )
 
-type DeployTracker struct {
+type FactoryTracker struct {
 	log      *logan.Entry
 	cfg      config.FactoryTracker
 	ctx      context.Context
@@ -23,19 +23,19 @@ type DeployTracker struct {
 	listener ethereum.FactoryListener
 }
 
-func NewDeployTracker(cfg config.Config, ctx context.Context) *DeployTracker {
-	return &DeployTracker{
+func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
+	return &FactoryTracker{
 		log:      cfg.Log(),
 		ctx:      ctx,
 		cfg:      cfg.FactoryTracker(),
 		database: postgres.NewDB(cfg.DB()),
-		listener: factory.NewFactoryListener(cfg, ctx).
+		listener: factory_listeners.NewFactoryListener(cfg, ctx).
 			WithAddress(cfg.FactoryTracker().Address).
 			WithMaxDepth(cfg.FactoryTracker().MaxDepth),
 	}
 }
 
-func (t *DeployTracker) Track(ch chan<- etherdata.ContractDeployedEvent) {
+func (t *FactoryTracker) TrackDeployEvents(ch chan<- etherdata.ContractDeployedEvent) {
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -47,11 +47,7 @@ func (t *DeployTracker) Track(ch chan<- etherdata.ContractDeployedEvent) {
 			}
 
 			listener := t.listener.From(startBlock).WithCtx(ctx)
-			if err = listener.WatchContractCreatedEvents(ch); err != nil {
-				return errors.Wrap(err, "failed to watch contract created events")
-			}
-
-			return nil
+			return listener.WatchContractCreatedEvents(ch)
 		},
 		t.cfg.Runner.NormalPeriod,
 		t.cfg.Runner.MinAbnormalPeriod,
@@ -60,7 +56,7 @@ func (t *DeployTracker) Track(ch chan<- etherdata.ContractDeployedEvent) {
 }
 
 // GetStartBlock gets the block to begin with based on config and KV cursor values
-func (t *DeployTracker) GetStartBlock() (uint64, error) {
+func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 	cursorKV, err := t.database.KeyValue().Get(key_value.FactoryTrackerCursor)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get cursor value")

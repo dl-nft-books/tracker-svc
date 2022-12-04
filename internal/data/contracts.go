@@ -19,6 +19,7 @@ type ContractsQ interface {
 	Select() ([]Contract, error)
 	Page(page pgdb.OffsetPageParams) ContractsQ
 	Get(id int64) (*Contract, error)
+	GetByContract(contract string) (*Contract, error)
 	Insert(contract ...Contract) ([]int64, error)
 	UpdateLastBlock(lastBlock uint64, id int64) error
 }

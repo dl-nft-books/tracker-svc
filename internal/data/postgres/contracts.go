@@ -53,6 +53,17 @@ func (q *contractsQ) Get(id int64) (*data.Contract, error) {
 	return &token, err
 }
 
+func (q *contractsQ) GetByContract(contract string) (*data.Contract, error) {
+	var token data.Contract
+
+	err := q.database.Get(&token, q.selector.Where(squirrel.Eq{contractsContract: contract}))
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	return &token, err
+}
+
 func (q *contractsQ) Insert(contracts ...data.Contract) (id []int64, err error) {
 	query := squirrel.Insert(contractsTable).Columns(structs.Names(contracts)...)
 	for _, contract := range contracts {

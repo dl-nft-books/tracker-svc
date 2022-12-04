@@ -6,7 +6,6 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
 )
 
@@ -16,6 +15,7 @@ const (
 	blocksIdColumn            = "id"
 	blocksContractIdColumn    = "contract_id"
 	blocksTransferBlockColumn = "transfer_block"
+	blocksUpdateBlockColumn   = "update_block"
 )
 
 type blocksQ struct {
@@ -42,14 +42,6 @@ func (q *blocksQ) FilterById(id ...int64) data.BlocksQ {
 func (q *blocksQ) FilterByContractId(contractId ...int64) data.BlocksQ {
 	q.selector = q.selector.Where(squirrel.Eq{blocksContractIdColumn: contractId})
 	return q
-}
-
-func (q *blocksQ) Upsert(blocks data.Blocks) error {
-	query := squirrel.Insert(blocksTable).
-		SetMap(structs.Map(blocks)).
-		Suffix("ON CONFLICT (contract_id) DO UPDATE SET transfer_block = EXCLUDED.transfer_block")
-
-	return q.db.Exec(query)
 }
 
 func (q *blocksQ) Get() (*data.Blocks, error) {

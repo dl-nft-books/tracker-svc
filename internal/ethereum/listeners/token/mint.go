@@ -1,12 +1,12 @@
-package token
+package token_listeners
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/nft-books/contract-tracker/'/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
 	"sync"
 )

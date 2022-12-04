@@ -1,7 +1,9 @@
-package processors
+package consumers
+
+/*
+package combiners
 
 import (
-	"context"
 	"gitlab.com/distributed_lab/logan/v3"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
@@ -16,20 +18,23 @@ type tokenProcessor struct {
 	logger      *logan.Entry
 	booker      *booker.Connector
 	generatorer *generatorer.Connector
-	database    data.DB
+
+	database   data.DB
+	contractId int64
 }
 
-func NewTokenConsumer(cfg config.Config, ctx context.Context) ethereum.TokenProcessor {
+func NewTokenConsumer(cfg config.Config, contractId int64) ethereum.TokenProcessor {
 	return &tokenProcessor{
 		logger:      cfg.Log(),
 		booker:      cfg.BookerConnector(),
 		generatorer: cfg.GeneratorConnector(),
 		database:    postgres.NewDB(cfg.DB()),
+		contractId:  contractId,
 	}
 }
 
 func (p *tokenProcessor) ProcessSuccessfulMint(event etherdata.SuccessfulMintEvent) error {
-	/*
+
 		return t.trackerDB.Transaction(func() error {
 				// FIXME: Make the following actions via connectors:
 				// 1. Get task info using event uri
@@ -148,14 +153,14 @@ func (p *tokenProcessor) ProcessSuccessfulMint(event etherdata.SuccessfulMintEve
 
 				return nil
 			})
-	*/
 
-	//TODO implement me
-	panic("implement me")
+
+//TODO implement me
+panic("implement me")
 }
 
 func (p *tokenProcessor) ProcessTransfer(event etherdata.TransferEvent) error {
-	/*
+
 		if event.From == ethereum.NullAddress || event.To == ethereum.NullAddress {
 				t.log.Info("Received transfer event with one address being null, omitting")
 				return nil
@@ -181,14 +186,14 @@ func (p *tokenProcessor) ProcessTransfer(event etherdata.TransferEvent) error {
 			}
 
 			return nil
-	*/
+
 
 	//TODO implement me
 	panic("implement me")
 }
 
 func (p *tokenProcessor) ProcessUpdate(event etherdata.UpdateEvent) error {
-	/*
+
 		if err := t.database.Books().UpdateContractParams(
 				event.Name,
 				event.Symbol,
@@ -199,8 +204,8 @@ func (p *tokenProcessor) ProcessUpdate(event etherdata.UpdateEvent) error {
 			}
 
 			return nil
-	*/
 
 	//TODO implement me
 	panic("implement me")
 }
+*/

@@ -30,7 +30,10 @@ func (s *service) run() error {
 	}
 
 	ctx := context.Background()
-	runners.Run(s.cfg, ctx)
+
+	if err := runners.Run(s.cfg, ctx); err != nil {
+		return errors.Wrap(err, "failed to initialize runners")
+	}
 
 	return http.Serve(s.listener, r)
 }
