@@ -1,5 +1,6 @@
 package trackers
 
+/*
 import (
 	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
@@ -240,3 +241,4 @@ func (t *TransferTracker) FormList() ([]data.Contract, error) {
 
 	return contracts, nil
 }
+*/

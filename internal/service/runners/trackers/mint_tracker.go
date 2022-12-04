@@ -1,5 +1,6 @@
 package trackers
 
+/*
 import (
 	"context"
 	"fmt"
@@ -311,3 +312,4 @@ func (t *MintTracker) FormList() ([]data.Contract, error) {
 
 	return contracts, nil
 }
+*/

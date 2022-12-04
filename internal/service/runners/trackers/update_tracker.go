@@ -1,5 +1,6 @@
 package trackers
 
+/*
 import (
 	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
@@ -194,3 +195,4 @@ func (t *UpdateTracker) FormList() ([]data.Book, error) {
 
 	return contracts, nil
 }
+*/
