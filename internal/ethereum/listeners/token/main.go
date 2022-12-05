@@ -25,8 +25,11 @@ type tokenListener struct {
 	ctx       context.Context
 	converter converters.Converter
 
-	// instancesCache is a map storing already initialized instances of contracts
-	instancesCache map[common.Address]*token.Tokencontract
+	// rpcInstancesCache is a map storing already initialized instances of contracts
+	rpcInstancesCache map[common.Address]*token.Tokencontract
+
+	// wsInstancesCache is a map storing already initialized ws instances of contracts
+	wsInstancesCache map[common.Address]*token.TokencontractFilterer
 }
 
 func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenListener {
@@ -37,8 +40,9 @@ func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenList
 		rpc:       rpc,
 		ctx:       context.Background(),
 
-		instancesCache: make(map[common.Address]*token.Tokencontract),
-		converter:      converters.NewConverter(rpc, ctx, cfg.NativeToken()),
+		rpcInstancesCache: make(map[common.Address]*token.Tokencontract),
+		wsInstancesCache:  map[common.Address]*token.TokencontractFilterer{},
+		converter:         converters.NewConverter(rpc, ctx, cfg.NativeToken()),
 	}
 }
 
@@ -81,19 +85,36 @@ func (l *tokenListener) validateParameters() error {
 	return nil
 }
 
-func (l *tokenListener) getInstance(address common.Address) (*token.Tokencontract, error) {
-	cacheInstance, ok := l.instancesCache[address]
+func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencontract, error) {
+	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
 
 	newInstance, err := token.NewTokencontract(address, l.rpc)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize token factory instance for given address", logan.F{
+		return nil, errors.Wrap(err, "failed to initialize rpc token factory instance for given address", logan.F{
 			"address": address,
 		})
 	}
 
-	l.instancesCache[address] = newInstance
+	l.rpcInstancesCache[address] = newInstance
+	return newInstance, nil
+}
+
+func (l *tokenListener) getWSInstance(address common.Address) (*token.TokencontractFilterer, error) {
+	cacheInstance, ok := l.wsInstancesCache[address]
+	if ok {
+		return cacheInstance, nil
+	}
+
+	newInstance, err := token.NewTokencontractFilterer(address, l.webSocket)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize ws token factory instance for given address", logan.F{
+			"address": address,
+		})
+	}
+
+	l.wsInstancesCache[address] = newInstance
 	return newInstance, nil
 }

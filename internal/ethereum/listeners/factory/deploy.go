@@ -13,7 +13,7 @@ import (
 )
 
 func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval, ch chan<- etherdata.ContractDeployedEvent) error {
-	instance, err := l.getInstance(*l.address)
+	instance, err := l.getRPCInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to get instance")
 	}
@@ -106,7 +106,7 @@ func (l *factoryListener) listenContractCreatedEvents(ch chan<- etherdata.Contra
 		Context: l.ctx,
 	}
 
-	filterer, err := factory.NewTokenfactoryFilterer(*l.address, l.webSocket)
+	filterer, err := l.getWSInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}

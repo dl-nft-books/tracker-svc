@@ -13,7 +13,7 @@ import (
 )
 
 func (l *tokenListener) readTransfersInterval(interval helpers.Interval, ch chan<- etherdata.TransferEvent) error {
-	instance, err := l.getInstance(*l.address)
+	instance, err := l.getRPCInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to get instance")
 	}
@@ -100,7 +100,7 @@ func (l *tokenListener) listenTransferEvents(ch chan<- etherdata.TransferEvent) 
 		Context: l.ctx,
 	}
 
-	filterer, err := token.NewTokencontractFilterer(*l.address, l.webSocket)
+	filterer, err := l.getWSInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}

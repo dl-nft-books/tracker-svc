@@ -13,7 +13,7 @@ import (
 )
 
 func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
-	instance, err := l.getInstance(*l.address)
+	instance, err := l.getRPCInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to get instance")
 	}
@@ -106,7 +106,7 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 		Context: l.ctx,
 	}
 
-	filterer, err := token.NewTokencontractFilterer(*l.address, l.webSocket)
+	filterer, err := l.getWSInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
