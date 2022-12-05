@@ -38,7 +38,7 @@ func NewFactoryConsumer(cfg config.Config, ctx context.Context) *FactoryConsumer
 	}
 }
 
-func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata.ContractDeployedEvent, combinersChannel chan<- common.Address) {
+func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata.ContractDeployedEvent, routinerChannel chan<- common.Address) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -51,26 +51,7 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 						return errors.Wrap(err, "failed to process deploy event")
 					}
 
-					entry, err := c.database.Contracts().GetByContract(event.Address.String())
-					if err != nil {
-						return errors.Wrap(err, "failed to validate whether the contract already exists")
-					}
-					if entry != nil {
-						c.logger.Warnf("Contract with address %s already exists. Omitting\n", event.Address.String())
-						continue
-					}
-
-					_, err = c.database.Contracts().Insert(data.Contract{
-						Contract:  event.Address.String(),
-						Name:      event.Name,
-						Symbol:    event.Symbol,
-						LastBlock: event.BlockNumber,
-					})
-					if err != nil {
-						return errors.Wrap(err, "failed to insert contract into the database")
-					}
-
-					combinersChannel <- event.Address
+					routinerChannel <- event.Address
 				}
 			}
 		},
@@ -101,6 +82,36 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 
 	switch event.Status {
 	case types.ReceiptStatusSuccessful:
+		// Validating whether the contract from event is already in the database
+		entry, err := c.database.Contracts().GetByContract(event.Address.String())
+		if err != nil {
+			return errors.Wrap(err, "failed to validate whether the contract already exists")
+		}
+		// If contract already exists, throw a warning and omit
+		if entry != nil {
+			c.logger.Warnf("Contract with address %s already exists. Omitting\n", event.Address.String())
+			return nil
+		}
+
+		// Add contract to the database
+		id, err := c.database.Contracts().Insert(data.Contract{
+			Contract:  event.Address.String(),
+			Name:      event.Name,
+			Symbol:    event.Symbol,
+			LastBlock: event.BlockNumber,
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed to insert contract into the database")
+		}
+		// Add contract starting blocks
+		// (it does not exist for sure since blocks table has a foreign key to the contracts table)
+		_, err = c.database.Blocks().Insert(data.Blocks{
+			ContractId:    id[0],
+			TransferBlock: event.BlockNumber,
+			UpdateBlock:   event.BlockNumber,
+		})
+
+		// Updating book information
 		var (
 			contractAddress     = event.Address.String()
 			successDeployStatus = bookResources.DeploySuccessful
@@ -114,11 +125,13 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 			return errors.Wrap(err, "failed to update book via connector")
 		}
 
+		// Setting new cursor value
 		return c.database.KeyValue().Upsert(data.KeyValue{
 			Key:   key_value.FactoryTrackerCursor,
 			Value: strconv.FormatUint(event.BlockNumber, 10),
 		})
 	case types.ReceiptStatusFailed:
+		// If tx has failed, just update a status that it has failed
 		var deployFailedStatus = bookResources.DeployFailed
 
 		return c.booker.UpdateBook(models.UpdateBookParams{
@@ -127,7 +140,5 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 		})
 	}
 
-	return errors.From(errors.New(""), logan.F{
-		"block_number": event.BlockNumber,
-	})
+	return nil
 }

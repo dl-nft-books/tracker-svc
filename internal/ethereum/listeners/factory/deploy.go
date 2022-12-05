@@ -58,7 +58,7 @@ func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval
 
 func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.ContractDeployedEvent) (err error) {
 	// Since l.to - l.from might exceed the max depth allowed in the chain,
-	// we split the reading operation into several parallel processes
+	// we split the reading operation into several smaller parallel processes
 	// that are all sending caught events to the events channel
 
 	lastChainBlock, err := l.rpc.BlockNumber(l.ctx)

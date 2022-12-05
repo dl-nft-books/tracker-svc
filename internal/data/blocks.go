@@ -13,8 +13,12 @@ type BlocksQ interface {
 	FilterById(id ...int64) BlocksQ
 	FilterByContractId(contractId ...int64) BlocksQ
 
+	Insert(block Blocks) (int64, error)
 	Get() (*Blocks, error)
 	Select() ([]Blocks, error)
+
+	UpdateTransferBlock(newTransferBlock uint64, id int64) error
+	UpdateParamsUpdateBlock(newUpdateBlock uint64, id int64) error
 
 	Delete(id int64) error
 }
