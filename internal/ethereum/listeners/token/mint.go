@@ -1,6 +1,8 @@
 package token_listeners
 
 import (
+	"sync"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -8,7 +10,6 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
-	"sync"
 )
 
 func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
@@ -85,7 +86,7 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	// yet to just give a better sense of control over the parallel processing we will keep it as it is
 	wg.Add(len(intervals))
 
-	for _, interval := range helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth) {
+	for _, interval := range intervals {
 		go func(readerInterval helpers.Interval) {
 			defer wg.Done()
 

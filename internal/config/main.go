@@ -32,6 +32,7 @@ type Config interface {
 	NativeToken() etherdata.Erc20Info
 
 	FactoryTracker() FactoryTracker
+	ContractTracker() ContractTracker
 	TransferTracker() ContractTracker
 	MintTracker() ContractTracker
 	UpdateTracker() ContractTracker
@@ -58,6 +59,7 @@ type config struct {
 	getter kv.Getter
 
 	mintTrackerOnce     comfig.Once
+	contractTrackerOnce comfig.Once
 	transferTrackerOnce comfig.Once
 	factoryTrackerOnce  comfig.Once
 	nativeTokenOnce     comfig.Once

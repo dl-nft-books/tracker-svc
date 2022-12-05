@@ -2,7 +2,7 @@ FROM golang:1.18-alpine as buildbase
 
 RUN apk add git build-base
 
-WORKDIR /go/src/contract-tracker
+WORKDIR /go/src/contract-runners
 COPY vendor .
 COPY . .
 

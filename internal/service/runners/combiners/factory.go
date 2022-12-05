@@ -2,6 +2,8 @@ package combiners
 
 import (
 	"context"
+
+	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
@@ -20,10 +22,10 @@ func NewFactoryCombiner(cfg config.Config, ctx context.Context) *FactoryCombiner
 	}
 }
 
-func (c *FactoryCombiner) ProduceAndConsumeDeployEvents() {
+func (c *FactoryCombiner) ProduceAndConsumeDeployEvents(combinersChannel chan<- common.Address) {
 	go func() {
-		ch := make(chan etherdata.ContractDeployedEvent)
-		go c.tracker.TrackDeployEvents(ch)
-		go c.consumer.ConsumeDeployedEvents(ch)
+		internalChannel := make(chan etherdata.ContractDeployedEvent)
+		go c.tracker.TrackDeployEvents(internalChannel)
+		go c.consumer.ConsumeDeployedEvents(internalChannel, combinersChannel)
 	}()
 }

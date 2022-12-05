@@ -2,6 +2,9 @@ package consumers
 
 import (
 	"context"
+	"strconv"
+
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -15,8 +18,6 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/key_value"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/combiners"
-	"strconv"
 )
 
 type FactoryConsumer struct {
@@ -25,7 +26,6 @@ type FactoryConsumer struct {
 	ctx      context.Context
 	booker   *booker.Connector
 	database data.DB
-	combiner *combiners.TokenCombiner
 }
 
 func NewFactoryConsumer(cfg config.Config, ctx context.Context) *FactoryConsumer {
@@ -35,11 +35,10 @@ func NewFactoryConsumer(cfg config.Config, ctx context.Context) *FactoryConsumer
 		cfg:      cfg.FactoryTracker(),
 		booker:   cfg.BookerConnector(),
 		database: postgres.NewDB(cfg.DB()),
-		combiner: combiners.NewTokenCombiner(cfg, ctx),
 	}
 }
 
-func (c *FactoryConsumer) ConsumeDeployedEvents(ch <-chan etherdata.ContractDeployedEvent) {
+func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata.ContractDeployedEvent, combinersChannel chan<- common.Address) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -47,7 +46,7 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(ch <-chan etherdata.ContractDepl
 		func(ctx context.Context) error {
 			for {
 				select {
-				case event := <-ch:
+				case event := <-internalChannel:
 					if err := c.processDeployEvent(event); err != nil {
 						return errors.Wrap(err, "failed to process deploy event")
 					}
@@ -71,7 +70,7 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(ch <-chan etherdata.ContractDepl
 						return errors.Wrap(err, "failed to insert contract into the database")
 					}
 
-					c.combiner.ProduceAndConsumeAllEvents(event.Address)
+					combinersChannel <- event.Address
 				}
 			}
 		},

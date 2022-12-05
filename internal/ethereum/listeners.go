@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"context"
+
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 )
