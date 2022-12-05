@@ -12,7 +12,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
-	generatorConnector "gitlab.com/tokend/nft-books/generator-svc/connector/config"
+	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 )
 
 type Config interface {
@@ -40,7 +40,7 @@ type Config interface {
 	// Connectors
 	documenter.Documenter
 	booker.Booker
-	generatorConnector.GeneratorConfigurator
+	generatorer.GeneratorConfigurator
 }
 
 type config struct {
@@ -68,7 +68,7 @@ type config struct {
 
 	// Connectors
 	booker.Booker
-	generatorConnector.GeneratorConfigurator
+	generatorer.GeneratorConfigurator
 	documenter.Documenter
 }
 
@@ -83,6 +83,6 @@ func New(getter kv.Getter) Config {
 		Infurer:               infura.NewInfurer(getter),
 		Pinater:               pinata.NewPinater(getter),
 		Booker:                booker.NewBooker(getter),
-		GeneratorConfigurator: generatorConnector.NewGeneratorConfigurator(getter),
+		GeneratorConfigurator: generatorer.NewGeneratorConfigurator(getter),
 	}
 }

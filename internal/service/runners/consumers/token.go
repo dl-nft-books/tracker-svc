@@ -8,11 +8,13 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/book-svc/connector/models"
+	bookerModels "gitlab.com/tokend/nft-books/book-svc/connector/models"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
+	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
+	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 )
 
 type TokenConsumer struct {
@@ -20,7 +22,9 @@ type TokenConsumer struct {
 	cfg      config.FactoryTracker
 	ctx      context.Context
 	database data.DB
-	booker   *booker.Connector
+
+	booker      *booker.Connector
+	generatorer *generatorer.Connector
 }
 
 func NewTokenConsumer(cfg config.Config, ctx context.Context) *TokenConsumer {
@@ -29,7 +33,9 @@ func NewTokenConsumer(cfg config.Config, ctx context.Context) *TokenConsumer {
 		ctx:      ctx,
 		cfg:      cfg.FactoryTracker(),
 		database: postgres.NewDB(cfg.DB()),
-		booker:   cfg.BookerConnector(),
+
+		booker:      cfg.BookerConnector(),
+		generatorer: cfg.GeneratorConnector(),
 	}
 }
 
@@ -177,38 +183,41 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 		c.ctx,
 		c.logger,
 		c.cfg.Name,
-		func(ctx context.Context) (err error) {
+		func(ctx context.Context) error {
 			for {
 				select {
 				case event := <-ch:
-					/*
-						if event.From == ethereum.NullAddress || event.To == ethereum.NullAddress {
-								t.log.Info("Received transfer event with one address being null, omitting")
-								return nil
-							}
+					logField := logan.F{"contract_address": address.String()}
 
-							// FIXME: Update owner via connector with generator service
-							token, err := t.generatorDB.Tokens().FilterByTokenId(int64(event.TokenId)).Get()
-							if err != nil {
-								return errors.Wrap(err, "failed to get token from the database")
-							}
-							if token == nil {
-								t.log.WithFields(logan.F{
-									"token_id": event.TokenId,
-								}).Warn("token from the event was not found")
-								return nil
-							}
+					if event.From == etherdata.NullAddress || event.To == etherdata.NullAddress {
+						c.logger.WithFields(logField).Info("Received transfer event with one address being null, omitting")
+						continue
+					}
 
-							if err = t.generatorDB.Tokens().UpdateAccount(event.To.String(), token.Id); err != nil {
-								return errors.Wrap(err, "failed to update token's owner", logan.F{
-									"new_owner": event.To.String(),
-									"token_id":  token.Id,
-								})
-							}
+					tokenId := int64(event.TokenId)
+					tokenResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
+						TokenId: &tokenId,
+					})
+					if err != nil {
+						return errors.Wrap(err, "failed to list tokens using connector")
+					}
+					if len(tokenResponse.Data) == 0 {
+						c.logger.WithFields(logField.Merge(logan.F{"token_id": tokenId})).Warn("token with specified token id was not found")
+					}
 
-							return nil
-					*/
-					c.logger.Infof("Hey, I found this nice little thing over here: %v", event)
+					var (
+						dbTokenId = cast.ToInt64(tokenResponse.Data[0].Key.ID)
+						newOwner  = event.To.String()
+					)
+
+					if err = c.generatorer.UpdateToken(generatorerModels.UpdateTokenParams{
+						Id:    dbTokenId,
+						Owner: &newOwner,
+					}); err != nil {
+						return errors.Wrap(err, "failed to update token using generatorer connector")
+					}
+
+					c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
 				}
 			}
 		},
@@ -229,7 +238,7 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 				case event := <-ch:
 					logField := logan.F{"contract_address": address.String()}
 
-					bookResponse, err := c.booker.ListBooks(models.ListBooksParams{
+					bookResponse, err := c.booker.ListBooks(bookerModels.ListBooksParams{
 						Contract: []string{address.String()},
 					})
 					if err != nil {
@@ -237,16 +246,20 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 					}
 					if len(bookResponse.Data) == 0 {
 						c.logger.WithFields(logField).Warnf("Contract with specified address was not found")
+						continue
 					}
 
 					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
-					if err = c.booker.UpdateBook(models.UpdateBookParams{
-						Id:    bookId,
-						Title: &event.Name,
-						// TODO: Update symbol and price as well
+					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
+						Id:     bookId,
+						Title:  &event.Name,
+						Symbol: &event.Symbol,
+						Price:  &event.Price,
 					}); err != nil {
 						return errors.Wrap(err, "failed to update book parameters")
 					}
+
+					c.logger.WithFields(logField).Infof("Successfully processed update event with a block number of %d", event.BlockNumber)
 				}
 			}
 		},
