@@ -5,7 +5,7 @@ import (
 	"gitlab.com/distributed_lab/logan/v3"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector/api"
+	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 	"net/http"
 )
 
