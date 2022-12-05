@@ -2,6 +2,7 @@ package combiners
 
 import (
 	"context"
+	"gitlab.com/distributed_lab/logan/v3"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
@@ -11,21 +12,27 @@ import (
 )
 
 type FactoryCombiner struct {
+	logger *logan.Entry
+
 	tracker  *trackers.FactoryTracker
 	consumer *consumers.FactoryConsumer
 }
 
 func NewFactoryCombiner(cfg config.Config, ctx context.Context) *FactoryCombiner {
 	return &FactoryCombiner{
+		logger: cfg.Log(),
+
 		tracker:  trackers.NewFactoryTracker(cfg, ctx),
 		consumer: consumers.NewFactoryConsumer(cfg, ctx),
 	}
 }
 
-func (c *FactoryCombiner) ProduceAndConsumeDeployEvents(combinersChannel chan<- common.Address) {
+func (c *FactoryCombiner) ProduceAndConsumeDeployEvents(routinerChannel chan<- common.Address) {
+	c.logger.Info("Running producer and consumer for a factory contract")
+
 	go func() {
 		internalChannel := make(chan etherdata.ContractDeployedEvent)
 		go c.tracker.TrackDeployEvents(internalChannel)
-		go c.consumer.ConsumeDeployedEvents(internalChannel, combinersChannel)
+		go c.consumer.ConsumeDeployedEvents(internalChannel, routinerChannel)
 	}()
 }

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	pathToFile   = "./files/test_2.rtf"
+	pathToFile   = "./files/test.rtf"
 	configKey    = "test_config.yaml"
 	fileTestName = "test"
 )
