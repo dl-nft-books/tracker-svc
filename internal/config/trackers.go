@@ -11,38 +11,44 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 )
 
-const factoryTrackerYamlKey = "factory_tracker"
+const trackersYamlKey = "trackers"
 
-type FactoryTracker struct {
-	Name       string         `fig:"name"`
-	Address    common.Address `fig:"address"`
-	Runner     Runner         `fig:"runner"`
+type FactorySettings struct {
 	FirstBlock uint64         `fig:"first_block"`
-	MaxDepth   uint64         `fig:"max_depth"`
+	Address    common.Address `fig:"address"`
 }
 
-var defaultFactoryTracker = FactoryTracker{
-	Name:       "factory_tracker",
-	Address:    etherdata.NullAddress,
-	Runner:     defaultRunner,
-	FirstBlock: 0,
-	MaxDepth:   5000,
+type Trackers struct {
+	Prefix   string          `fig:"prefix"`
+	MaxDepth uint64          `fig:"max_depth"`
+	Backoff  BackoffSettings `fig:"backoff_settings"`
+	Factory  FactorySettings `fig:"factory"`
 }
 
-func (c *config) FactoryTracker() FactoryTracker {
-	return c.factoryTrackerOnce.Do(func() interface{} {
-		cfg := defaultFactoryTracker
+var defaultTrackers = Trackers{
+	Prefix:   "tracker",
+	MaxDepth: 5000,
+	Backoff:  defaultBackoffSettings,
+	Factory: FactorySettings{
+		FirstBlock: 0,
+		Address:    etherdata.NullAddress,
+	},
+}
+
+func (c *config) Trackers() Trackers {
+	return c.trackersOnce.Do(func() interface{} {
+		cfg := defaultTrackers
 
 		if err := figure.
 			Out(&cfg).
 			With(figure.BaseHooks, contractHook).
-			From(kv.MustGetStringMap(c.getter, factoryTrackerYamlKey)).
+			From(kv.MustGetStringMap(c.getter, trackersYamlKey)).
 			Please(); err != nil {
 			panic(errors.Wrap(err, "failed to figure out mint runners config"))
 		}
 
 		return cfg
-	}).(FactoryTracker)
+	}).(Trackers)
 }
 
 var contractHook = figure.Hooks{

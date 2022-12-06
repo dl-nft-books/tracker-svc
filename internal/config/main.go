@@ -31,11 +31,9 @@ type Config interface {
 	EtherClient() EtherClient
 	NativeToken() etherdata.Erc20Info
 
-	FactoryTracker() FactoryTracker
-	ContractTracker() ContractTracker
-	TransferTracker() ContractTracker
-	MintTracker() ContractTracker
-	UpdateTracker() ContractTracker
+	Trackers() Trackers
+	Consumers() Runner
+	Routiner() Runner
 
 	// Connectors
 	documenter.Documenter
@@ -56,15 +54,12 @@ type config struct {
 	ipfsLoaderOnce comfig.Once
 
 	// Contract trackers
-	getter kv.Getter
-
-	mintTrackerOnce     comfig.Once
-	contractTrackerOnce comfig.Once
-	transferTrackerOnce comfig.Once
-	factoryTrackerOnce  comfig.Once
-	nativeTokenOnce     comfig.Once
-	ethererOnce         comfig.Once
-	updateTrackerOnce   comfig.Once
+	getter          kv.Getter
+	trackersOnce    comfig.Once
+	consumersOnce   comfig.Once
+	routinerOnce    comfig.Once
+	nativeTokenOnce comfig.Once
+	ethererOnce     comfig.Once
 
 	// Connectors
 	booker.Booker

@@ -8,10 +8,12 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 )
 
+const tokensRoutinerSuffix = "-tokens"
+
 type TokenRoutiner struct {
 	combiner *TokenCombiner
 	logger   *logan.Entry
-	cfg      config.ContractTracker
+	cfg      config.Runner
 	ctx      context.Context
 
 	routinesNumber uint64
@@ -20,7 +22,7 @@ type TokenRoutiner struct {
 func NewTokenRoutiner(cfg config.Config, ctx context.Context) *TokenRoutiner {
 	return &TokenRoutiner{
 		logger:   cfg.Log(),
-		cfg:      cfg.ContractTracker(),
+		cfg:      cfg.Routiner(),
 		ctx:      ctx,
 		combiner: NewTokenCombiner(cfg, ctx),
 	}
@@ -32,7 +34,7 @@ func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
 	running.WithBackOff(
 		r.ctx,
 		r.logger,
-		r.cfg.Name,
+		r.cfg.Prefix+tokensRoutinerSuffix,
 		func(ctx context.Context) error {
 			for {
 				select {
@@ -44,8 +46,8 @@ func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
 				}
 			}
 		},
-		r.cfg.Runner.NormalPeriod,
-		r.cfg.Runner.MinAbnormalPeriod,
-		r.cfg.Runner.MaxAbnormalPeriod,
+		r.cfg.Backoff.NormalPeriod,
+		r.cfg.Backoff.MinAbnormalPeriod,
+		r.cfg.Backoff.MaxAbnormalPeriod,
 	)
 }

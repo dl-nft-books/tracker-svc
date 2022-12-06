@@ -20,9 +20,11 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 )
 
+const deployConsumerSuffix = "-factory-deploy"
+
 type FactoryConsumer struct {
 	logger   *logan.Entry
-	cfg      config.FactoryTracker
+	cfg      config.Runner
 	ctx      context.Context
 	booker   *booker.Connector
 	database data.DB
@@ -32,7 +34,7 @@ func NewFactoryConsumer(cfg config.Config, ctx context.Context) *FactoryConsumer
 	return &FactoryConsumer{
 		logger:   cfg.Log(),
 		ctx:      ctx,
-		cfg:      cfg.FactoryTracker(),
+		cfg:      cfg.Consumers(),
 		booker:   cfg.BookerConnector(),
 		database: postgres.NewDB(cfg.DB()),
 	}
@@ -42,7 +44,7 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
-		c.cfg.Name,
+		c.cfg.Prefix+deployConsumerSuffix,
 		func(ctx context.Context) error {
 			for {
 				select {
@@ -55,9 +57,9 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 				}
 			}
 		},
-		c.cfg.Runner.NormalPeriod,
-		c.cfg.Runner.MinAbnormalPeriod,
-		c.cfg.Runner.MaxAbnormalPeriod,
+		c.cfg.Backoff.NormalPeriod,
+		c.cfg.Backoff.MinAbnormalPeriod,
+		c.cfg.Backoff.MaxAbnormalPeriod,
 	)
 }
 

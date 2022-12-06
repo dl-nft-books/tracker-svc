@@ -17,38 +17,27 @@ native_token: # Info about native token
   symbol: ETH
   decimals: 18
 
-factory_tracker:
-  name: factory_tracker # Name to be displayed in logs
-  runner: # Periods settings
-    normal_period: 10s
-    min_abnormal_period: 10s
-    max_abnormal_period: 10s
-  first_block: 7832143  # A block to begin from
+trackers:
+  prefix: tracker # Name prefix to be displayed in logs
   max_depth: 10000
+  backoff: # running.WithBackoff settings
+    normal_period: 10s
+    min_abnormal_period: 10s
+    max_abnormal_period: 10s
+  factory: # Settings of factory tracker
+    first_block: 7832143  # A block to begin from for the factory contract
+    address: 0x123132
 
-mint_tracker:
-  name: mint_tracker # Name to be displayed in logs
-  capacity: 1
-  iteration_size: 100
-  runner: # Periods settings
+consumers:
+  prefix: consumer # Name prefix to be displayed in logs
+  backoff: # running.WithBackoff settings
     normal_period: 10s
     min_abnormal_period: 10s
     max_abnormal_period: 10s
 
-update_tracker:
-  name: update_tracker # Name to be displayed in logs
-  capacity: 1
-  iteration_size: 10000
-  runner: # Periods settings
-    normal_period: 10s
-    min_abnormal_period: 10s
-    max_abnormal_period: 10s
-
-transfer_tracker:
-  name: transfer_tracker # Name to be displayed in logs
-  capacity: 1
-  iteration_size: 100
-  runner: # Periods settings
+routiner:
+  prefix: routiner # Name prefix to be displayed in logs
+  backoff: # running.WithBackoff settings
     normal_period: 10s
     min_abnormal_period: 10s
     max_abnormal_period: 10s

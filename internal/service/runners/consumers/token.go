@@ -17,9 +17,15 @@ import (
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 )
 
+const (
+	transferConsumerSuffix = "-token-transfer"
+	mintConsumerSuffix     = "-token-mint"
+	updateConsumerSuffix   = "-token-update"
+)
+
 type TokenConsumer struct {
 	logger   *logan.Entry
-	cfg      config.FactoryTracker
+	cfg      config.Runner
 	ctx      context.Context
 	database data.DB
 
@@ -31,7 +37,7 @@ func NewTokenConsumer(cfg config.Config, ctx context.Context) *TokenConsumer {
 	return &TokenConsumer{
 		logger:   cfg.Log(),
 		ctx:      ctx,
-		cfg:      cfg.FactoryTracker(),
+		cfg:      cfg.Consumers(),
 		database: postgres.NewDB(cfg.DB()),
 
 		booker:      cfg.BookerConnector(),
@@ -43,19 +49,13 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
-		c.cfg.Name,
+		c.cfg.Prefix+mintConsumerSuffix,
 		func(ctx context.Context) (err error) {
 			for {
 				select {
 				case event := <-ch:
 					/*
 						return t.trackerDB.Transaction(func() error {
-								// FIXME: Make the following actions via connectors:
-								// 1. Get task info using event uri
-								// 2. Get book info using retrieved from step 1 (e.g., via included)
-								// 3. Insert new token into generator table
-								// 4. Update status of a task
-
 								// Updating book and tasks db
 								t.booksQ = t.booksQ.New()
 
@@ -172,9 +172,9 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 				}
 			}
 		},
-		c.cfg.Runner.NormalPeriod,
-		c.cfg.Runner.MinAbnormalPeriod,
-		c.cfg.Runner.MaxAbnormalPeriod,
+		c.cfg.Backoff.NormalPeriod,
+		c.cfg.Backoff.MinAbnormalPeriod,
+		c.cfg.Backoff.MaxAbnormalPeriod,
 	)
 }
 
@@ -182,7 +182,7 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
-		c.cfg.Name,
+		c.cfg.Prefix+transferConsumerSuffix,
 		func(ctx context.Context) error {
 			for {
 				select {
@@ -221,9 +221,9 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 				}
 			}
 		},
-		c.cfg.Runner.NormalPeriod,
-		c.cfg.Runner.MinAbnormalPeriod,
-		c.cfg.Runner.MaxAbnormalPeriod,
+		c.cfg.Backoff.NormalPeriod,
+		c.cfg.Backoff.MinAbnormalPeriod,
+		c.cfg.Backoff.MaxAbnormalPeriod,
 	)
 }
 
@@ -231,7 +231,7 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
-		c.cfg.Name,
+		c.cfg.Prefix+updateConsumerSuffix,
 		func(ctx context.Context) error {
 			for {
 				select {
@@ -263,8 +263,8 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 				}
 			}
 		},
-		c.cfg.Runner.NormalPeriod,
-		c.cfg.Runner.MinAbnormalPeriod,
-		c.cfg.Runner.MaxAbnormalPeriod,
+		c.cfg.Backoff.NormalPeriod,
+		c.cfg.Backoff.MinAbnormalPeriod,
+		c.cfg.Backoff.MaxAbnormalPeriod,
 	)
 }

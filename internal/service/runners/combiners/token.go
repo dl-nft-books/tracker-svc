@@ -5,7 +5,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
-	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
@@ -17,7 +16,6 @@ type TokenCombiner struct {
 	consumer *consumers.TokenConsumer
 
 	logger *logan.Entry
-	cfg    config.ContractTracker
 	ctx    context.Context
 }
 
@@ -26,29 +24,8 @@ func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
 		tracker:  trackers.NewTokenTracker(cfg, ctx),
 		consumer: consumers.NewTokenConsumer(cfg, ctx),
 		logger:   cfg.Log(),
-
-		cfg: cfg.ContractTracker(),
-		ctx: ctx,
+		ctx:      ctx,
 	}
-}
-
-func (c *TokenCombiner) ProcessNewTokenContracts(ch <-chan common.Address) {
-	running.WithBackOff(
-		c.ctx,
-		c.logger,
-		c.cfg.Name,
-		func(ctx context.Context) (err error) {
-			for {
-				select {
-				case addr := <-ch:
-					c.ProduceAndConsumeAllEvents(addr)
-				}
-			}
-		},
-		c.cfg.Runner.NormalPeriod,
-		c.cfg.Runner.MinAbnormalPeriod,
-		c.cfg.Runner.MaxAbnormalPeriod,
-	)
 }
 
 func (c *TokenCombiner) ProduceAndConsumeMintEvents(address common.Address) {
