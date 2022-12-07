@@ -43,6 +43,8 @@ func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval
 	for iterator.Next() {
 		raw := iterator.Event
 		if raw != nil {
+			l.logger.Debugf("Caught deploy contract event: %s\n", raw.NewTokenContractAddr.String())
+
 			var event *etherdata.ContractDeployedEvent
 			event, err = l.converter.Deploy(*raw)
 			if err != nil {
@@ -87,9 +89,9 @@ func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.Contrac
 	// Waitgroup is not necessary here, as we can simply run both listener and readers separately,
 	// yet to just give a better sense of control over the parallel processing we will keep it as it is
 	wg.Add(len(intervals))
-	l.logger.Debugf("Splitting into %d intervals...", len(intervals))
+	l.logger.Debugf("Splitting into %d intervals... These intervals are:\n", len(intervals))
 	l.logger.Debug(intervals)
-	
+
 	for _, interval := range intervals {
 		go func(readerInterval helpers.Interval) {
 			defer wg.Done()

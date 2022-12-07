@@ -49,11 +49,16 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 			for {
 				select {
 				case event := <-internalChannel:
-					if err := c.processDeployEvent(event); err != nil {
+					foundBook, err := c.processDeployEvent(event)
+					if err != nil {
 						return errors.Wrap(err, "failed to process deploy event")
 					}
 
-					routinerChannel <- event.Address
+					// Only if we found a book corresponding to a contract, we call a routiner
+					// to add consumer and producer for it
+					if foundBook {
+						routinerChannel <- event.Address
+					}
 				}
 			}
 		},
@@ -63,19 +68,22 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 	)
 }
 
-func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEvent) error {
+// processDeployEvent checks whether the book-svc contains a book corresponding to a contract
+// in the event. If not, apart from error status, returns false,
+// otherwise updates book's information and returns true
+func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEvent) (bookFound bool, err error) {
 	eventTokenId := int64(event.TokenId)
 	bookResponse, err := c.booker.ListBooks(models.ListBooksParams{
 		TokenId: []int64{eventTokenId},
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call a list books function from booker", logan.F{
+		return false, errors.Wrap(err, "failed to call a list books function from booker", logan.F{
 			"token_id": eventTokenId,
 		})
 	}
 	if len(bookResponse.Data) == 0 {
 		c.logger.WithFields(logan.F{"token_id": eventTokenId}).Warnf("book with specified token id was not found")
-		return nil
+		return false, nil
 	}
 	var (
 		book   = bookResponse.Data[0]
@@ -87,32 +95,40 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 		// Validating whether the contract from event is already in the database
 		entry, err := c.database.Contracts().GetByAddress(event.Address.String())
 		if err != nil {
-			return errors.Wrap(err, "failed to validate whether the contract already exists")
+			return true, errors.Wrap(err, "failed to validate whether the contract already exists")
 		}
 		// If contract already exists, throw a warning and omit
 		if entry != nil {
 			c.logger.Warnf("Addr with address %s already exists. Omitting\n", event.Address.String())
+			return true, nil
+		}
+
+		if err = c.database.Transaction(func() error {
+			// Add contract to the database
+			id, err := c.database.Contracts().Insert(data.Contract{
+				Addr:              event.Address.String(),
+				Name:              event.Name,
+				Symbol:            event.Symbol,
+				PreviousMintBLock: event.BlockNumber,
+			})
+			if err != nil {
+				return errors.Wrap(err, "failed to insert contract into the database")
+			}
+
+			// Add contract starting blocks
+			// (it does not exist for sure since blocks table has a foreign key to the contracts table)
+			if _, err = c.database.Blocks().Insert(data.Blocks{
+				ContractId:    id[0],
+				TransferBlock: event.BlockNumber,
+				UpdateBlock:   event.BlockNumber,
+			}); err != nil {
+				return errors.Wrap(err, "failed to insert starting blocks into the database")
+			}
+
 			return nil
+		}); err != nil {
+			return true, errors.Wrap(err, "failed to execute database tx")
 		}
-
-		// Add contract to the database
-		id, err := c.database.Contracts().Insert(data.Contract{
-			Addr:              event.Address.String(),
-			Name:              event.Name,
-			Symbol:            event.Symbol,
-			PreviousMintBLock: event.BlockNumber,
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to insert contract into the database")
-		}
-
-		// Add contract starting blocks
-		// (it does not exist for sure since blocks table has a foreign key to the contracts table)
-		_, err = c.database.Blocks().Insert(data.Blocks{
-			ContractId:    id[0],
-			TransferBlock: event.BlockNumber,
-			UpdateBlock:   event.BlockNumber,
-		})
 
 		// Updating book information
 		var (
@@ -125,11 +141,11 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 			ContractAddress: &contractAddress,
 			DeployStatus:    &successDeployStatus,
 		}); err != nil {
-			return errors.Wrap(err, "failed to update book via connector")
+			return true, errors.Wrap(err, "failed to update book via connector")
 		}
 
 		// Setting new cursor value
-		return c.database.KeyValue().Upsert(data.KeyValue{
+		return true, c.database.KeyValue().Upsert(data.KeyValue{
 			Key:   key_value.FactoryTrackerCursor,
 			Value: strconv.FormatUint(event.BlockNumber, 10),
 		})
@@ -137,11 +153,11 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 		// If tx has failed, just update a status that it has failed
 		var deployFailedStatus = bookResources.DeployFailed
 
-		return c.booker.UpdateBook(models.UpdateBookParams{
+		return true, c.booker.UpdateBook(models.UpdateBookParams{
 			Id:           bookId,
 			DeployStatus: &deployFailedStatus,
 		})
 	}
 
-	return nil
+	return true, nil
 }

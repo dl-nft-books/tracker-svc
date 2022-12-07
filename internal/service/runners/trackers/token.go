@@ -85,6 +85,11 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 				return errors.Wrap(err, "failed to get contract from the database")
 			}
 
+			if contractEntry == nil {
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchSuccessfulMintEvents(ch)
+			}
+
 			return t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WatchSuccessfulMintEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
