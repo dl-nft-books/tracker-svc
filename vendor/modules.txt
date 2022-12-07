@@ -213,16 +213,9 @@ github.com/multiformats/go-multihash/register/sha3
 # github.com/multiformats/go-varint v0.0.6
 ## explicit; go 1.12
 github.com/multiformats/go-varint
-# github.com/nullstyle/go-xdr v0.0.0-20180726165426-f4c839f75077
-## explicit
-github.com/nullstyle/go-xdr/xdr3
 # github.com/oklog/ulid v1.3.1
 ## explicit
 github.com/oklog/ulid
-# github.com/onsi/ginkgo v1.16.4
-## explicit; go 1.15
-# github.com/onsi/gomega v1.10.1
-## explicit
 # github.com/pelletier/go-toml v1.9.3
 ## explicit; go 1.12
 github.com/pelletier/go-toml
@@ -298,11 +291,6 @@ gitlab.com/distributed_lab/ape/problems
 # gitlab.com/distributed_lab/figure v2.1.0+incompatible
 ## explicit
 gitlab.com/distributed_lab/figure
-# gitlab.com/distributed_lab/json-api-connector v0.2.4
-## explicit
-gitlab.com/distributed_lab/json-api-connector/base
-gitlab.com/distributed_lab/json-api-connector/cerrors
-gitlab.com/distributed_lab/json-api-connector/client
 # gitlab.com/distributed_lab/kit v1.11.1
 ## explicit; go 1.14
 gitlab.com/distributed_lab/kit/comfig
@@ -331,40 +319,19 @@ gitlab.com/distributed_lab/running
 gitlab.com/distributed_lab/urlval
 gitlab.com/distributed_lab/urlval/internal
 gitlab.com/distributed_lab/urlval/internal/betterreflect
-# gitlab.com/tokend/connectors v0.1.9
-## explicit; go 1.17
-gitlab.com/tokend/connectors/keyer
-gitlab.com/tokend/connectors/signed
-# gitlab.com/tokend/go v3.15.0+incompatible
-## explicit
-gitlab.com/tokend/go/crc16
-gitlab.com/tokend/go/hash
-gitlab.com/tokend/go/keypair
-gitlab.com/tokend/go/network
-gitlab.com/tokend/go/signcontrol
-gitlab.com/tokend/go/signcontrol/internal/httpsignatures
-gitlab.com/tokend/go/strkey
-gitlab.com/tokend/go/xdr
-# gitlab.com/tokend/keypair v0.0.0-20190412110653-b9d7e0c8b312
-## explicit
-gitlab.com/tokend/keypair
-gitlab.com/tokend/keypair/figurekeypair
-gitlab.com/tokend/keypair/internal
-gitlab.com/tokend/keypair/internal/crc16
-gitlab.com/tokend/keypair/internal/strkey
-# gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221104125850-7e8369e2ce8a
+# gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d
 ## explicit; go 1.18
 gitlab.com/tokend/nft-books/blob-svc/connector/api
 gitlab.com/tokend/nft-books/blob-svc/connector/config
 gitlab.com/tokend/nft-books/blob-svc/connector/models
 gitlab.com/tokend/nft-books/blob-svc/resources
-# gitlab.com/tokend/nft-books/book-svc v0.0.0-20221205220251-22644cc408be
+# gitlab.com/tokend/nft-books/book-svc v0.0.0-20221207110528-6f6ff8a47fac
 ## explicit; go 1.18
 gitlab.com/tokend/nft-books/book-svc/connector
 gitlab.com/tokend/nft-books/book-svc/connector/models
 gitlab.com/tokend/nft-books/book-svc/internal/service/api/requests
 gitlab.com/tokend/nft-books/book-svc/resources
-# gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221206183105-da118c7dd33f
+# gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221207112622-ac7aa2c97d22
 ## explicit; go 1.18
 gitlab.com/tokend/nft-books/generator-svc/connector
 gitlab.com/tokend/nft-books/generator-svc/connector/models
@@ -374,7 +341,6 @@ gitlab.com/tokend/nft-books/generator-svc/resources
 ## explicit; go 1.17
 golang.org/x/crypto/blake2b
 golang.org/x/crypto/blake2s
-golang.org/x/crypto/ed25519
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/scrypt
 golang.org/x/crypto/sha3
