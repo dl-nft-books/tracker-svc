@@ -14,6 +14,7 @@ import (
 )
 
 type factoryListener struct {
+	logger    *logan.Entry
 	webSocket *ethclient.Client
 	rpc       *ethclient.Client
 
@@ -36,6 +37,7 @@ func NewFactoryListener(cfg config.Config, ctx context.Context) ethereum.Factory
 	rpc := cfg.EtherClient().Rpc
 
 	return &factoryListener{
+		logger:    cfg.Log(),
 		webSocket: cfg.EtherClient().WebSocket,
 		rpc:       rpc,
 		ctx:       context.Background(),

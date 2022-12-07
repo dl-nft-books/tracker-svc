@@ -66,6 +66,8 @@ func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.Contrac
 		return errors.Wrap(err, "failed to get last block in chain")
 	}
 
+	l.logger.Debugf("Last block in chain is %d", lastChainBlock)
+
 	if l.maxDepth == nil {
 		return l.readContractDeployedInterval(helpers.Interval{
 			From: *l.from,
@@ -78,14 +80,16 @@ func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.Contrac
 	}
 
 	var (
-		wg        sync.WaitGroup
+		wg        = new(sync.WaitGroup)
 		intervals = helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth)
 	)
 
 	// Waitgroup is not necessary here, as we can simply run both listener and readers separately,
 	// yet to just give a better sense of control over the parallel processing we will keep it as it is
 	wg.Add(len(intervals))
-
+	l.logger.Debugf("Splitting into %d intervals...", len(intervals))
+	l.logger.Debug(intervals)
+	
 	for _, interval := range intervals {
 		go func(readerInterval helpers.Interval) {
 			defer wg.Done()
