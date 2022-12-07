@@ -85,26 +85,27 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 	switch event.Status {
 	case types.ReceiptStatusSuccessful:
 		// Validating whether the contract from event is already in the database
-		entry, err := c.database.Contracts().GetByContract(event.Address.String())
+		entry, err := c.database.Contracts().GetByAddress(event.Address.String())
 		if err != nil {
 			return errors.Wrap(err, "failed to validate whether the contract already exists")
 		}
 		// If contract already exists, throw a warning and omit
 		if entry != nil {
-			c.logger.Warnf("Contract with address %s already exists. Omitting\n", event.Address.String())
+			c.logger.Warnf("Addr with address %s already exists. Omitting\n", event.Address.String())
 			return nil
 		}
 
 		// Add contract to the database
 		id, err := c.database.Contracts().Insert(data.Contract{
-			Contract:  event.Address.String(),
-			Name:      event.Name,
-			Symbol:    event.Symbol,
-			LastBlock: event.BlockNumber,
+			Addr:              event.Address.String(),
+			Name:              event.Name,
+			Symbol:            event.Symbol,
+			PreviousMintBLock: event.BlockNumber,
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to insert contract into the database")
 		}
+
 		// Add contract starting blocks
 		// (it does not exist for sure since blocks table has a foreign key to the contracts table)
 		_, err = c.database.Blocks().Insert(data.Blocks{

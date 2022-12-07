@@ -6,11 +6,11 @@ import (
 )
 
 type Contract struct {
-	Id        int64  `db:"id" structs:"-"`
-	Contract  string `db:"contract" structs:"contract"`
-	Name      string `db:"name" structs:"name"`
-	Symbol    string `db:"symbol" structs:"symbol"`
-	LastBlock uint64 `db:"last_block" structs:"last_block"`
+	Id                int64  `db:"id" structs:"-"`
+	Addr              string `db:"address" structs:"address"`
+	Name              string `db:"name" structs:"name"`
+	Symbol            string `db:"symbol" structs:"symbol"`
+	PreviousMintBLock uint64 `db:"previous_mint_block" structs:"previous_mint_block"`
 }
 
 //go:generate mockery --case=underscore --name=KeyValueQ
@@ -19,11 +19,11 @@ type ContractsQ interface {
 	Select() ([]Contract, error)
 	Page(page pgdb.OffsetPageParams) ContractsQ
 	Get(id int64) (*Contract, error)
-	GetByContract(contract string) (*Contract, error)
+	GetByAddress(address string) (*Contract, error)
 	Insert(contract ...Contract) ([]int64, error)
-	UpdateLastBlock(lastBlock uint64, id int64) error
+	UpdatePreviousMintBlock(lastBlock uint64, id int64) error
 }
 
 func (c *Contract) Address() common.Address {
-	return common.HexToAddress(c.Contract)
+	return common.HexToAddress(c.Addr)
 }

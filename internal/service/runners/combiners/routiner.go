@@ -2,6 +2,7 @@ package combiners
 
 import (
 	"context"
+
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/running"
@@ -39,10 +40,9 @@ func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
 			for {
 				select {
 				case address := <-ch:
-					r.combiner.ProduceAndConsumeAllEvents(address)
-
 					r.routinesNumber++
 					r.logger.Infof("Caught new token to run combiner for. Current number of tokens to process: %d\n", r.routinesNumber)
+					r.combiner.ProduceAndConsumeAllEvents(address)
 				}
 			}
 		},

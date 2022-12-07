@@ -10,9 +10,9 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.1
 	github.com/ipfs/go-ipfs-api v0.3.0
-	github.com/lib/pq v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/rubenv/sql-migrate v1.2.0
+	github.com/spf13/cast v1.4.1
 	github.com/stretchr/testify v1.8.1
 	github.com/wealdtech/go-ipfs-provider v1.1.0
 	github.com/wealdtech/go-ipfs-provider-pinata v1.1.0
@@ -23,8 +23,8 @@ require (
 	gitlab.com/distributed_lab/running v1.6.0
 	gitlab.com/distributed_lab/urlval v3.0.0+incompatible
 	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221104125850-7e8369e2ce8a
-	gitlab.com/tokend/nft-books/book-svc v0.0.0-20221201111324-4772579cdbf3
-	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221130224011-0effaeaa3c87
+	gitlab.com/tokend/nft-books/book-svc v0.0.0-20221205220251-22644cc408be
+	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221206183105-da118c7dd33f
 )
 
 require (
@@ -58,6 +58,7 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
+	github.com/lib/pq v1.10.0 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
 	github.com/libp2p/go-libp2p-core v0.11.0 // indirect
@@ -86,7 +87,6 @@ require (
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
-	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.8.1 // indirect

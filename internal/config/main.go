@@ -27,7 +27,7 @@ type Config interface {
 	pinata.Pinater
 	IpfsLoader() ipfs.Uploader
 
-	// Contract trackers
+	// Addr trackers
 	EtherClient() EtherClient
 	NativeToken() etherdata.Erc20Info
 
@@ -53,7 +53,7 @@ type config struct {
 	pinata.Pinater
 	ipfsLoaderOnce comfig.Once
 
-	// Contract trackers
+	// Addr trackers
 	getter          kv.Getter
 	trackersOnce    comfig.Once
 	consumersOnce   comfig.Once

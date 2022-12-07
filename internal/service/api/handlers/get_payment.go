@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/spf13/cast"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
 	"gitlab.com/tokend/nft-books/book-svc/connector/models"
-	"net/http"
 
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -94,7 +95,7 @@ func getBookIdFromPayment(payment data.Payment, db data.DB, booker *booker.Conne
 	}
 
 	bookResponse, err := booker.ListBooks(models.ListBooksParams{
-		Contract: []string{contract.Contract},
+		Contract: []string{contract.Addr},
 	})
 
 	if err != nil {
@@ -102,7 +103,7 @@ func getBookIdFromPayment(payment data.Payment, db data.DB, booker *booker.Conne
 	}
 	if bookResponse == nil {
 		return nil, errors.From(BookNotFoundErr, logan.F{
-			"book_contract_address": contract.Contract,
+			"book_contract_address": contract.Addr,
 		})
 	}
 

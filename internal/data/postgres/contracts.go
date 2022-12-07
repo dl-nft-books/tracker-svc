@@ -13,12 +13,12 @@ import (
 const (
 	contractsTable = "contracts"
 
-	contractsId        = "id"
-	contractsContract  = "contract"
-	contractsName      = "name"
-	contractsSymbol    = "symbol"
-	contractsLastBlock = "last_block"
-	contractsChainID   = "chain_id"
+	contractsId                = "id"
+	contractsAddress           = "address"
+	contractsName              = "name"
+	contractsSymbol            = "symbol"
+	contractsPreviousMintBlock = "previous_mint_block"
+	contractsChainID           = "chain_id"
 )
 
 type contractsQ struct {
@@ -53,10 +53,10 @@ func (q *contractsQ) Get(id int64) (*data.Contract, error) {
 	return &token, err
 }
 
-func (q *contractsQ) GetByContract(contract string) (*data.Contract, error) {
+func (q *contractsQ) GetByAddress(contract string) (*data.Contract, error) {
 	var token data.Contract
 
-	err := q.database.Get(&token, q.selector.Where(squirrel.Eq{contractsContract: contract}))
+	err := q.database.Get(&token, q.selector.Where(squirrel.Eq{contractsAddress: contract}))
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -75,9 +75,9 @@ func (q *contractsQ) Insert(contracts ...data.Contract) (id []int64, err error) 
 	return
 }
 
-func (q *contractsQ) UpdateLastBlock(lastBlock uint64, id int64) error {
+func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {
 	statement := squirrel.Update(contractsTable).
-		Set(contractsLastBlock, lastBlock).
+		Set(contractsPreviousMintBlock, lastBlock).
 		Where(squirrel.Eq{contractsId: id})
 	return q.database.Exec(statement)
 }

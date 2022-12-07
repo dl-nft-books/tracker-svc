@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
+	"net/http"
+
 	"gitlab.com/distributed_lab/logan/v3"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
-	"net/http"
 )
 
 type ctxKey int
@@ -46,14 +46,4 @@ func CtxBooker(entry *booker.Connector) func(context.Context) context.Context {
 
 func Booker(r *http.Request) *booker.Connector {
 	return r.Context().Value(bookerCtxKey).(*booker.Connector)
-}
-
-func CtxGeneratorer(entry generatorer.Connector) func(ctx context.Context) context.Context {
-	return func(ctx context.Context) context.Context {
-		return context.WithValue(ctx, generatorerCtxKey, entry)
-	}
-}
-
-func Generatorer(r *http.Request) generatorer.Connector {
-	return r.Context().Value(generatorerCtxKey).(generatorer.Connector)
 }

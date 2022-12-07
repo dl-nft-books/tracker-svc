@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -47,7 +48,7 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 		func(ctx context.Context) error {
 			startBlock := uint64(0)
 
-			contract, err := t.database.Contracts().GetByContract(address.String())
+			contract, err := t.database.Contracts().GetByAddress(address.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to get contract by address")
 			}
@@ -79,12 +80,12 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 		t.log,
 		t.cfg.Prefix+mintTrackerSuffix,
 		func(ctx context.Context) error {
-			contractEntry, err := t.database.Contracts().GetByContract(address.String())
+			contractEntry, err := t.database.Contracts().GetByAddress(address.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to get contract from the database")
 			}
 
-			return t.listener.From(contractEntry.LastBlock).WithCtx(ctx).WatchSuccessfulMintEvents(ch)
+			return t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WatchSuccessfulMintEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
@@ -100,7 +101,7 @@ func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- ether
 		func(ctx context.Context) error {
 			startBlock := uint64(0)
 
-			contract, err := t.database.Contracts().GetByContract(address.String())
+			contract, err := t.database.Contracts().GetByAddress(address.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to get contract by address")
 			}

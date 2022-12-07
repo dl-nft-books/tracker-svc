@@ -23,7 +23,7 @@ type tokenListener struct {
 
 	address   *common.Address
 	ctx       context.Context
-	converter converters.Converter
+	converter converters.EventConverter
 
 	// rpcInstancesCache is a map storing already initialized instances of contracts
 	rpcInstancesCache map[common.Address]*token.Tokencontract
@@ -42,7 +42,7 @@ func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenList
 
 		rpcInstancesCache: make(map[common.Address]*token.Tokencontract),
 		wsInstancesCache:  map[common.Address]*token.TokencontractFilterer{},
-		converter:         converters.NewConverter(rpc, ctx, cfg.NativeToken()),
+		converter:         converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
 }
 

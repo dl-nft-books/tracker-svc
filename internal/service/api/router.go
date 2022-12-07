@@ -20,10 +20,11 @@ func (a *api) router() chi.Router {
 			handlers.CtxDB(postgres.NewDB(a.cfg.DB())),
 			// connectors
 			handlers.CtxBooker(a.cfg.BookerConnector()),
-			handlers.CtxGeneratorer(*a.cfg.GeneratorConnector()),
 		),
 	)
-	r.Route("/integrations/runners", func(r chi.Router) {
+
+	// TODO: REPLACE MAIN ENDPOINT TO `runners`
+	r.Route("/integrations/token-tracker", func(r chi.Router) {
 		r.Route("/payments", func(r chi.Router) {
 			r.Get("/", handlers.ListPayments)
 

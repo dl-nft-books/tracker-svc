@@ -23,7 +23,7 @@ type factoryListener struct {
 
 	address   *common.Address
 	ctx       context.Context
-	converter converters.Converter
+	converter converters.EventConverter
 
 	// rpcInstancesCache is a map storing already initialized rpc instances of contracts
 	rpcInstancesCache map[common.Address]*factory.Tokenfactory
@@ -42,7 +42,7 @@ func NewFactoryListener(cfg config.Config, ctx context.Context) ethereum.Factory
 
 		rpcInstancesCache: make(map[common.Address]*factory.Tokenfactory),
 		wsInstancesCache:  map[common.Address]*factory.TokenfactoryFilterer{},
-		converter:         converters.NewConverter(rpc, ctx, cfg.NativeToken()),
+		converter:         converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
 }
 

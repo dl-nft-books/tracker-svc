@@ -2,6 +2,9 @@ package converters
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -11,25 +14,23 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
-	"math/big"
-	"time"
 )
 
-type Converter struct {
+type EventConverter struct {
 	client      *ethclient.Client
 	ctx         context.Context
 	nativeToken etherdata.Erc20Info
 }
 
-func NewConverter(client *ethclient.Client, ctx context.Context, nativeToken etherdata.Erc20Info) Converter {
-	return Converter{
+func NewEventConverter(client *ethclient.Client, ctx context.Context, nativeToken etherdata.Erc20Info) EventConverter {
+	return EventConverter{
 		client:      client,
 		ctx:         ctx,
 		nativeToken: nativeToken,
 	}
 }
 
-func (c *Converter) Deploy(raw factory.TokenfactoryTokenContractDeployed) (*etherdata.ContractDeployedEvent, error) {
+func (c *EventConverter) Deploy(raw factory.TokenfactoryTokenContractDeployed) (*etherdata.ContractDeployedEvent, error) {
 	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
@@ -47,7 +48,7 @@ func (c *Converter) Deploy(raw factory.TokenfactoryTokenContractDeployed) (*ethe
 	}, nil
 }
 
-func (c *Converter) SuccessfulMint(raw token.TokencontractSuccessfullyMinted) (*etherdata.SuccessfulMintEvent, error) {
+func (c *EventConverter) SuccessfulMint(raw token.TokencontractSuccessfullyMinted) (*etherdata.SuccessfulMintEvent, error) {
 	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
@@ -79,7 +80,7 @@ func (c *Converter) SuccessfulMint(raw token.TokencontractSuccessfullyMinted) (*
 	}, nil
 }
 
-func (c *Converter) Transfer(raw token.TokencontractTransfer) etherdata.TransferEvent {
+func (c *EventConverter) Transfer(raw token.TokencontractTransfer) etherdata.TransferEvent {
 	return etherdata.TransferEvent{
 		From:    raw.From,
 		To:      raw.To,
@@ -87,7 +88,7 @@ func (c *Converter) Transfer(raw token.TokencontractTransfer) etherdata.Transfer
 	}
 }
 
-func (c *Converter) Update(raw token.TokencontractTokenContractParamsUpdated) etherdata.UpdateEvent {
+func (c *EventConverter) Update(raw token.TokencontractTokenContractParamsUpdated) etherdata.UpdateEvent {
 	return etherdata.UpdateEvent{
 		Name:        raw.TokenName,
 		Symbol:      raw.TokenSymbol,
@@ -98,7 +99,7 @@ func (c *Converter) Update(raw token.TokencontractTokenContractParamsUpdated) et
 
 // getBlockTimestamp is a function that returns a timestamp
 // when a block with specified blockNumber was initialized
-func (c *Converter) getBlockTimestamp(blockNumber uint64) (*time.Time, error) {
+func (c *EventConverter) getBlockTimestamp(blockNumber uint64) (*time.Time, error) {
 	// Get header by a block number
 	header, err := c.client.BlockByNumber(c.ctx, new(big.Int).SetUint64(blockNumber))
 	if err != nil {
@@ -114,7 +115,7 @@ func (c *Converter) getBlockTimestamp(blockNumber uint64) (*time.Time, error) {
 // address specified in parameters. If address is etherdata.NullAddress, function
 // returns the native erc20 data. Otherwise, contract on the specified
 // address must implement IERC20 interface.
-func (c *Converter) GetErc20Data(address common.Address) (*etherdata.Erc20Info, error) {
+func (c *EventConverter) GetErc20Data(address common.Address) (*etherdata.Erc20Info, error) {
 	if address == etherdata.NullAddress {
 		return &c.nativeToken, nil
 	}
