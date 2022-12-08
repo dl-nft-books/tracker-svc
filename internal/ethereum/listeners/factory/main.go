@@ -28,27 +28,24 @@ type factoryListener struct {
 
 	// rpcInstancesCache is a map storing already initialized rpc instances of contracts
 	rpcInstancesCache map[common.Address]*factory.Tokenfactory
-	rpcSync           sync.RWMutex
-
 	// wsInstancesCache is a map storing already initialized ws instances of contracts
 	wsInstancesCache map[common.Address]*factory.TokenfactoryFilterer
-	wsSync           sync.RWMutex
+
+	mutex *sync.RWMutex
 }
 
-func NewFactoryListener(cfg config.Config, ctx context.Context) ethereum.FactoryListener {
+func NewFactoryListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex) ethereum.FactoryListener {
 	rpc := cfg.EtherClient().Rpc
 
 	return &factoryListener{
 		logger:    cfg.Log(),
 		webSocket: cfg.EtherClient().WebSocket,
 		rpc:       rpc,
-		ctx:       context.Background(),
+		ctx:       ctx,
+		mutex:     mutex,
 
 		rpcInstancesCache: make(map[common.Address]*factory.Tokenfactory),
-		rpcSync:           sync.RWMutex{},
-
-		wsInstancesCache: map[common.Address]*factory.TokenfactoryFilterer{},
-		wsSync:           sync.RWMutex{},
+		wsInstancesCache:  make(map[common.Address]*factory.TokenfactoryFilterer),
 
 		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
@@ -94,7 +91,7 @@ func (l *factoryListener) validateParameters() error {
 }
 
 func (l *factoryListener) getRPCInstance(address common.Address) (*factory.Tokenfactory, error) {
-	l.rpcSync.RLock()
+	l.mutex.RLock()
 	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -108,13 +105,13 @@ func (l *factoryListener) getRPCInstance(address common.Address) (*factory.Token
 	}
 
 	l.rpcInstancesCache[address] = newInstance
-	l.rpcSync.RUnlock()
+	l.mutex.RUnlock()
 
 	return newInstance, nil
 }
 
 func (l *factoryListener) getWSInstance(address common.Address) (*factory.TokenfactoryFilterer, error) {
-	l.wsSync.RLock()
+	l.mutex.RLock()
 	cacheInstance, ok := l.wsInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -128,7 +125,7 @@ func (l *factoryListener) getWSInstance(address common.Address) (*factory.Tokenf
 	}
 
 	l.wsInstancesCache[address] = newInstance
-	l.wsSync.RUnlock()
+	l.mutex.RUnlock()
 
 	return newInstance, nil
 }

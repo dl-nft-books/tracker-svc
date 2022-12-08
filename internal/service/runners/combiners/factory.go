@@ -3,6 +3,7 @@ package combiners
 import (
 	"context"
 	"gitlab.com/distributed_lab/logan/v3"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
@@ -16,6 +17,7 @@ type FactoryCombiner struct {
 
 	tracker  *trackers.FactoryTracker
 	consumer *consumers.FactoryConsumer
+	mutex    *sync.RWMutex
 }
 
 func NewFactoryCombiner(cfg config.Config, ctx context.Context) *FactoryCombiner {

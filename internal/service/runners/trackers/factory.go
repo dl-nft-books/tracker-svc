@@ -13,6 +13,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/listeners/factory"
+	"sync"
 )
 
 const deployEventsSuffix = "-factory-deploy"
@@ -22,17 +23,20 @@ type FactoryTracker struct {
 	ctx      context.Context
 	database data.DB
 	listener ethereum.FactoryListener
-
-	cfg config.Trackers
+	cfg      config.Trackers
+	mutex    *sync.RWMutex
 }
 
 func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
+	mutex := new(sync.RWMutex)
+
 	return &FactoryTracker{
 		log:      cfg.Log(),
 		ctx:      ctx,
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
-		listener: factory_listeners.NewFactoryListener(cfg, ctx).
+		mutex:    mutex,
+		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex).
 			WithAddress(cfg.Trackers().Factory.Address).
 			WithMaxDepth(cfg.Trackers().MaxDepth),
 	}

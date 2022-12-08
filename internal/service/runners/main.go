@@ -2,7 +2,6 @@ package runners
 
 import (
 	"context"
-
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	"github.com/ethereum/go-ethereum/common"
