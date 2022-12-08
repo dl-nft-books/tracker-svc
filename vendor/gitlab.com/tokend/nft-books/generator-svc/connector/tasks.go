@@ -69,7 +69,8 @@ func (c *Connector) ListTasks(request models.ListTasksRequest) (*models.ListTask
 
 	// setting full endpoint
 	fullEndpoint := fmt.Sprintf("%s/%s?%s", c.baseUrl, tasksEndpoint, urlval.MustEncode(request))
-
+	fmt.Printf("Trying to list tasks using %s...\n", fullEndpoint)
+	
 	// getting response
 	if _, err := c.get(fullEndpoint, &result); err != nil {
 		// errors are already wrapped
