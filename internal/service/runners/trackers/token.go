@@ -95,7 +95,8 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchSuccessfulMintEvents(ch)
 			}
 
-			return t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WatchSuccessfulMintEvents(ch)
+			listener := t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WithAddress(address)
+			return listener.WatchSuccessfulMintEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
