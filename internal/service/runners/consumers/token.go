@@ -72,7 +72,9 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					// Getting task by hash (uri)
 					tasksResponse, err := c.generatorer.ListTasks(generatorerModels.ListTasksRequest{IpfsHash: &event.Uri})
 					if err != nil {
-						return errors.Wrap(err, "failed to get task by ipfs hash", logField)
+						return errors.Wrap(err, "failed to get task by ipfs hash", logField.Merge(logan.F{
+							"ipfs_hash": event.Uri,
+						}))
 					}
 					if len(tasksResponse.Data) == 0 {
 						c.logger.
