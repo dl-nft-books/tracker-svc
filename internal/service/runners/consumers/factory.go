@@ -99,7 +99,7 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 		}
 		// If contract already exists, throw a warning and omit
 		if entry != nil {
-			c.logger.Warnf("Addr with address %s already exists. Omitting\n", event.Address.String())
+			c.logger.Warnf("Entry with address %s already exists. Omitting\n", event.Address.String())
 			return true, nil
 		}
 

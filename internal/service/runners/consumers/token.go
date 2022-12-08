@@ -77,7 +77,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					if len(tasksResponse.Data) == 0 {
 						c.logger.
 							WithFields(logField.Merge(logan.F{"ipfs_hash": event.Uri})).
-							Warn("task with specified ipfs hash wasn`t found")
+							Warn("task with specified ipfs hash was not found")
 						continue
 					}
 
@@ -92,7 +92,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					if book == nil {
 						c.logger.
 							WithFields(logField.Merge(logan.F{"book_id": task.Attributes.BookId})).
-							Warn("Could not find book")
+							Warn("could not find book")
 						continue
 					}
 
@@ -272,7 +272,7 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 						return errors.Wrap(err, "failed to get book corresponding to the given address", logField)
 					}
 					if len(bookResponse.Data) == 0 {
-						c.logger.WithFields(logField).Warnf("Addr with specified address was not found")
+						c.logger.WithFields(logField).Warnf("Contract with specified address was not found")
 						continue
 					}
 
