@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -27,16 +28,20 @@ type TokenTracker struct {
 	ctx      context.Context
 	database data.DB
 	listener ethereum.TokenListener
+	mutex    *sync.RWMutex
 }
 
 func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
+	mutex := new(sync.RWMutex)
+
 	return &TokenTracker{
 		log:      cfg.Log(),
 		ctx:      ctx,
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
-		listener: token_listeners.NewTokenListener(cfg, ctx).
+		listener: token_listeners.NewTokenListener(cfg, ctx, mutex).
 			WithMaxDepth(cfg.Trackers().MaxDepth),
+		mutex: mutex,
 	}
 }
 
