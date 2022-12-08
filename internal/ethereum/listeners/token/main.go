@@ -2,6 +2,7 @@ package token_listeners
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -27,9 +28,11 @@ type tokenListener struct {
 
 	// rpcInstancesCache is a map storing already initialized instances of contracts
 	rpcInstancesCache map[common.Address]*token.Tokencontract
+	rpcSync           sync.RWMutex
 
 	// wsInstancesCache is a map storing already initialized ws instances of contracts
 	wsInstancesCache map[common.Address]*token.TokencontractFilterer
+	wsSync           sync.RWMutex
 }
 
 func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenListener {
@@ -41,8 +44,12 @@ func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenList
 		ctx:       context.Background(),
 
 		rpcInstancesCache: make(map[common.Address]*token.Tokencontract),
-		wsInstancesCache:  map[common.Address]*token.TokencontractFilterer{},
-		converter:         converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
+		rpcSync:           sync.RWMutex{},
+
+		wsInstancesCache: map[common.Address]*token.TokencontractFilterer{},
+		wsSync:           sync.RWMutex{},
+
+		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
 }
 
@@ -86,6 +93,7 @@ func (l *tokenListener) validateParameters() error {
 }
 
 func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencontract, error) {
+	l.rpcSync.RLock()
 	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -99,10 +107,13 @@ func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencont
 	}
 
 	l.rpcInstancesCache[address] = newInstance
+	l.rpcSync.Unlock()
+
 	return newInstance, nil
 }
 
 func (l *tokenListener) getWSInstance(address common.Address) (*token.TokencontractFilterer, error) {
+	l.wsSync.RLock()
 	cacheInstance, ok := l.wsInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -116,5 +127,7 @@ func (l *tokenListener) getWSInstance(address common.Address) (*token.Tokencontr
 	}
 
 	l.wsInstancesCache[address] = newInstance
+	l.wsSync.RUnlock()
+
 	return newInstance, nil
 }
