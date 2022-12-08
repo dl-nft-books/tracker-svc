@@ -625,8 +625,8 @@ gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d h1:ce1
 gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d/go.mod h1:q1z3N4ZyIFjFIPr5rJWaYlRjURgZ6WVB928KFpwd2bY=
 gitlab.com/tokend/nft-books/book-svc v0.0.0-20221208185019-9f5208af2d9d h1:wgazJIBEVQ+7XkpIBlr6n1p7VOr9DX7iaCEtcFernFQ=
 gitlab.com/tokend/nft-books/book-svc v0.0.0-20221208185019-9f5208af2d9d/go.mod h1:vbh0F9b9a8URnlLWke5T9RTkEireAFRJC1Ce9KrZa1Q=
-gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221207112622-ac7aa2c97d22 h1:tl58/OrJhH5tv0P2Iavd47QF+7bv93Olqc7ueROO1Qc=
-gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221207112622-ac7aa2c97d22/go.mod h1:CUs3EncUUr+muLaDsSru/BMsEhLL4aigHX41of51oso=
+gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221208185628-0b7176298cf5 h1:gbtDWfKKT5S0VUfdgd7CTagdluGe+r9LspqrCrBtjDM=
+gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221208185628-0b7176298cf5/go.mod h1:PISxkgyUzwJy7Gli+k+0BowIZjbZOX3dYXIup95PgN4=
 go.etcd.io/etcd/api/v3 v3.5.0/go.mod h1:cbVKeC6lCfl7j/8jBhAK6aIYO9XOjdptoxU/nLQcPvs=
 go.etcd.io/etcd/client/pkg/v3 v3.5.0/go.mod h1:IJHfcCEKxYu1Os13ZdwCwIUTUVGYTSAM3YSwc9/Ac1g=
 go.etcd.io/etcd/client/v2 v2.305.0/go.mod h1:h9puh54ZTgAKtEbut2oe9P4L/oqKCVB6xsXlzd7alYQ=
