@@ -2,6 +2,7 @@ package token_listeners
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,26 +24,28 @@ type tokenListener struct {
 
 	address   *common.Address
 	ctx       context.Context
+	mutex     *sync.RWMutex
 	converter converters.EventConverter
 
 	// rpcInstancesCache is a map storing already initialized instances of contracts
 	rpcInstancesCache map[common.Address]*token.Tokencontract
-
 	// wsInstancesCache is a map storing already initialized ws instances of contracts
 	wsInstancesCache map[common.Address]*token.TokencontractFilterer
 }
 
-func NewTokenListener(cfg config.Config, ctx context.Context) ethereum.TokenListener {
+func NewTokenListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex) ethereum.TokenListener {
 	rpc := cfg.EtherClient().Rpc
 
 	return &tokenListener{
 		webSocket: cfg.EtherClient().WebSocket,
 		rpc:       rpc,
-		ctx:       context.Background(),
+		ctx:       ctx,
+		mutex:     mutex,
 
 		rpcInstancesCache: make(map[common.Address]*token.Tokencontract),
-		wsInstancesCache:  map[common.Address]*token.TokencontractFilterer{},
-		converter:         converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
+		wsInstancesCache:  make(map[common.Address]*token.TokencontractFilterer),
+
+		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
 }
 
@@ -86,6 +89,7 @@ func (l *tokenListener) validateParameters() error {
 }
 
 func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencontract, error) {
+	l.mutex.RLock()
 	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -99,10 +103,13 @@ func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencont
 	}
 
 	l.rpcInstancesCache[address] = newInstance
+	l.mutex.RUnlock()
+
 	return newInstance, nil
 }
 
 func (l *tokenListener) getWSInstance(address common.Address) (*token.TokencontractFilterer, error) {
+	l.mutex.RLock()
 	cacheInstance, ok := l.wsInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
@@ -116,5 +123,7 @@ func (l *tokenListener) getWSInstance(address common.Address) (*token.Tokencontr
 	}
 
 	l.wsInstancesCache[address] = newInstance
+	l.mutex.RUnlock()
+
 	return newInstance, nil
 }

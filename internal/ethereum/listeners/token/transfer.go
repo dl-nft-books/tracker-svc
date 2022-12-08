@@ -72,7 +72,7 @@ func (l *tokenListener) readTransferEvents(ch chan<- etherdata.TransferEvent) (e
 	}
 
 	var (
-		wg        sync.WaitGroup
+		wg        = new(sync.WaitGroup)
 		intervals = helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth)
 	)
 

@@ -64,15 +64,13 @@ func (q *contractsQ) GetByAddress(contract string) (*data.Contract, error) {
 	return &token, err
 }
 
-func (q *contractsQ) Insert(contracts ...data.Contract) (id []int64, err error) {
-	query := squirrel.Insert(contractsTable).Columns(structs.Names(contracts)...)
-	for _, contract := range contracts {
-		query = query.Values(structs.Values(contract)...)
-	}
+func (q *contractsQ) Insert(contract data.Contract) (id int64, err error) {
+	statement := squirrel.Insert(contractsTable).
+		Suffix("returning id").
+		SetMap(structs.Map(&contract))
 
-	query = query.Suffix("returning id")
-	err = q.database.Select(&id, query)
-	return
+	err = q.database.Get(&id, statement)
+	return id, err
 }
 
 func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {

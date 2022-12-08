@@ -78,7 +78,7 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	}
 
 	var (
-		wg        sync.WaitGroup
+		wg        = new(sync.WaitGroup)
 		intervals = helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth)
 	)
 
