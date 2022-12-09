@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Token Contract Tracker API
+  description: Documentation describing how to use token contract runners service API
+servers:
+  - url: 'https://api.demo.tokend.io'
+    description: TokenD Developer Environment

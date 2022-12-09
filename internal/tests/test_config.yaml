@@ -1,0 +1,16 @@
+log:
+  level: debug
+  disable_sentry: true
+
+infura_connector:
+  endpoint: https://ipfs.infura.io:5001
+  project_id: 2GcNH2zjqYzGwHPg07HNvLO3Hx1
+  project_secret: ffc35796a64678b134b7564afe38be95
+
+pinata_connector:
+  endpoint: https://api.pinata.cloud/pinning/pinFileToIPFS
+  api_key: 75885611586eb44b9ab3
+  api_secret: 445479ab40fbc3bd223585d94e4174c2bf4cc5f1f70907512bd90813a02a21f6
+
+ipfs_loader:
+  mode: pinata # Either 'infura' or 'pinata'
