@@ -15,7 +15,6 @@ const (
 	logCtxKey ctxKey = iota
 	dbCtxKey
 	bookerCtxKey
-	generatorerCtxKey
 )
 
 func CtxLog(entry *logan.Entry) func(context.Context) context.Context {

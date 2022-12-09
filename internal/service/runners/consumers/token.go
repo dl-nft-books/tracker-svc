@@ -27,7 +27,8 @@ const (
 	transferConsumerSuffix = "-token-transfer"
 	mintConsumerSuffix     = "-token-mint"
 	updateConsumerSuffix   = "-token-update"
-	baseURI                = "https://ipfs.io/ipfs/"
+
+	baseURI = "https://ipfs.io/ipfs/"
 )
 
 type TokenConsumer struct {
@@ -197,7 +198,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}))
 					}
 
-					c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
+					c.logger.WithFields(logField).Infof("Successfully processed mint event of a token with id %d", event.TokenId)
 				}
 			}
 		},

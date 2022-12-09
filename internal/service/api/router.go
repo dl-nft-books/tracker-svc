@@ -15,15 +15,17 @@ func (a *api) router() chi.Router {
 		ape.RecoverMiddleware(a.log),
 		ape.LoganMiddleware(a.log),
 		ape.CtxMiddleware(
-			// base configs
+			// Base configs
 			handlers.CtxLog(a.log),
 			handlers.CtxDB(postgres.NewDB(a.cfg.DB())),
-			// connectors
+
+			// Connectors
 			handlers.CtxBooker(a.cfg.BookerConnector()),
 		),
 	)
 
-	// TODO: REPLACE MAIN ENDPOINT TO `runners`
+	// TODO: Replace later 'token-tracker' to just 'tracker'
+	// Not done yet since it is not synchronized with the frontend side
 	r.Route("/integrations/token-tracker", func(r chi.Router) {
 		r.Route("/payments", func(r chi.Router) {
 			r.Get("/", handlers.ListPayments)
