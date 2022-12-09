@@ -16,8 +16,7 @@ func Run(cfg config.Config, ctx context.Context) error {
 		factoryCombiner = combiners.NewFactoryCombiner(cfg, ctx)
 		tokenRoutiner   = combiners.NewTokenRoutiner(cfg, ctx)
 
-		// Special channel to link two combiners in order
-		// to fetch newly deployed contracts and track them as well
+		// Channel connecting factory deploy consumer and routiner
 		deployedTokensCh = make(chan common.Address)
 	)
 

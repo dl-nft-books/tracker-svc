@@ -27,7 +27,8 @@ const (
 	transferConsumerSuffix = "-token-transfer"
 	mintConsumerSuffix     = "-token-mint"
 	updateConsumerSuffix   = "-token-update"
-	baseURI                = "https://ipfs.io/ipfs/"
+
+	baseURI = "https://ipfs.io/ipfs/"
 )
 
 type TokenConsumer struct {
@@ -72,7 +73,9 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					// Getting task by hash (uri)
 					tasksResponse, err := c.generatorer.ListTasks(generatorerModels.ListTasksRequest{IpfsHash: &event.Uri})
 					if err != nil {
-						return errors.Wrap(err, "failed to get task by ipfs hash", logField)
+						return errors.Wrap(err, "failed to get task by ipfs hash", logField.Merge(logan.F{
+							"ipfs_hash": event.Uri,
+						}))
 					}
 					if len(tasksResponse.Data) == 0 {
 						c.logger.
@@ -195,7 +198,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}))
 					}
 
-					c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
+					c.logger.WithFields(logField).Infof("Successfully processed mint event of a token with id %d", event.TokenId)
 				}
 			}
 		},
