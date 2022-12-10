@@ -14,7 +14,9 @@ Contract Tracker service is responsible for tracking events from factory and tok
 
 The service contains metadata and files IPFS uploading logic. The uploader client is configurable. Currently, there is a support just for _Infura_ and _Pinata_ clients (_Infura_ is not recommended as it was proven to process files way too slowly)
 
-## Trackers Structure
+## Tracking Flow
+
+Tracking flow functions as follows: we firstly initialize a `factory_tracker` and `factory_consumer` for a factory contract using `factory_combiner`. That is, `factory_tracker` runs a web socket and when it catches a deploy event, sends it to the internal channel `internalCh`. Then the `factory_consumer` catches this event, processes it, and after that sends it to the deployed contracts channel `deployedContractsCh`. Then, the `token_routiner` catches this event and creates a separate `token_combiner` which includes a `token_tracker` and `token_consumer`, similarly to the `factory_combiner`. In some sense, `token_routiner` works as a manager of all goroutines, that is why it is called so :)
 
 ![alt text](./docs/images/tracker_structure.png)
 
@@ -71,10 +73,9 @@ You can [install it locally](https://www.postgresql.org/download/) or use [docke
 
 
 ### Third-party services
-
+- RPC and Websocket — [Alchemy](https://www.alchemy.com/) in this particular case.
+- IPFS Uploader Client — either [Pinata](https://www.pinata.cloud/) or [Infura](https://www.infura.io/). We recommend using former.  
 
 ## Contacts
 
-Dmytro Zakharov is responsible for this service.
-
-Can be contacted via the _Telegram_ (`@ZamDimon`)
+Dmytro Zakharov is responsible for this service. Can be contacted via the _Telegram_ (`@ZamDimon`)
