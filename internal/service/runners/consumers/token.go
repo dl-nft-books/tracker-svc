@@ -68,6 +68,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 			for {
 				select {
 				case event := <-ch:
+					fmt.Printf("Token id: %d", event.TokenId)
 					logField := logan.F{"contract_address": address.String()}
 
 					// Getting task by hash (uri)

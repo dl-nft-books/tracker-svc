@@ -1,6 +1,7 @@
 package token_listeners
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -129,10 +130,12 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 
 			var convertedEvent *etherdata.SuccessfulMintEvent
 			convertedEvent, err = l.converter.SuccessfulMint(*raw)
+			fmt.Printf("Raw token id on listener: %s\n", raw.MintedTokenInfo.TokenId.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to convert event to the needed type")
 			}
 
+			fmt.Printf("Converted token id on listener: %d\n", convertedEvent.TokenId)
 			ch <- *convertedEvent
 		}
 	}
