@@ -3,6 +3,7 @@ package runners
 import (
 	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
@@ -10,6 +11,8 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/combiners"
 )
+
+const delayBetweenContractInsertions = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	var (
@@ -29,6 +32,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 		go func(contract data.Contract) {
 			deployedTokensCh <- contract.Address()
 		}(contract)
+		
+		time.Sleep(delayBetweenContractInsertions)
 	}
 
 	// factoryCombiner would run producer and consumer for a factory contract
