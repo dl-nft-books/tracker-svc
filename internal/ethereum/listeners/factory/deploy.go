@@ -8,6 +8,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
+	"time"
 )
 
 func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval, ch chan<- etherdata.ContractDeployedEvent) error {
@@ -79,6 +80,10 @@ func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.Contrac
 				"from": interval.From,
 				"to":   interval.To,
 			})
+		}
+
+		if l.delayBetweenIntervals != nil {
+			time.Sleep(*l.delayBetweenIntervals)
 		}
 	}
 

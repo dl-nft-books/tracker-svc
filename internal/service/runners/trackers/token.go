@@ -39,8 +39,10 @@ func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
 		ctx:      ctx,
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
-		listener: token_listeners.NewTokenListener(cfg, ctx, mutex).
-			WithMaxDepth(cfg.Trackers().MaxDepth),
+		listener: token_listeners.
+			NewTokenListener(cfg, ctx, mutex).
+			WithMaxDepth(cfg.Trackers().MaxDepth).
+			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 		mutex: mutex,
 	}
 }

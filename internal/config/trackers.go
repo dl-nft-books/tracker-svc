@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"reflect"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/figure"
@@ -19,16 +20,18 @@ type FactorySettings struct {
 }
 
 type Trackers struct {
-	Prefix   string          `fig:"prefix"`
-	MaxDepth uint64          `fig:"max_depth"`
-	Backoff  BackoffSettings `fig:"backoff_settings"`
-	Factory  FactorySettings `fig:"factory"`
+	Prefix                string          `fig:"prefix"`
+	MaxDepth              uint64          `fig:"max_depth"`
+	DelayBetweenIntervals time.Duration   `fig:"delay_between_intervals"`
+	Backoff               BackoffSettings `fig:"backoff_settings"`
+	Factory               FactorySettings `fig:"factory"`
 }
 
 var defaultTrackers = Trackers{
-	Prefix:   "tracker",
-	MaxDepth: 5000,
-	Backoff:  defaultBackoffSettings,
+	Prefix:                "tracker",
+	MaxDepth:              5000,
+	DelayBetweenIntervals: 500 * time.Millisecond,
+	Backoff:               defaultBackoffSettings,
 	Factory: FactorySettings{
 		FirstBlock: 0,
 		Address:    etherdata.NullAddress,

@@ -20,6 +20,7 @@ native_token: # Info about native token
 trackers:
   prefix: tracker # Name prefix to be displayed in logs
   max_depth: 10000
+  delay_between_intervals: 500ms
   backoff: # running.WithBackoff settings
     normal_period: 10s
     min_abnormal_period: 10s

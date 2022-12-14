@@ -11,6 +11,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/converters"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
 	"sync"
+	"time"
 )
 
 type factoryListener struct {
@@ -18,9 +19,10 @@ type factoryListener struct {
 	webSocket *ethclient.Client
 	rpc       *ethclient.Client
 
-	from     *uint64
-	to       *uint64
-	maxDepth *uint64
+	from                  *uint64
+	to                    *uint64
+	maxDepth              *uint64
+	delayBetweenIntervals *time.Duration
 
 	address   *common.Address
 	ctx       context.Context
@@ -73,6 +75,11 @@ func (l *factoryListener) WithAddress(address common.Address) ethereum.FactoryLi
 
 func (l *factoryListener) WithCtx(ctx context.Context) ethereum.FactoryListener {
 	l.ctx = ctx
+	return l
+}
+
+func (l *factoryListener) WithDelayBetweenIntervals(delay time.Duration) ethereum.FactoryListener {
+	l.delayBetweenIntervals = &delay
 	return l
 }
 

@@ -38,7 +38,8 @@ func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
 		mutex:    mutex,
 		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex).
 			WithAddress(cfg.Trackers().Factory.Address).
-			WithMaxDepth(cfg.Trackers().MaxDepth),
+			WithMaxDepth(cfg.Trackers().MaxDepth).
+			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}
 }
 

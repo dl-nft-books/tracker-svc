@@ -8,6 +8,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
+	"time"
 )
 
 func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
@@ -77,6 +78,10 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 				"from": interval.From,
 				"to":   interval.To,
 			})
+		}
+
+		if l.delayBetweenIntervals != nil {
+			time.Sleep(*l.delayBetweenIntervals)
 		}
 	}
 

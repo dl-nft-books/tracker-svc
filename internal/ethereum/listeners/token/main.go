@@ -3,6 +3,7 @@ package token_listeners
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -18,9 +19,10 @@ type tokenListener struct {
 	webSocket *ethclient.Client
 	rpc       *ethclient.Client
 
-	from     *uint64
-	to       *uint64
-	maxDepth *uint64
+	from                  *uint64
+	to                    *uint64
+	maxDepth              *uint64
+	delayBetweenIntervals *time.Duration
 
 	address   *common.Address
 	ctx       context.Context
@@ -71,6 +73,11 @@ func (l *tokenListener) WithAddress(address common.Address) ethereum.TokenListen
 
 func (l *tokenListener) WithCtx(ctx context.Context) ethereum.TokenListener {
 	l.ctx = ctx
+	return l
+}
+
+func (l *tokenListener) WithDelayBetweenIntervals(delay time.Duration) ethereum.TokenListener {
+	l.delayBetweenIntervals = &delay
 	return l
 }
 
