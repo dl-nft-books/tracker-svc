@@ -1,8 +1,6 @@
 package factory_listeners
 
 import (
-	"sync"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -59,16 +57,10 @@ func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval
 }
 
 func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.ContractDeployedEvent) (err error) {
-	// Since l.to - l.from might exceed the max depth allowed in the chain,
-	// we split the reading operation into several smaller parallel processes
-	// that are all sending caught events to the events channel
-
 	lastChainBlock, err := l.rpc.BlockNumber(l.ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block in chain")
 	}
-
-	l.logger.Debugf("Last block in chain is %d", lastChainBlock)
 
 	if l.maxDepth == nil {
 		return l.readContractDeployedInterval(helpers.Interval{
@@ -81,30 +73,16 @@ func (l *factoryListener) readContractDeployedEvents(ch chan<- etherdata.Contrac
 		l.to = &lastChainBlock
 	}
 
-	var (
-		wg        = new(sync.WaitGroup)
-		intervals = helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth)
-	)
-
-	// Waitgroup is not necessary here, as we can simply run both listener and readers separately,
-	// yet to just give a better sense of control over the parallel processing we will keep it as it is
-	wg.Add(len(intervals))
-	l.logger.Debugf("Splitting into %d intervals... These intervals are:\n", len(intervals))
-	l.logger.Debug(intervals)
-
-	for _, interval := range intervals {
-		go func(readerInterval helpers.Interval) {
-			defer wg.Done()
-
-			if tempErr := l.readContractDeployedInterval(readerInterval, ch); tempErr != nil {
-				err = tempErr
-				return
-			}
-		}(interval)
+	for _, interval := range helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth) {
+		if err = l.readContractDeployedInterval(interval, ch); err != nil {
+			return errors.Wrap(err, "failed to read contract deployed interval", logan.F{
+				"from": interval.From,
+				"to":   interval.To,
+			})
+		}
 	}
 
-	wg.Wait()
-	return err
+	return nil
 }
 
 func (l *factoryListener) listenContractCreatedEvents(ch chan<- etherdata.ContractDeployedEvent) (err error) {
