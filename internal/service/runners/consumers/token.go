@@ -251,19 +251,30 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 						c.logger.WithFields(logField.Merge(logan.F{"token_id": tokenId})).Warn("token with specified token id was not found")
 					}
 
-					var (
-						dbTokenId = cast.ToInt64(tokenResponse.Data[0].Key.ID)
-						newOwner  = event.To.String()
-					)
+					for _, token := range tokenResponse.Data {
+						paymentId := cast.ToInt64(token.Relationships.Payment.Data.ID)
+						payment, err := c.database.Payments().FilterById(paymentId).Get()
+						if err != nil {
+							return errors.Wrap(err, "failed to get payment by token id")
+						}
+						if common.HexToAddress(payment.ContractAddress) != address {
+							continue
+						}
 
-					if err = c.generatorer.UpdateToken(generatorerModels.UpdateTokenParams{
-						Id:    dbTokenId,
-						Owner: &newOwner,
-					}); err != nil {
-						return errors.Wrap(err, "failed to update token using generatorer connector")
+						var (
+							dbTokenId = cast.ToInt64(token.Key.ID)
+							newOwner  = event.To.String()
+						)
+
+						if err = c.generatorer.UpdateToken(generatorerModels.UpdateTokenParams{
+							Id:    dbTokenId,
+							Owner: &newOwner,
+						}); err != nil {
+							return errors.Wrap(err, "failed to update token using generatorer connector")
+						}
+
+						c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
 					}
-
-					c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
 				}
 			}
 		},
