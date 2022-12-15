@@ -2,8 +2,6 @@ package combiners
 
 import (
 	"context"
-	"sync"
-
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
@@ -18,7 +16,6 @@ type TokenCombiner struct {
 
 	logger *logan.Entry
 	ctx    context.Context
-	mutex  *sync.Mutex
 }
 
 func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
@@ -27,7 +24,6 @@ func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
 		consumer: consumers.NewTokenConsumer(cfg, ctx),
 		logger:   cfg.Log(),
 		ctx:      ctx,
-		mutex:    new(sync.Mutex),
 	}
 }
 
@@ -62,10 +58,8 @@ func (c *TokenCombiner) ProduceAndConsumeUpdateEvents(address common.Address) {
 }
 
 func (c *TokenCombiner) ProduceAndConsumeAllEvents(address common.Address) {
-	c.mutex.Lock()
 	c.logger.Infof("Initializing all possible consumers and producers for %s", address.String())
 	c.ProduceAndConsumeMintEvents(address)
 	c.ProduceAndConsumeTransferEvents(address)
 	c.ProduceAndConsumeUpdateEvents(address)
-	c.mutex.Unlock()
 }

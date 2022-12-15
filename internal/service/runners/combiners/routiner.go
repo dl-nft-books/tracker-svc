@@ -2,6 +2,7 @@ package combiners
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -16,6 +17,7 @@ type TokenRoutiner struct {
 	logger   *logan.Entry
 	cfg      config.Runner
 	ctx      context.Context
+	mutex    sync.Mutex
 
 	routinesNumber uint64
 }
@@ -26,6 +28,7 @@ func NewTokenRoutiner(cfg config.Config, ctx context.Context) *TokenRoutiner {
 		cfg:      cfg.Routiner(),
 		ctx:      ctx,
 		combiner: NewTokenCombiner(cfg, ctx),
+		mutex:    sync.Mutex{},
 	}
 }
 
@@ -40,9 +43,11 @@ func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
 			for {
 				select {
 				case address := <-ch:
+					r.mutex.Lock()
 					r.routinesNumber++
 					r.logger.Infof("Caught new token to run combiner for. Current number of tokens to process: %d\n", r.routinesNumber)
 					r.combiner.ProduceAndConsumeAllEvents(address)
+					r.mutex.Unlock()
 				}
 			}
 		},
