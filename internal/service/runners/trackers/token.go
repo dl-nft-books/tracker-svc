@@ -28,7 +28,6 @@ type TokenTracker struct {
 	ctx      context.Context
 	database data.DB
 	listener ethereum.TokenListener
-	mutex    *sync.RWMutex
 }
 
 func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
@@ -43,11 +42,12 @@ func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
 			NewTokenListener(cfg, ctx, mutex).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
-		mutex: mutex,
 	}
 }
 
 func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- etherdata.TransferEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -72,8 +72,10 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 				startBlock = block.TransferBlock
 			}
 
-			listener := t.listener.From(startBlock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchTransferEvents(ch)
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchTransferEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
@@ -82,6 +84,8 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 }
 
 func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherdata.SuccessfulMintEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -94,11 +98,13 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 
 			if contractEntry == nil {
 				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
-				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchSuccessfulMintEvents(ch)
+				return nil
 			}
 
-			listener := t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchSuccessfulMintEvents(ch)
+			return listener.
+				From(contractEntry.PreviousMintBLock).
+				WithCtx(ctx).
+				WatchSuccessfulMintEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
@@ -107,6 +113,8 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 }
 
 func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- etherdata.UpdateEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -131,8 +139,10 @@ func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- ether
 				startBlock = block.UpdateBlock
 			}
 
-			listener := t.listener.From(startBlock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchUpdateEvents(ch)
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchUpdateEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
