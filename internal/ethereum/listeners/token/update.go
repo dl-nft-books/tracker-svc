@@ -1,7 +1,6 @@
 package token_listeners
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -120,15 +119,9 @@ func (l *tokenListener) WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) (err 
 	if err = l.validateParameters(); err != nil {
 		return err
 	}
-
-	fmt.Printf("running iterator on address %s", *l.address)
-
 	if err = l.readUpdateEvents(ch); err != nil {
 		return errors.Wrap(err, "failed to read previous events")
 	}
-
-	fmt.Printf("running update watcher on address %s", *l.address)
-
 	if err = l.listenUpdateEvents(ch); err != nil {
 		return errors.Wrap(err, "failed to listen to update events")
 	}

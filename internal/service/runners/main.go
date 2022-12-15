@@ -23,6 +23,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 		deployedTokensCh = make(chan common.Address)
 	)
 
+	tokenRoutiner.Watch(deployedTokensCh)
+
 	contracts, err := postgres.NewContractsQ(cfg.DB()).Select()
 	if err != nil {
 		return errors.Wrap(err, "failed to select contracts from the database")
@@ -41,7 +43,6 @@ func Run(cfg config.Config, ctx context.Context) error {
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
 	factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
-	tokenRoutiner.Watch(deployedTokensCh)
 
 	return nil
 }
