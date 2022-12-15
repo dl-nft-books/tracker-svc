@@ -113,6 +113,7 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 }
 
 func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- etherdata.UpdateEvent) {
+	t.log.Infof("Initializing update listener on address %s...", address)
 	listener := t.listener.WithAddress(address)
 
 	running.WithBackOff(

@@ -2,8 +2,6 @@ package combiners
 
 import (
 	"context"
-	"sync"
-
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/running"
@@ -17,7 +15,6 @@ type TokenRoutiner struct {
 	logger   *logan.Entry
 	cfg      config.Runner
 	ctx      context.Context
-	mutex    sync.Mutex
 
 	routinesNumber uint64
 }
@@ -28,7 +25,6 @@ func NewTokenRoutiner(cfg config.Config, ctx context.Context) *TokenRoutiner {
 		cfg:      cfg.Routiner(),
 		ctx:      ctx,
 		combiner: NewTokenCombiner(cfg, ctx),
-		mutex:    sync.Mutex{},
 	}
 }
 
