@@ -2,6 +2,7 @@ package combiners
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -17,6 +18,7 @@ type TokenCombiner struct {
 
 	logger *logan.Entry
 	ctx    context.Context
+	mutex  *sync.Mutex
 }
 
 func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
@@ -25,12 +27,12 @@ func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
 		consumer: consumers.NewTokenConsumer(cfg, ctx),
 		logger:   cfg.Log(),
 		ctx:      ctx,
+		mutex:    new(sync.Mutex),
 	}
 }
 
 func (c *TokenCombiner) ProduceAndConsumeMintEvents(address common.Address) {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
-	// TODO: Make as a runner.WithBackOff?
 	c.logger.Infof("Initializing mint event consumer and producer for %s", address.String())
 	go func() {
 		ch := make(chan etherdata.SuccessfulMintEvent)
@@ -51,7 +53,7 @@ func (c *TokenCombiner) ProduceAndConsumeTransferEvents(address common.Address) 
 
 func (c *TokenCombiner) ProduceAndConsumeUpdateEvents(address common.Address) {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
-	c.logger.Infof("Initializing consumer event consumer and producer for %s", address.String())
+	c.logger.Infof("Initializing update event consumer and producer for %s", address.String())
 	go func() {
 		ch := make(chan etherdata.UpdateEvent)
 		go c.tracker.TrackUpdateEvents(address, ch)
@@ -60,8 +62,10 @@ func (c *TokenCombiner) ProduceAndConsumeUpdateEvents(address common.Address) {
 }
 
 func (c *TokenCombiner) ProduceAndConsumeAllEvents(address common.Address) {
+	c.mutex.Lock()
 	c.logger.Infof("Initializing all possible consumers and producers for %s", address.String())
 	c.ProduceAndConsumeMintEvents(address)
 	c.ProduceAndConsumeTransferEvents(address)
 	c.ProduceAndConsumeUpdateEvents(address)
+	c.mutex.Unlock()
 }
