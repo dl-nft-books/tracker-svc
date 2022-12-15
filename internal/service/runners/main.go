@@ -32,7 +32,7 @@ func Run(cfg config.Config, ctx context.Context) error {
 		go func(contract data.Contract) {
 			deployedTokensCh <- contract.Address()
 		}(contract)
-		
+
 		time.Sleep(delayBetweenContractInsertions)
 	}
 
