@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -27,7 +28,7 @@ type FactoryTracker struct {
 	mutex    *sync.RWMutex
 }
 
-func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
+func NewFactoryTracker(cfg config.Config, ctx context.Context, address common.Address) *FactoryTracker {
 	mutex := new(sync.RWMutex)
 
 	return &FactoryTracker{
@@ -37,7 +38,7 @@ func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
 		database: postgres.NewDB(cfg.DB()),
 		mutex:    mutex,
 		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex).
-			WithAddress(cfg.Trackers().Factory.Address).
+			WithAddress(address).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}

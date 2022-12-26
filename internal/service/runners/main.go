@@ -16,8 +16,7 @@ const delayBetweenContractInsertions = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	var (
-		factoryCombiner = combiners.NewFactoryCombiner(cfg, ctx)
-		tokenRoutiner   = combiners.NewTokenRoutiner(cfg, ctx)
+		tokenRoutiner = combiners.NewTokenRoutiner(cfg, ctx)
 
 		// Channel connecting factory deploy consumer and routiner
 		deployedTokensCh = make(chan common.Address)
@@ -36,12 +35,20 @@ func Run(cfg config.Config, ctx context.Context) error {
 		time.Sleep(delayBetweenContractInsertions)
 	}
 
+	networks, err := cfg.NetworkConnector().GetNetworks()
+	if err != nil {
+		return errors.Wrap(err, "failed to select networks from the database")
+	}
+
 	// factoryCombiner would run producer and consumer for a factory contract
 	// and, after consumer processes the event, consumer will
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
-	factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
 	tokenRoutiner.Watch(deployedTokensCh)
+	for _, network := range networks.Data {
+		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, common.HexToAddress(network.FactoryAddress))
+		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
+	}
 
 	return nil
 }

@@ -71,9 +71,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					logField := logan.F{"contract_address": address.String()}
 
 					// Validating that event was not previously already processed
-					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
-						MetadataHash: []string{event.Uri},
-					})
+					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{})
 					if err != nil {
 						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
 							"metadata_hash": event.Uri,
@@ -308,11 +306,10 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 
 					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
 					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
-						Id:           bookId,
-						Title:        &event.Name,
-						ContractName: &event.Name,
-						Symbol:       &event.Symbol,
-						Price:        &event.Price,
+						Id:     bookId,
+						Title:  &event.Name,
+						Symbol: &event.Symbol,
+						Price:  &event.Price,
 					}); err != nil {
 						return errors.Wrap(err, "failed to update book parameters")
 					}

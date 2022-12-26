@@ -12,10 +12,9 @@ type ListTokensRequest struct {
 	pgdb.OffsetPageParams
 	Sorts pgdb.Sorts `url:"sort" default:"id"`
 
-	Account      []string                `filter:"account"`
-	Status       []resources.TokenStatus `filter:"status"`
-	TokenId      *int64                  `filter:"token_id"`
-	MetadataHash []string                `filter:"metadata_hash"`
+	Account []string                `filter:"account"`
+	Status  []resources.TokenStatus `filter:"status"`
+	TokenId *int64                  `filter:"token_id""`
 }
 
 func NewListTokensRequest(r *http.Request) (*ListTokensRequest, error) {

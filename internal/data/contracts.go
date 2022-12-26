@@ -11,6 +11,7 @@ type Contract struct {
 	Name              string `db:"name" structs:"name"`
 	Symbol            string `db:"symbol" structs:"symbol"`
 	PreviousMintBLock uint64 `db:"previous_mint_block" structs:"previous_mint_block"`
+	ChainId           int64  `db:"chain_id" structs:"chain_id"`
 }
 
 //go:generate mockery --case=underscore --name=KeyValueQ

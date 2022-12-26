@@ -26,7 +26,7 @@ func (r CreateTokenRequest) validate() error {
 	return validation.Errors{
 		"data/attributes/token_id": validation.Validate(
 			&r.Data.Attributes.TokenId,
-			validation.Min(0),
+			validation.Required,
 		),
 		"data/attributes/status": validation.Validate(
 			&r.Data.Attributes.Status,

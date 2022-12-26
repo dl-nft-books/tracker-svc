@@ -20,18 +20,17 @@ type FactoryCombiner struct {
 	mutex    *sync.RWMutex
 }
 
-func NewFactoryCombiner(cfg config.Config, ctx context.Context) *FactoryCombiner {
+func NewFactoryCombiner(cfg config.Config, ctx context.Context, address common.Address) *FactoryCombiner {
 	return &FactoryCombiner{
 		logger: cfg.Log(),
 
-		tracker:  trackers.NewFactoryTracker(cfg, ctx),
+		tracker:  trackers.NewFactoryTracker(cfg, ctx, address),
 		consumer: consumers.NewFactoryConsumer(cfg, ctx),
 	}
 }
 
 func (c *FactoryCombiner) ProduceAndConsumeDeployEvents(routinerChannel chan<- common.Address) {
 	c.logger.Info("Running producer and consumer for a factory contract")
-
 	go func() {
 		internalChannel := make(chan etherdata.ContractDeployedEvent)
 		go c.tracker.TrackDeployEvents(internalChannel)

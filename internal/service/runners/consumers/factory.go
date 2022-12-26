@@ -110,6 +110,7 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 				Name:              event.Name,
 				Symbol:            event.Symbol,
 				PreviousMintBLock: event.BlockNumber,
+				ChainId:           book.Attributes.ChainId,
 			})
 			if err != nil {
 				return errors.Wrap(err, "failed to insert contract into the database")
