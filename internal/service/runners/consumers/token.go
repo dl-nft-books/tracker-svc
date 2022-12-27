@@ -3,7 +3,6 @@ package consumers
 import (
 	"context"
 	"fmt"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -21,6 +20,7 @@ import (
 	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 	generatorerResources "gitlab.com/tokend/nft-books/generator-svc/resources"
+	"log"
 )
 
 const (
@@ -71,9 +71,11 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					logField := logan.F{"contract_address": address.String()}
 
 					// Validating that event was not previously already processed
+					log.Println("event.Uri" + event.Uri)
 					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
 						MetadataHash: []string{event.Uri},
 					})
+					log.Println("tokensResponse" + tokensResponse.Data[0].ID)
 					if err != nil {
 						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
 							"metadata_hash": event.Uri,
