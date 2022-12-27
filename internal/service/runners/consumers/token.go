@@ -71,17 +71,17 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					logField := logan.F{"contract_address": address.String()}
 
 					// Validating that event was not previously already processed
-					log.Println("event.Uri" + event.Uri)
+					log.Println("event.Uri " + event.Uri)
 					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
 						MetadataHash: []string{event.Uri},
 					})
-					log.Println("tokensResponse" + tokensResponse.Data[0].ID)
 					if err != nil {
 						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
 							"metadata_hash": event.Uri,
 						}))
 					}
 					if len(tokensResponse.Data) > 0 {
+						log.Println("tokensResponse " + tokensResponse.Data[0].ID)
 						c.logger.
 							WithFields(logField.Merge(logan.F{"metadata_hash": event.Uri})).
 							Warn("token with specified metadata hash already exists")
