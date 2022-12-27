@@ -22,9 +22,9 @@ trackers:
   max_depth: 10000
   delay_between_intervals: 500ms
   backoff: # running.WithBackoff settings
-    normal_period: 10s
-    min_abnormal_period: 10s
-    max_abnormal_period: 10s
+    normal_period: 1s
+    min_abnormal_period: 1s
+    max_abnormal_period: 1s
   factory: # Settings of factory tracker
     first_block: 7832143  # A block to begin from for the factory contract
     address: 0x123132
