@@ -20,7 +20,6 @@ import (
 	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 	generatorerResources "gitlab.com/tokend/nft-books/generator-svc/resources"
-	"log"
 )
 
 const (
@@ -71,23 +70,23 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					logField := logan.F{"contract_address": address.String()}
 
 					// Validating that event was not previously already processed
-					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
-						MetadataHash: []string{event.Uri},
-					})
-					log.Println("event.Uri ", event.Uri)
-					log.Println("len(tokensResponse.Data) ", len(tokensResponse.Data))
-					if err != nil {
-						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
-							"metadata_hash": event.Uri,
-						}))
-					}
-					if len(tokensResponse.Data) > 0 {
-						log.Println("tokensResponse " + tokensResponse.Data[0].Attributes.MetadataHash)
-						c.logger.
-							WithFields(logField.Merge(logan.F{"metadata_hash": event.Uri})).
-							Warn("token with specified metadata hash already exists")
-						continue
-					}
+					//tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
+					//	MetadataHash: []string{event.Uri},
+					//})
+					//log.Println("event.Uri ", event.Uri)
+					//log.Println("len(tokensResponse.Data) ", len(tokensResponse.Data))
+					//if err != nil {
+					//	return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
+					//		"metadata_hash": event.Uri,
+					//	}))
+					//}
+					//if len(tokensResponse.Data) > 0 {
+					//	log.Println("tokensResponse " + tokensResponse.Data[0].Attributes.MetadataHash)
+					//	c.logger.
+					//		WithFields(logField.Merge(logan.F{"metadata_hash": event.Uri})).
+					//		Warn("token with specified metadata hash already exists")
+					//	continue
+					//}
 
 					// Getting task by hash (uri)
 					tasksResponse, err := c.generatorer.ListTasks(generatorerModels.ListTasksRequest{IpfsHash: &event.Uri})
@@ -186,7 +185,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							BookId:       task.Attributes.BookId,
 							PaymentId:    paymentId,
 						}); err != nil {
-							return errors.Wrap(err, "failed to create new token", logField)
+							return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 						}
 
 						// Updating task info
