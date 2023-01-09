@@ -41,10 +41,10 @@ func (c *EventConverter) Deploy(raw tokenfactory.TokenfactoryTokenContractDeploy
 	return &etherdata.ContractDeployedEvent{
 		Address:     raw.NewTokenContractAddr,
 		BlockNumber: raw.Raw.BlockNumber,
-		Name:        raw.TokenName,
-		Symbol:      raw.TokenSymbol,
+		Name:        raw.TokenContractParams.TokenName,
+		Symbol:      raw.TokenContractParams.TokenSymbol,
 		Status:      receipt.Status,
-		TokenId:     raw.TokenContractId.Uint64(),
+		TokenId:     raw.TokenContractParams.TokenContractId.Uint64(),
 	}, nil
 }
 
