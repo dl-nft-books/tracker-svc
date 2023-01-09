@@ -1,14 +1,15 @@
 package token_listeners
 
 import (
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
-	"time"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
 func (l *tokenListener) readUpdatesInterval(interval helpers.Interval, ch chan<- etherdata.UpdateEvent) error {
@@ -33,7 +34,7 @@ func (l *tokenListener) readUpdatesInterval(interval helpers.Interval, ch chan<-
 		})
 	}
 
-	defer func(iterator *token.TokencontractTokenContractParamsUpdatedIterator) {
+	defer func(iterator *tokencontract.TokencontractTokenContractParamsUpdatedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -92,7 +93,7 @@ func (l *tokenListener) listenUpdateEvents(ch chan<- etherdata.UpdateEvent) (err
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *token.TokencontractTokenContractParamsUpdated)
+	eventsChannel := make(chan *tokencontract.TokencontractTokenContractParamsUpdated)
 	subscription, err := filterer.WatchTokenContractParamsUpdated(&opts, eventsChannel)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch update events")

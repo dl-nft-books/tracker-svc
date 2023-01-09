@@ -1,14 +1,15 @@
 package factory_listeners
 
 import (
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
-	"time"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
 func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval, ch chan<- etherdata.ContractDeployedEvent) error {
@@ -33,7 +34,7 @@ func (l *factoryListener) readContractDeployedInterval(interval helpers.Interval
 		})
 	}
 
-	defer func(iterator *factory.TokenfactoryTokenContractDeployedIterator) {
+	defer func(iterator *tokenfactory.TokenfactoryTokenContractDeployedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -100,7 +101,7 @@ func (l *factoryListener) listenContractCreatedEvents(ch chan<- etherdata.Contra
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *factory.TokenfactoryTokenContractDeployed)
+	eventsChannel := make(chan *tokenfactory.TokenfactoryTokenContractDeployed)
 	subscription, err := filterer.WatchTokenContractDeployed(&opts, eventsChannel)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch contracts deployed")

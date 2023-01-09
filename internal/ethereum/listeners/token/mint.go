@@ -1,14 +1,15 @@
 package token_listeners
 
 import (
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
-	"time"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
 func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
@@ -33,7 +34,7 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 		})
 	}
 
-	defer func(iterator *token.TokencontractSuccessfullyMintedIterator) {
+	defer func(iterator *tokencontract.TokencontractSuccessfullyMintedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -98,7 +99,7 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *token.TokencontractSuccessfullyMinted)
+	eventsChannel := make(chan *tokencontract.TokencontractSuccessfullyMinted)
 	subscription, err := filterer.WatchSuccessfullyMinted(&opts, eventsChannel, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch succeesfully minted events")

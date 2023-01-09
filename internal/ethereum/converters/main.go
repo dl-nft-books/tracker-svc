@@ -12,8 +12,8 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
 type EventConverter struct {
@@ -30,7 +30,7 @@ func NewEventConverter(client *ethclient.Client, ctx context.Context, nativeToke
 	}
 }
 
-func (c *EventConverter) Deploy(raw factory.TokenfactoryTokenContractDeployed) (*etherdata.ContractDeployedEvent, error) {
+func (c *EventConverter) Deploy(raw tokenfactory.TokenfactoryTokenContractDeployed) (*etherdata.ContractDeployedEvent, error) {
 	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
@@ -48,7 +48,7 @@ func (c *EventConverter) Deploy(raw factory.TokenfactoryTokenContractDeployed) (
 	}, nil
 }
 
-func (c *EventConverter) SuccessfulMint(raw token.TokencontractSuccessfullyMinted) (*etherdata.SuccessfulMintEvent, error) {
+func (c *EventConverter) SuccessfulMint(raw tokencontract.TokencontractSuccessfullyMinted) (*etherdata.SuccessfulMintEvent, error) {
 	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
@@ -80,7 +80,7 @@ func (c *EventConverter) SuccessfulMint(raw token.TokencontractSuccessfullyMinte
 	}, nil
 }
 
-func (c *EventConverter) Transfer(raw token.TokencontractTransfer) etherdata.TransferEvent {
+func (c *EventConverter) Transfer(raw tokencontract.TokencontractTransfer) etherdata.TransferEvent {
 	return etherdata.TransferEvent{
 		From:    raw.From,
 		To:      raw.To,
@@ -88,7 +88,7 @@ func (c *EventConverter) Transfer(raw token.TokencontractTransfer) etherdata.Tra
 	}
 }
 
-func (c *EventConverter) Update(raw token.TokencontractTokenContractParamsUpdated) etherdata.UpdateEvent {
+func (c *EventConverter) Update(raw tokencontract.TokencontractTokenContractParamsUpdated) etherdata.UpdateEvent {
 	return etherdata.UpdateEvent{
 		Name:        raw.TokenName,
 		Symbol:      raw.TokenSymbol,

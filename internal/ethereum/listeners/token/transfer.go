@@ -1,14 +1,15 @@
 package token_listeners
 
 import (
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
-	"time"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
 func (l *tokenListener) readTransfersInterval(interval helpers.Interval, ch chan<- etherdata.TransferEvent) error {
@@ -33,7 +34,7 @@ func (l *tokenListener) readTransfersInterval(interval helpers.Interval, ch chan
 		})
 	}
 
-	defer func(iterator *token.TokencontractTransferIterator) {
+	defer func(iterator *tokencontract.TokencontractTransferIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -92,7 +93,7 @@ func (l *tokenListener) listenTransferEvents(ch chan<- etherdata.TransferEvent) 
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *token.TokencontractTransfer)
+	eventsChannel := make(chan *tokencontract.TokencontractTransfer)
 	subscription, err := filterer.WatchTransfer(&opts, eventsChannel, nil, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch transfer events")
