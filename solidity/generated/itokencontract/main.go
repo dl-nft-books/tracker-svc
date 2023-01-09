@@ -1,7 +1,7 @@
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
-package itoken
+package itokencontract
 
 import (
 	"errors"
@@ -37,7 +37,7 @@ type ITokenContractMintedTokenInfo struct {
 
 // ItokencontractMetaData contains all meta data concerning the Itokencontract contract.
 var ItokencontractMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"indexed\":false,\"internalType\":\"structITokenContract.MintedTokenInfo\",\"name\":\"mintedTokenInfo\",\"type\":\"tuple\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"paymentTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paidTokensAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice\",\"type\":\"uint256\"}],\"name\":\"SuccessfullyMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaidTokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"}],\"indexed\":false,\"internalType\":\"structITokenContract.MintedTokenInfo\",\"name\":\"mintedTokenInfo\",\"type\":\"tuple\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"paymentTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paidTokensAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"discount\",\"type\":\"uint256\"}],\"name\":\"SuccessfullyMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenSymbol\",\"type\":\"string\"}],\"name\":\"TokenContractParamsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newVoucherTokenContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newVoucherTokensAmount\",\"type\":\"uint256\"}],\"name\":\"VoucherParamsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tokenSymbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"tokenFactoryAddr_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerOneToken_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"voucherTokenContract_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"voucherTokensAmount_\",\"type\":\"uint256\"}],\"name\":\"__TokenContract_init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"}],\"name\":\"existingTokenURIs\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"getUserTokenIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIDs_\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentTokenAddress_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"paymentTokenPrice_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"discount_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"tokenURI_\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"r_\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s_\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"v_\",\"type\":\"uint8\"}],\"name\":\"mintToken\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerOneToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenFactory\",\"outputs\":[{\"internalType\":\"contractITokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newPrice_\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newTokenName_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"newTokenSymbol_\",\"type\":\"string\"}],\"name\":\"updateTokenContractParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"voucherTokenContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"voucherTokensAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"}],\"name\":\"withdrawPaidTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ItokencontractABI is the input ABI used to generate the binding from.
@@ -310,46 +310,108 @@ func (_Itokencontract *ItokencontractCallerSession) TokenFactory() (common.Addre
 	return _Itokencontract.Contract.TokenFactory(&_Itokencontract.CallOpts)
 }
 
-// TokenContractInit is a paid mutator transaction binding the contract method 0xdac51535.
+// VoucherTokenContract is a free data retrieval call binding the contract method 0xf09ad8f2.
 //
-// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_) returns()
-func (_Itokencontract *ItokencontractTransactor) TokenContractInit(opts *bind.TransactOpts, tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.contract.Transact(opts, "__TokenContract_init", tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_)
+// Solidity: function voucherTokenContract() view returns(address)
+func (_Itokencontract *ItokencontractCaller) VoucherTokenContract(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _Itokencontract.contract.Call(opts, &out, "voucherTokenContract")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
-// TokenContractInit is a paid mutator transaction binding the contract method 0xdac51535.
+// VoucherTokenContract is a free data retrieval call binding the contract method 0xf09ad8f2.
 //
-// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_) returns()
-func (_Itokencontract *ItokencontractSession) TokenContractInit(tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.Contract.TokenContractInit(&_Itokencontract.TransactOpts, tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_)
+// Solidity: function voucherTokenContract() view returns(address)
+func (_Itokencontract *ItokencontractSession) VoucherTokenContract() (common.Address, error) {
+	return _Itokencontract.Contract.VoucherTokenContract(&_Itokencontract.CallOpts)
 }
 
-// TokenContractInit is a paid mutator transaction binding the contract method 0xdac51535.
+// VoucherTokenContract is a free data retrieval call binding the contract method 0xf09ad8f2.
 //
-// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_) returns()
-func (_Itokencontract *ItokencontractTransactorSession) TokenContractInit(tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int) (*types.Transaction, error) {
-	return _Itokencontract.Contract.TokenContractInit(&_Itokencontract.TransactOpts, tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_)
+// Solidity: function voucherTokenContract() view returns(address)
+func (_Itokencontract *ItokencontractCallerSession) VoucherTokenContract() (common.Address, error) {
+	return _Itokencontract.Contract.VoucherTokenContract(&_Itokencontract.CallOpts)
 }
 
-// MintToken is a paid mutator transaction binding the contract method 0x7cec18b3.
+// VoucherTokensAmount is a free data retrieval call binding the contract method 0x59843195.
 //
-// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
-func (_Itokencontract *ItokencontractTransactor) MintToken(opts *bind.TransactOpts, paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
-	return _Itokencontract.contract.Transact(opts, "mintToken", paymentTokenAddress_, paymentTokenPrice_, endTimestamp_, tokenURI_, r_, s_, v_)
+// Solidity: function voucherTokensAmount() view returns(uint256)
+func (_Itokencontract *ItokencontractCaller) VoucherTokensAmount(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Itokencontract.contract.Call(opts, &out, "voucherTokensAmount")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
-// MintToken is a paid mutator transaction binding the contract method 0x7cec18b3.
+// VoucherTokensAmount is a free data retrieval call binding the contract method 0x59843195.
 //
-// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
-func (_Itokencontract *ItokencontractSession) MintToken(paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
-	return _Itokencontract.Contract.MintToken(&_Itokencontract.TransactOpts, paymentTokenAddress_, paymentTokenPrice_, endTimestamp_, tokenURI_, r_, s_, v_)
+// Solidity: function voucherTokensAmount() view returns(uint256)
+func (_Itokencontract *ItokencontractSession) VoucherTokensAmount() (*big.Int, error) {
+	return _Itokencontract.Contract.VoucherTokensAmount(&_Itokencontract.CallOpts)
 }
 
-// MintToken is a paid mutator transaction binding the contract method 0x7cec18b3.
+// VoucherTokensAmount is a free data retrieval call binding the contract method 0x59843195.
 //
-// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
-func (_Itokencontract *ItokencontractTransactorSession) MintToken(paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
-	return _Itokencontract.Contract.MintToken(&_Itokencontract.TransactOpts, paymentTokenAddress_, paymentTokenPrice_, endTimestamp_, tokenURI_, r_, s_, v_)
+// Solidity: function voucherTokensAmount() view returns(uint256)
+func (_Itokencontract *ItokencontractCallerSession) VoucherTokensAmount() (*big.Int, error) {
+	return _Itokencontract.Contract.VoucherTokensAmount(&_Itokencontract.CallOpts)
+}
+
+// TokenContractInit is a paid mutator transaction binding the contract method 0x8b1b500b.
+//
+// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_, address voucherTokenContract_, uint256 voucherTokensAmount_) returns()
+func (_Itokencontract *ItokencontractTransactor) TokenContractInit(opts *bind.TransactOpts, tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int, voucherTokenContract_ common.Address, voucherTokensAmount_ *big.Int) (*types.Transaction, error) {
+	return _Itokencontract.contract.Transact(opts, "__TokenContract_init", tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_, voucherTokenContract_, voucherTokensAmount_)
+}
+
+// TokenContractInit is a paid mutator transaction binding the contract method 0x8b1b500b.
+//
+// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_, address voucherTokenContract_, uint256 voucherTokensAmount_) returns()
+func (_Itokencontract *ItokencontractSession) TokenContractInit(tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int, voucherTokenContract_ common.Address, voucherTokensAmount_ *big.Int) (*types.Transaction, error) {
+	return _Itokencontract.Contract.TokenContractInit(&_Itokencontract.TransactOpts, tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_, voucherTokenContract_, voucherTokensAmount_)
+}
+
+// TokenContractInit is a paid mutator transaction binding the contract method 0x8b1b500b.
+//
+// Solidity: function __TokenContract_init(string tokenName_, string tokenSymbol_, address tokenFactoryAddr_, uint256 pricePerOneToken_, address voucherTokenContract_, uint256 voucherTokensAmount_) returns()
+func (_Itokencontract *ItokencontractTransactorSession) TokenContractInit(tokenName_ string, tokenSymbol_ string, tokenFactoryAddr_ common.Address, pricePerOneToken_ *big.Int, voucherTokenContract_ common.Address, voucherTokensAmount_ *big.Int) (*types.Transaction, error) {
+	return _Itokencontract.Contract.TokenContractInit(&_Itokencontract.TransactOpts, tokenName_, tokenSymbol_, tokenFactoryAddr_, pricePerOneToken_, voucherTokenContract_, voucherTokensAmount_)
+}
+
+// MintToken is a paid mutator transaction binding the contract method 0xc0e0d461.
+//
+// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 discount_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
+func (_Itokencontract *ItokencontractTransactor) MintToken(opts *bind.TransactOpts, paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, discount_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Itokencontract.contract.Transact(opts, "mintToken", paymentTokenAddress_, paymentTokenPrice_, discount_, endTimestamp_, tokenURI_, r_, s_, v_)
+}
+
+// MintToken is a paid mutator transaction binding the contract method 0xc0e0d461.
+//
+// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 discount_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
+func (_Itokencontract *ItokencontractSession) MintToken(paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, discount_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Itokencontract.Contract.MintToken(&_Itokencontract.TransactOpts, paymentTokenAddress_, paymentTokenPrice_, discount_, endTimestamp_, tokenURI_, r_, s_, v_)
+}
+
+// MintToken is a paid mutator transaction binding the contract method 0xc0e0d461.
+//
+// Solidity: function mintToken(address paymentTokenAddress_, uint256 paymentTokenPrice_, uint256 discount_, uint256 endTimestamp_, string tokenURI_, bytes32 r_, bytes32 s_, uint8 v_) payable returns()
+func (_Itokencontract *ItokencontractTransactorSession) MintToken(paymentTokenAddress_ common.Address, paymentTokenPrice_ *big.Int, discount_ *big.Int, endTimestamp_ *big.Int, tokenURI_ string, r_ [32]byte, s_ [32]byte, v_ uint8) (*types.Transaction, error) {
+	return _Itokencontract.Contract.MintToken(&_Itokencontract.TransactOpts, paymentTokenAddress_, paymentTokenPrice_, discount_, endTimestamp_, tokenURI_, r_, s_, v_)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
@@ -656,12 +718,13 @@ type ItokencontractSuccessfullyMinted struct {
 	PaymentTokenAddress common.Address
 	PaidTokensAmount    *big.Int
 	PaymentTokenPrice   *big.Int
+	Discount            *big.Int
 	Raw                 types.Log // Blockchain specific contextual infos
 }
 
-// FilterSuccessfullyMinted is a free log retrieval operation binding the contract event 0x02b1bf23e516927e84009386de383fc159d489987af921462c93acffab46459c.
+// FilterSuccessfullyMinted is a free log retrieval operation binding the contract event 0xa0e50db80a8b39153d2af9fbbd044e9b21d5aa11c51b217f544f2f308cb1a241.
 //
-// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice, uint256 discount)
 func (_Itokencontract *ItokencontractFilterer) FilterSuccessfullyMinted(opts *bind.FilterOpts, recipient []common.Address, paymentTokenAddress []common.Address) (*ItokencontractSuccessfullyMintedIterator, error) {
 
 	var recipientRule []interface{}
@@ -681,9 +744,9 @@ func (_Itokencontract *ItokencontractFilterer) FilterSuccessfullyMinted(opts *bi
 	return &ItokencontractSuccessfullyMintedIterator{contract: _Itokencontract.contract, event: "SuccessfullyMinted", logs: logs, sub: sub}, nil
 }
 
-// WatchSuccessfullyMinted is a free log subscription operation binding the contract event 0x02b1bf23e516927e84009386de383fc159d489987af921462c93acffab46459c.
+// WatchSuccessfullyMinted is a free log subscription operation binding the contract event 0xa0e50db80a8b39153d2af9fbbd044e9b21d5aa11c51b217f544f2f308cb1a241.
 //
-// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice, uint256 discount)
 func (_Itokencontract *ItokencontractFilterer) WatchSuccessfullyMinted(opts *bind.WatchOpts, sink chan<- *ItokencontractSuccessfullyMinted, recipient []common.Address, paymentTokenAddress []common.Address) (event.Subscription, error) {
 
 	var recipientRule []interface{}
@@ -728,9 +791,9 @@ func (_Itokencontract *ItokencontractFilterer) WatchSuccessfullyMinted(opts *bin
 	}), nil
 }
 
-// ParseSuccessfullyMinted is a log parse operation binding the contract event 0x02b1bf23e516927e84009386de383fc159d489987af921462c93acffab46459c.
+// ParseSuccessfullyMinted is a log parse operation binding the contract event 0xa0e50db80a8b39153d2af9fbbd044e9b21d5aa11c51b217f544f2f308cb1a241.
 //
-// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice)
+// Solidity: event SuccessfullyMinted(address indexed recipient, (uint256,uint256,string) mintedTokenInfo, address indexed paymentTokenAddress, uint256 paidTokensAmount, uint256 paymentTokenPrice, uint256 discount)
 func (_Itokencontract *ItokencontractFilterer) ParseSuccessfullyMinted(log types.Log) (*ItokencontractSuccessfullyMinted, error) {
 	event := new(ItokencontractSuccessfullyMinted)
 	if err := _Itokencontract.contract.UnpackLog(event, "SuccessfullyMinted", log); err != nil {
@@ -870,6 +933,141 @@ func (_Itokencontract *ItokencontractFilterer) WatchTokenContractParamsUpdated(o
 func (_Itokencontract *ItokencontractFilterer) ParseTokenContractParamsUpdated(log types.Log) (*ItokencontractTokenContractParamsUpdated, error) {
 	event := new(ItokencontractTokenContractParamsUpdated)
 	if err := _Itokencontract.contract.UnpackLog(event, "TokenContractParamsUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ItokencontractVoucherParamsUpdatedIterator is returned from FilterVoucherParamsUpdated and is used to iterate over the raw logs and unpacked data for VoucherParamsUpdated events raised by the Itokencontract contract.
+type ItokencontractVoucherParamsUpdatedIterator struct {
+	Event *ItokencontractVoucherParamsUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ItokencontractVoucherParamsUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ItokencontractVoucherParamsUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ItokencontractVoucherParamsUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ItokencontractVoucherParamsUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ItokencontractVoucherParamsUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ItokencontractVoucherParamsUpdated represents a VoucherParamsUpdated event raised by the Itokencontract contract.
+type ItokencontractVoucherParamsUpdated struct {
+	NewVoucherTokenContract common.Address
+	NewVoucherTokensAmount  *big.Int
+	Raw                     types.Log // Blockchain specific contextual infos
+}
+
+// FilterVoucherParamsUpdated is a free log retrieval operation binding the contract event 0x526fc674430e078ab81756274a8fedd526b74df2995fe145d18f8bf48ea0a1ef.
+//
+// Solidity: event VoucherParamsUpdated(address newVoucherTokenContract, uint256 newVoucherTokensAmount)
+func (_Itokencontract *ItokencontractFilterer) FilterVoucherParamsUpdated(opts *bind.FilterOpts) (*ItokencontractVoucherParamsUpdatedIterator, error) {
+
+	logs, sub, err := _Itokencontract.contract.FilterLogs(opts, "VoucherParamsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &ItokencontractVoucherParamsUpdatedIterator{contract: _Itokencontract.contract, event: "VoucherParamsUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchVoucherParamsUpdated is a free log subscription operation binding the contract event 0x526fc674430e078ab81756274a8fedd526b74df2995fe145d18f8bf48ea0a1ef.
+//
+// Solidity: event VoucherParamsUpdated(address newVoucherTokenContract, uint256 newVoucherTokensAmount)
+func (_Itokencontract *ItokencontractFilterer) WatchVoucherParamsUpdated(opts *bind.WatchOpts, sink chan<- *ItokencontractVoucherParamsUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Itokencontract.contract.WatchLogs(opts, "VoucherParamsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ItokencontractVoucherParamsUpdated)
+				if err := _Itokencontract.contract.UnpackLog(event, "VoucherParamsUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseVoucherParamsUpdated is a log parse operation binding the contract event 0x526fc674430e078ab81756274a8fedd526b74df2995fe145d18f8bf48ea0a1ef.
+//
+// Solidity: event VoucherParamsUpdated(address newVoucherTokenContract, uint256 newVoucherTokensAmount)
+func (_Itokencontract *ItokencontractFilterer) ParseVoucherParamsUpdated(log types.Log) (*ItokencontractVoucherParamsUpdated, error) {
+	event := new(ItokencontractVoucherParamsUpdated)
+	if err := _Itokencontract.contract.UnpackLog(event, "VoucherParamsUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

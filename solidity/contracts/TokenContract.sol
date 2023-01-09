@@ -17,20 +17,20 @@ import "./interfaces/ITokenContract.sol";
 import "./interfaces/IOwnable.sol";
 
 contract TokenContract is
-ITokenContract,
-IOwnable,
-ERC721EnumerableUpgradeable,
-EIP712Upgradeable,
-PausableUpgradeable,
-ReentrancyGuardUpgradeable
+    ITokenContract,
+    IOwnable,
+    ERC721EnumerableUpgradeable,
+    EIP712Upgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable
 {
     using DecimalsConverter for uint256;
     using SafeERC20 for IERC20Metadata;
 
     bytes32 internal constant _MINT_TYPEHASH =
-    keccak256(
-        "Mint(address paymentTokenAddress,uint256 paymentTokenPrice,uint256 endTimestamp,bytes32 tokenURI)"
-    );
+        keccak256(
+            "Mint(address paymentTokenAddress,uint256 paymentTokenPrice,uint256 discount,uint256 endTimestamp,bytes32 tokenURI)"
+        );
 
     ITokenFactory public override tokenFactory;
     uint256 public override pricePerOneToken;
@@ -41,6 +41,11 @@ ReentrancyGuardUpgradeable
 
     mapping(string => bool) public override existingTokenURIs;
     mapping(uint256 => string) internal _tokenURIs;
+
+    // v1.0.0
+
+    address public override voucherTokenContract;
+    uint256 public override voucherTokensAmount;
 
     modifier onlyAdmin() {
         require(
@@ -59,7 +64,9 @@ ReentrancyGuardUpgradeable
         string memory tokenName_,
         string memory tokenSymbol_,
         address tokenFactoryAddr_,
-        uint256 pricePerOneToken_
+        uint256 pricePerOneToken_,
+        address voucherTokenContract_,
+        uint256 voucherTokensAmount_
     ) external override initializer {
         __ERC721_init(tokenName_, tokenSymbol_);
         __EIP712_init(tokenName_, "1");
@@ -67,12 +74,9 @@ ReentrancyGuardUpgradeable
         __ReentrancyGuard_init();
 
         tokenFactory = ITokenFactory(tokenFactoryAddr_);
-        pricePerOneToken = pricePerOneToken_;
 
-        _tokenName = tokenName_;
-        _tokenSymbol = tokenSymbol_;
-
-        emit TokenContractParamsUpdated(pricePerOneToken_, tokenName_, tokenSymbol_);
+        _updateTokenContractParams(pricePerOneToken_, tokenName_, tokenSymbol_);
+        _updateVoucherParams(voucherTokenContract_, voucherTokensAmount_);
     }
 
     function updateTokenContractParams(
@@ -80,17 +84,25 @@ ReentrancyGuardUpgradeable
         string memory newTokenName_,
         string memory newTokenSymbol_
     ) external onlyAdmin {
-        pricePerOneToken = newPrice_;
+        _updateTokenContractParams(newPrice_, newTokenName_, newTokenSymbol_);
+    }
 
-        if (!_compareStrings(newTokenName_, _tokenName)) {
-            _tokenName = newTokenName_;
-        }
+    function updateVoucherParams(address newVoucherTokenContract_, uint256 newVoucherTokensAmount_)
+        external
+        onlyAdmin
+    {
+        _updateVoucherParams(newVoucherTokenContract_, newVoucherTokensAmount_);
+    }
 
-        if (!_compareStrings(newTokenSymbol_, _tokenSymbol)) {
-            _tokenSymbol = newTokenSymbol_;
-        }
-
-        emit TokenContractParamsUpdated(newPrice_, newTokenName_, newTokenSymbol_);
+    function updateAllParams(
+        uint256 newPrice_,
+        address newVoucherTokenContract_,
+        uint256 newVoucherTokensAmount_,
+        string memory newTokenName_,
+        string memory newTokenSymbol_
+    ) external onlyAdmin {
+        _updateTokenContractParams(newPrice_, newTokenName_, newTokenSymbol_);
+        _updateVoucherParams(newVoucherTokenContract_, newVoucherTokensAmount_);
     }
 
     function pause() external override onlyAdmin {
@@ -102,16 +114,16 @@ ReentrancyGuardUpgradeable
     }
 
     function withdrawPaidTokens(address tokenAddr_, address recipient_)
-    external
-    override
-    onlyOwner
+        external
+        override
+        onlyOwner
     {
         IERC20Metadata token_ = IERC20Metadata(tokenAddr_);
         bool isNativeCurrency_ = tokenAddr_ == address(0);
 
         uint256 amount_ = isNativeCurrency_
-        ? address(this).balance
-        : token_.balanceOf(address(this));
+            ? address(this).balance
+            : token_.balanceOf(address(this));
 
         require(amount_ > 0, "TokenContract: Nothing to withdraw.");
 
@@ -130,6 +142,7 @@ ReentrancyGuardUpgradeable
     function mintToken(
         address paymentTokenAddress_,
         uint256 paymentTokenPrice_,
+        uint256 discount_,
         uint256 endTimestamp_,
         string memory tokenURI_,
         bytes32 r_,
@@ -143,6 +156,7 @@ ReentrancyGuardUpgradeable
                 _MINT_TYPEHASH,
                 paymentTokenAddress_,
                 paymentTokenPrice_,
+                discount_,
                 endTimestamp_,
                 keccak256(abi.encodePacked(tokenURI_))
             )
@@ -155,16 +169,15 @@ ReentrancyGuardUpgradeable
 
         uint256 amountToPay_;
 
-        if (paymentTokenPrice_ != 0) {
-            if (paymentTokenAddress_ != address(0)) {
-                require(msg.value == 0, "TokenContract: Currency amount must be a zero.");
-
+        if (paymentTokenPrice_ != 0 || paymentTokenAddress_ != address(0)) {
+            if (paymentTokenAddress_ == address(0)) {
+                amountToPay_ = _payWithETH(paymentTokenPrice_, discount_);
+            } else {
                 amountToPay_ = _payWithERC20(
                     IERC20Metadata(paymentTokenAddress_),
-                    paymentTokenPrice_
+                    paymentTokenPrice_,
+                    discount_
                 );
-            } else {
-                amountToPay_ = _payWithETH(paymentTokenPrice_);
             }
         }
 
@@ -180,15 +193,16 @@ ReentrancyGuardUpgradeable
             MintedTokenInfo(currentTokenId_, pricePerOneToken, tokenURI_),
             paymentTokenAddress_,
             amountToPay_,
-            paymentTokenPrice_
+            paymentTokenPrice_,
+            discount_
         );
     }
 
     function getUserTokenIDs(address userAddr_)
-    external
-    view
-    override
-    returns (uint256[] memory tokenIDs_)
+        external
+        view
+        override
+        returns (uint256[] memory tokenIDs_)
     {
         uint256 _tokensCount = balanceOf(userAddr_);
 
@@ -209,11 +223,11 @@ ReentrancyGuardUpgradeable
         string memory baseURI_ = _baseURI();
 
         return
-        bytes(baseURI_).length > 0
-        ? string(
-            abi.encodePacked(tokenFactory.baseTokenContractsURI(), _tokenURIs[tokenId_])
-        )
-        : "";
+            bytes(baseURI_).length > 0
+                ? string(
+                    abi.encodePacked(tokenFactory.baseTokenContractsURI(), _tokenURIs[tokenId_])
+                )
+                : "";
     }
 
     function name() public view override returns (string memory) {
@@ -224,11 +238,39 @@ ReentrancyGuardUpgradeable
         return _tokenSymbol;
     }
 
-    function _payWithERC20(IERC20Metadata tokenAddr_, uint256 tokenPrice_)
-    internal
-    returns (uint256)
-    {
-        uint256 amountToPay_ = (pricePerOneToken * DECIMAL) / tokenPrice_;
+    function _updateTokenContractParams(
+        uint256 newPrice_,
+        string memory newTokenName_,
+        string memory newTokenSymbol_
+    ) internal {
+        pricePerOneToken = newPrice_;
+
+        _tokenName = newTokenName_;
+        _tokenSymbol = newTokenSymbol_;
+
+        emit TokenContractParamsUpdated(newPrice_, newTokenName_, newTokenSymbol_);
+    }
+
+    function _updateVoucherParams(
+        address newVoucherTokenContract_,
+        uint256 newVoucherTokensAmount_
+    ) internal {
+        voucherTokenContract = newVoucherTokenContract_;
+        voucherTokensAmount = newVoucherTokensAmount_;
+
+        emit VoucherParamsUpdated(newVoucherTokenContract_, newVoucherTokensAmount_);
+    }
+
+    function _payWithERC20(
+        IERC20Metadata tokenAddr_,
+        uint256 tokenPrice_,
+        uint256 discount_
+    ) internal returns (uint256) {
+        require(msg.value == 0, "TokenContract: Currency amount must be a zero.");
+
+        uint256 amountToPay_ = tokenPrice_ != 0
+            ? _getAmountAfterDiscount((pricePerOneToken * DECIMAL) / tokenPrice_, discount_)
+            : voucherTokensAmount;
 
         tokenAddr_.safeTransferFrom(
             msg.sender,
@@ -239,8 +281,11 @@ ReentrancyGuardUpgradeable
         return amountToPay_;
     }
 
-    function _payWithETH(uint256 ethPrice_) internal returns (uint256) {
-        uint256 amountToPay_ = (pricePerOneToken * DECIMAL) / ethPrice_;
+    function _payWithETH(uint256 ethPrice_, uint256 discount_) internal returns (uint256) {
+        uint256 amountToPay_ = _getAmountAfterDiscount(
+            (pricePerOneToken * DECIMAL) / ethPrice_,
+            discount_
+        );
 
         require(msg.value >= amountToPay_, "TokenContract: Invalid currency amount.");
 
@@ -262,11 +307,11 @@ ReentrancyGuardUpgradeable
         return keccak256(bytes(_tokenName));
     }
 
-    function _compareStrings(string memory firstStr_, string memory secondStr_)
-    internal
-    pure
-    returns (bool)
+    function _getAmountAfterDiscount(uint256 amount_, uint256 discount_)
+        internal
+        pure
+        returns (uint256)
     {
-        return keccak256(abi.encodePacked(firstStr_)) == keccak256(abi.encodePacked(secondStr_));
+        return (amount_ * (PERCENTAGE_100 - discount_)) / PERCENTAGE_100;
     }
 }
