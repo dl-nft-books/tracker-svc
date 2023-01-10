@@ -623,10 +623,10 @@ gitlab.com/distributed_lab/urlval v3.0.0+incompatible h1:OWU3CcZU+z0BVooufOSQFO9
 gitlab.com/distributed_lab/urlval v3.0.0+incompatible/go.mod h1:cKnUlnZCHUuke/l95YLvW5JoGC2yn53HVgF9rt1WiIg=
 gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d h1:ce1dOWmTbuKeXEV9FexbPMgt2jgvoiFGKhtQ39NXr10=
 gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d/go.mod h1:q1z3N4ZyIFjFIPr5rJWaYlRjURgZ6WVB928KFpwd2bY=
-gitlab.com/tokend/nft-books/book-svc v0.0.0-20221223150715-94ca65a61474 h1:JRXMnLhYzAi0x//7LPd+ogk2cxQpYOVKxuaYkddvtYw=
-gitlab.com/tokend/nft-books/book-svc v0.0.0-20221223150715-94ca65a61474/go.mod h1:3j7DIi8dqO5JhvZlVJmQiOmE/bPZ13oej+3keAWwAd4=
-gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221209105908-76e918717c61 h1:qhxOjvyWgs9Ccercbxk8X9FooffJmriJ5GsrXafHkjk=
-gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221209105908-76e918717c61/go.mod h1:WEaqQvdgK+FAb5ucSPstZCdsBcxsy0AjHCwQbsa4u1M=
+gitlab.com/tokend/nft-books/book-svc v0.0.0-20221223143323-3750afae3439 h1:F+b4gsOsfldpOJlkLeqUADXBseV0Fmx9A56ZMbJod7w=
+gitlab.com/tokend/nft-books/book-svc v0.0.0-20221223143323-3750afae3439/go.mod h1:3j7DIi8dqO5JhvZlVJmQiOmE/bPZ13oej+3keAWwAd4=
+gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230110154743-cc9857d4ff5f h1:jvyk6KfiJVYKCGeUU7M7YAfw7j/S6oYrivO64ce2i98=
+gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230110154743-cc9857d4ff5f/go.mod h1:ZBzjBx9rEBXwcbhNIHy2Flw1nIo85//Xf+eH12P42FI=
 gitlab.com/tokend/nft-books/network-svc v0.0.0-20221223131406-d85f79ef1876 h1:x3kH+YPyCc2e8dgING7//F1njt74J388hF/DHt2cLbg=
 gitlab.com/tokend/nft-books/network-svc v0.0.0-20221223131406-d85f79ef1876/go.mod h1:44RDp3fiYuRcslo6F9jJ1cdniTT8wmLqpTbyXqZJOfM=
 go.etcd.io/etcd/api/v3 v3.5.0/go.mod h1:cbVKeC6lCfl7j/8jBhAK6aIYO9XOjdptoxU/nLQcPvs=

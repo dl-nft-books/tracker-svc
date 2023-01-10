@@ -3,7 +3,6 @@ package consumers
 import (
 	"context"
 	"fmt"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -119,7 +118,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						return errors.Wrap(err, "failed to get banner image link", logField)
 					}
 
-					// updating status to loading on IPFS
+					// Updating status to loading on IPFS
 					status := generatorerResources.TaskUploading
 					if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
 						Id:     cast.ToInt64(task.ID),
@@ -130,86 +129,80 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}))
 					}
 
-					// getting contract by address
+					// Getting contract by address
 					contract, err := c.database.Contracts().GetByAddress(address.String())
 					if err != nil {
 						return errors.Wrap(err, "failed to update status", logField)
 					}
 
-					// inserting information about payment
-					paymentId, err := c.database.Payments().Insert(data.Payment{
-						ContractId:        contract.Id,
-						ContractAddress:   contract.Addr,
-						PayerAddress:      event.Recipient.String(),
-						TokenAddress:      event.Erc20Info.TokenAddress.String(),
-						TokenSymbol:       event.Erc20Info.Symbol,
-						TokenName:         event.Erc20Info.Name,
-						TokenDecimals:     event.Erc20Info.Decimals,
-						Amount:            event.Amount.String(),
-						PriceMinted:       event.MintedTokenPrice.String(),
-						PriceToken:        event.PaymentTokenPrice.String(),
-						PurchaseTimestamp: event.Timestamp,
-						BookUrl:           baseURI + task.Attributes.FileIpfsHash,
-					})
-					if err != nil {
-						return errors.Wrap(err, "failed to add payment to the table", logField)
-					}
+					if err = c.database.Transaction(func() error {
+						// Uploading metadata
+						if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
+							Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
+							Description: book.Data.Attributes.Description,
+							Image:       bannerLink.Data.Attributes.Url,
+							FileURL:     baseURI + task.Attributes.FileIpfsHash,
+						}); err != nil {
+							return errors.Wrap(err, "failed to load metadata to the ipfs")
+						}
 
-					// Inserting information about token
-					tokenId, err := c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
-						Account:      event.Recipient.String(),
-						MetadataHash: task.Attributes.MetadataIpfsHash,
-						Status:       generatorerResources.TokenUploading,
-						TokenId:      event.TokenId,
-						Signature:    task.Attributes.Signature,
-						BookId:       task.Attributes.BookId,
-						PaymentId:    paymentId,
-					})
-					if err != nil {
-						return errors.Wrap(err, "failed to create new token", logField)
-					}
+						// Uploading file
+						if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
+							return errors.Wrap(err, "failed to load file to the ipfs", logField)
+						}
 
-					// Uploading metadata
-					if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-						Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
-						Description: book.Data.Attributes.Description,
-						Image:       bannerLink.Data.Attributes.Url,
-						FileURL:     baseURI + task.Attributes.FileIpfsHash,
+						// Inserting information about payment
+						paymentId, err := c.database.Payments().Insert(data.Payment{
+							ContractId:        contract.Id,
+							ContractAddress:   contract.Addr,
+							PayerAddress:      event.Recipient.String(),
+							TokenAddress:      event.Erc20Info.TokenAddress.String(),
+							TokenSymbol:       event.Erc20Info.Symbol,
+							TokenName:         event.Erc20Info.Name,
+							TokenDecimals:     event.Erc20Info.Decimals,
+							Amount:            event.Amount.String(),
+							PriceMinted:       event.MintedTokenPrice.String(),
+							PriceToken:        event.PaymentTokenPrice.String(),
+							PurchaseTimestamp: event.Timestamp,
+							BookUrl:           baseURI + task.Attributes.FileIpfsHash,
+						})
+						if err != nil {
+							return errors.Wrap(err, "failed to add payment to the table", logField)
+						}
+
+						// Inserting information about token
+						if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
+							Account:      event.Recipient.String(),
+							MetadataHash: task.Attributes.MetadataIpfsHash,
+							Status:       generatorerResources.TokenFinishedUploading,
+							TokenId:      event.TokenId,
+							Signature:    task.Attributes.Signature,
+							BookId:       task.Attributes.BookId,
+							PaymentId:    paymentId,
+						}); err != nil {
+							return errors.Wrap(err, "failed to create new token or token is already exists", logField)
+						}
+
+						// Updating task info
+						taskStatus := generatorerResources.TaskFinishedUploading
+						if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
+							Id:      cast.ToInt64(task.ID),
+							Status:  &taskStatus,
+							TokenId: &event.TokenId,
+						}); err != nil {
+							return errors.Wrap(err, "failed to update task`s token id and status", logField)
+						}
+
+						// Updating contract`s last mint block
+						if err = c.database.Contracts().UpdatePreviousMintBlock(event.BlockNumber, contract.Id); err != nil {
+							return errors.Wrap(err, "failed to update contract`s last mint block", logField.Merge(logan.F{
+								"contract_id": contract.Id,
+							}))
+						}
+
+						return nil
 					}); err != nil {
-						return errors.Wrap(err, "failed to load metadata to the ipfs")
-					}
-
-					// Uploading file
-					if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
-						return errors.Wrap(err, "failed to load file to the ipfs", logField)
-					}
-
-					// Updating task info
-					taskStatus := generatorerResources.TaskFinishedUploading
-					if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
-						Id:      cast.ToInt64(task.ID),
-						Status:  &taskStatus,
-						TokenId: &event.TokenId,
-					}); err != nil {
-						return errors.Wrap(err, "failed to update task`s token id and status", logField)
-					}
-
-					// Updating status to a token
-					tokenStatus := generatorerResources.TokenFinishedUploading
-					if err = c.generatorer.UpdateToken(generatorerModels.UpdateTokenParams{
-						Id:     tokenId,
-						Status: &tokenStatus,
-					}); err != nil {
-						return errors.Wrap(err, "failed to update token's status", logField.Merge(logan.F{
-							"token_id": tokenId,
-						}))
-					}
-
-					// Updating contract`s last mint block
-					if err = c.database.Contracts().UpdatePreviousMintBlock(event.BlockNumber, contract.Id); err != nil {
-						return errors.Wrap(err, "failed to update contract`s last mint block", logField.Merge(logan.F{
-							"contract_id": contract.Id,
-						}))
+						return errors.Wrap(err, "transaction failed")
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a token with id %d", event.TokenId)

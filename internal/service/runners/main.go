@@ -13,6 +13,7 @@ import (
 )
 
 const delayBetweenContractInsertions = time.Second
+const delayBetweenCombinerCalls = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	var (
@@ -48,6 +49,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 	for _, network := range networks.Data {
 		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, common.HexToAddress(network.FactoryAddress))
 		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
+
+		time.Sleep(delayBetweenCombinerCalls)
 	}
 
 	return nil
