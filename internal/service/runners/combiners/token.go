@@ -64,8 +64,7 @@ func (c *TokenCombiner) ProduceAndConsumeVoucherUpdateEvents() {
 	go func() {
 		ch := make(chan etherdata.VoucherUpdateEvent)
 		go c.tracker.TrackVoucherUpdateEvents(c.address, ch)
-		//TODO consumer
-		//go c.consumer.
+		go c.consumer.ConsumeVoucherUpdateEvents(c.address, ch)
 	}()
 }
 
