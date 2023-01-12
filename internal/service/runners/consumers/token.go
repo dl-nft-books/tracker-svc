@@ -23,9 +23,10 @@ import (
 )
 
 const (
-	transferConsumerSuffix = "-token-transfer"
-	mintConsumerSuffix     = "-token-mint"
-	updateConsumerSuffix   = "-token-update"
+	transferConsumerSuffix      = "-token-transfer"
+	mintConsumerSuffix          = "-token-mint"
+	updateConsumerSuffix        = "-token-update"
+	updateVoucherConsumerSuffix = "-voucher-update"
 
 	baseURI = "https://ipfs.io/ipfs/"
 )
@@ -313,6 +314,50 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed update event with a block number of %d", event.BlockNumber)
+				}
+			}
+		},
+		c.cfg.Backoff.NormalPeriod,
+		c.cfg.Backoff.MinAbnormalPeriod,
+		c.cfg.Backoff.MaxAbnormalPeriod,
+	)
+}
+
+func (c *TokenConsumer) ConsumeVoucherUpdateEvents(address common.Address, ch <-chan etherdata.VoucherUpdateEvent) {
+	running.WithBackOff(
+		c.ctx,
+		c.logger,
+		c.cfg.Prefix+updateVoucherConsumerSuffix,
+		func(ctx context.Context) error {
+			for {
+				select {
+				case event := <-ch:
+					logField := logan.F{"contract_address": address.String()}
+
+					bookResponse, err := c.booker.ListBooks(bookerModels.ListBooksParams{
+						Contract: []string{address.String()},
+					})
+					if err != nil {
+						return errors.Wrap(err, "failed to get book corresponding to the given address", logField)
+					}
+					if len(bookResponse.Data) == 0 {
+						c.logger.WithFields(logField).Warnf("Contract with specified address was not found")
+						continue
+					}
+
+					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
+					voucherToken := event.VoucherTokenAddress.String()
+					voucherTokenAmount := event.VoucherTokenAmount.String()
+
+					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
+						Id:                 bookId,
+						VoucherToken:       &voucherToken,
+						VoucherTokenAmount: &voucherTokenAmount,
+					}); err != nil {
+						return errors.Wrap(err, "failed to update book parameters")
+					}
+
+					c.logger.WithFields(logField).Infof("Successfully processed voucher update event with a block number of %d", event.BlockNumber)
 				}
 			}
 		},

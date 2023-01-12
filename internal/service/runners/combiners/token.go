@@ -59,9 +59,20 @@ func (c *TokenCombiner) ProduceAndConsumeUpdateEvents() {
 	}()
 }
 
+func (c *TokenCombiner) ProduceAndConsumeVoucherUpdateEvents() {
+	c.logger.Infof("Initializing voucher update event consumer and producer for %s", c.address.String())
+	go func() {
+		ch := make(chan etherdata.VoucherUpdateEvent)
+		go c.tracker.TrackVoucherUpdateEvents(c.address, ch)
+		//TODO consumer
+		//go c.consumer.
+	}()
+}
+
 func (c *TokenCombiner) ProduceAndConsumeAllEvents() {
 	c.logger.Infof("Initializing all possible consumers and producers for %s", c.address.String())
 	c.ProduceAndConsumeMintEvents()
 	c.ProduceAndConsumeTransferEvents()
 	c.ProduceAndConsumeUpdateEvents()
+	c.ProduceAndConsumeVoucherUpdateEvents()
 }

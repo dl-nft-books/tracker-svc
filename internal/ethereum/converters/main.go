@@ -97,6 +97,14 @@ func (c *EventConverter) Update(raw tokencontract.TokencontractTokenContractPara
 	}
 }
 
+func (c *EventConverter) UpdateVoucher(raw tokencontract.TokencontractVoucherParamsUpdated) etherdata.VoucherUpdateEvent {
+	return etherdata.VoucherUpdateEvent{
+		VoucherTokenAddress: raw.NewVoucherTokenContract,
+		VoucherTokenAmount:  raw.NewVoucherTokensAmount,
+		BlockNumber:         raw.Raw.BlockNumber,
+	}
+}
+
 // getBlockTimestamp is a function that returns a timestamp
 // when a block with specified blockNumber was initialized
 func (c *EventConverter) getBlockTimestamp(blockNumber uint64) (*time.Time, error) {
