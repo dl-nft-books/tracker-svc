@@ -31,5 +31,6 @@ type (
 		WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) error
 		WatchTransferEvents(ch chan<- etherdata.TransferEvent) error
 		WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) error
+		WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) error
 	}
 )

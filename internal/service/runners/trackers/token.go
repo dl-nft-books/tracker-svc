@@ -17,9 +17,10 @@ import (
 )
 
 const (
-	transferTrackerSuffix = "-token-transfer"
-	mintTrackerSuffix     = "-token-mint"
-	updateTrackerSuffix   = "-token-update"
+	transferTrackerSuffix      = "-token-transfer"
+	mintTrackerSuffix          = "-token-mint"
+	updateTrackerSuffix        = "-token-update"
+	updateVoucherTrackerSuffix = "-update-voucher"
 )
 
 type TokenTracker struct {
@@ -143,6 +144,44 @@ func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- ether
 				From(startBlock).
 				WithCtx(ctx).
 				WatchUpdateEvents(ch)
+		},
+		t.cfg.Backoff.NormalPeriod,
+		t.cfg.Backoff.MinAbnormalPeriod,
+		t.cfg.Backoff.MaxAbnormalPeriod,
+	)
+}
+
+func (t *TokenTracker) TrackVoucherUpdateEvents(address common.Address, ch chan<- etherdata.VoucherUpdateEvent) {
+	listener := t.listener.WithAddress(address)
+
+	running.WithBackOff(
+		t.ctx,
+		t.log,
+		t.cfg.Prefix+updateVoucherTrackerSuffix,
+		func(ctx context.Context) error {
+			startBlock := uint64(0)
+
+			contract, err := t.database.Contracts().GetByAddress(address.String())
+			if err != nil {
+				return errors.Wrap(err, "failed to get contract by address")
+			}
+			if contract == nil {
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchVoucherUpdateEvents(ch)
+			}
+
+			block, err := t.database.Blocks().FilterByContractId(contract.Id).Get()
+			if err != nil {
+				return errors.Wrap(err, "failed to get block to begin with")
+			}
+			if block != nil {
+				startBlock = block.UpdateBlock
+			}
+
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchVoucherUpdateEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,

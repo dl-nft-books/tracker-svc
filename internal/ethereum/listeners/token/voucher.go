@@ -12,17 +12,17 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
-func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
+func (l *tokenListener) readVoucherUpdateInterval(interval helpers.Interval, ch chan<- etherdata.VoucherUpdateEvent) error {
 	instance, err := l.getRPCInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to get instance")
 	}
 
-	iterator, err := instance.FilterSuccessfullyMinted(
+	iterator, err := instance.FilterVoucherParamsUpdated(
 		&bind.FilterOpts{
 			Start: interval.From,
 			End:   &interval.To,
-		}, nil, nil,
+		},
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize an iterator")
@@ -34,7 +34,7 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 		})
 	}
 
-	defer func(iterator *tokencontract.TokencontractSuccessfullyMintedIterator) {
+	defer func(iterator *tokencontract.TokencontractVoucherParamsUpdatedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -43,27 +43,21 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 	for iterator.Next() {
 		raw := iterator.Event
 		if raw != nil {
-			var event *etherdata.SuccessfulMintEvent
-			event, err = l.converter.SuccessfulMint(*raw)
-			if err != nil {
-				return errors.Wrap(err, "failed to convert raw event to the needed format")
-			}
-
-			ch <- *event
+			ch <- l.converter.UpdateVoucher(*raw)
 		}
 	}
 
 	return nil
 }
 
-func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) readVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) (err error) {
 	lastChainBlock, err := l.rpc.BlockNumber(l.ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block in chain")
 	}
 
 	if l.maxDepth == nil {
-		return l.readSuccessfulMintInterval(helpers.Interval{
+		return l.readVoucherUpdateInterval(helpers.Interval{
 			From: *l.from,
 			To:   lastChainBlock,
 		}, ch)
@@ -74,8 +68,8 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	}
 
 	for _, interval := range helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth) {
-		if err = l.readSuccessfulMintInterval(interval, ch); err != nil {
-			return errors.Wrap(err, "failed to read mint interval", logan.F{
+		if err = l.readVoucherUpdateInterval(interval, ch); err != nil {
+			return errors.Wrap(err, "failed to read voucher update interval", logan.F{
 				"from": interval.From,
 				"to":   interval.To,
 			})
@@ -89,7 +83,7 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	return nil
 }
 
-func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) listenVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) (err error) {
 	opts := bind.WatchOpts{
 		Context: l.ctx,
 	}
@@ -99,10 +93,10 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *tokencontract.TokencontractSuccessfullyMinted)
-	subscription, err := filterer.WatchSuccessfullyMinted(&opts, eventsChannel, nil, nil)
+	eventsChannel := make(chan *tokencontract.TokencontractVoucherParamsUpdated)
+	subscription, err := filterer.WatchVoucherParamsUpdated(&opts, eventsChannel)
 	if err != nil {
-		return errors.Wrap(err, "failed to watch succeesfully minted events")
+		return errors.Wrap(err, "failed to watch update events")
 	}
 
 	for {
@@ -115,28 +109,22 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 				continue
 			}
 
-			var convertedEvent *etherdata.SuccessfulMintEvent
-			convertedEvent, err = l.converter.SuccessfulMint(*raw)
-			if err != nil {
-				return errors.Wrap(err, "failed to convert event to the needed type")
-			}
-
-			ch <- *convertedEvent
+			ch <- l.converter.UpdateVoucher(*raw)
 		}
 	}
 }
 
-func (l *tokenListener) WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) (err error) {
 	// We firstly range from l.from to the last chain block and then start a listener
 
 	if err = l.validateParameters(); err != nil {
 		return err
 	}
-	if err = l.readSuccessfulMintEvents(ch); err != nil {
+	if err = l.readVoucherUpdateEvents(ch); err != nil {
 		return errors.Wrap(err, "failed to read previous events")
 	}
-	if err = l.listenSuccessfulMintEvents(ch); err != nil {
-		return errors.Wrap(err, "failed to listen to deploy events")
+	if err = l.listenVoucherUpdateEvents(ch); err != nil {
+		return errors.Wrap(err, "failed to listen to update events")
 	}
 
 	return nil

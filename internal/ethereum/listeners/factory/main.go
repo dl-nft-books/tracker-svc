@@ -2,6 +2,9 @@ package factory_listeners
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -9,9 +12,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/converters"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/factory"
-	"sync"
-	"time"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
 )
 
 type factoryListener struct {
@@ -29,9 +30,9 @@ type factoryListener struct {
 	converter converters.EventConverter
 
 	// rpcInstancesCache is a map storing already initialized rpc instances of contracts
-	rpcInstancesCache map[common.Address]*factory.Tokenfactory
+	rpcInstancesCache map[common.Address]*tokenfactory.Tokenfactory
 	// wsInstancesCache is a map storing already initialized ws instances of contracts
-	wsInstancesCache map[common.Address]*factory.TokenfactoryFilterer
+	wsInstancesCache map[common.Address]*tokenfactory.TokenfactoryFilterer
 
 	mutex *sync.RWMutex
 }
@@ -46,8 +47,8 @@ func NewFactoryListener(cfg config.Config, ctx context.Context, mutex *sync.RWMu
 		ctx:       ctx,
 		mutex:     mutex,
 
-		rpcInstancesCache: make(map[common.Address]*factory.Tokenfactory),
-		wsInstancesCache:  make(map[common.Address]*factory.TokenfactoryFilterer),
+		rpcInstancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
+		wsInstancesCache:  make(map[common.Address]*tokenfactory.TokenfactoryFilterer),
 
 		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
@@ -97,14 +98,14 @@ func (l *factoryListener) validateParameters() error {
 	return nil
 }
 
-func (l *factoryListener) getRPCInstance(address common.Address) (*factory.Tokenfactory, error) {
+func (l *factoryListener) getRPCInstance(address common.Address) (*tokenfactory.Tokenfactory, error) {
 	l.mutex.RLock()
 	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
 
-	newInstance, err := factory.NewTokenfactory(address, l.rpc)
+	newInstance, err := tokenfactory.NewTokenfactory(address, l.rpc)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize rpc token factory instance for given address", logan.F{
 			"address": address,
@@ -117,14 +118,14 @@ func (l *factoryListener) getRPCInstance(address common.Address) (*factory.Token
 	return newInstance, nil
 }
 
-func (l *factoryListener) getWSInstance(address common.Address) (*factory.TokenfactoryFilterer, error) {
+func (l *factoryListener) getWSInstance(address common.Address) (*tokenfactory.TokenfactoryFilterer, error) {
 	l.mutex.RLock()
 	cacheInstance, ok := l.wsInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
 
-	newInstance, err := factory.NewTokenfactoryFilterer(address, l.webSocket)
+	newInstance, err := tokenfactory.NewTokenfactoryFilterer(address, l.webSocket)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize ws token factory instance for given address", logan.F{
 			"address": address,

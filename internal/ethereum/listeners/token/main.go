@@ -12,7 +12,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/converters"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
 type tokenListener struct {
@@ -30,9 +30,9 @@ type tokenListener struct {
 	converter converters.EventConverter
 
 	// rpcInstancesCache is a map storing already initialized instances of contracts
-	rpcInstancesCache map[common.Address]*token.Tokencontract
+	rpcInstancesCache map[common.Address]*tokencontract.Tokencontract
 	// wsInstancesCache is a map storing already initialized ws instances of contracts
-	wsInstancesCache map[common.Address]*token.TokencontractFilterer
+	wsInstancesCache map[common.Address]*tokencontract.TokencontractFilterer
 }
 
 func NewTokenListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex) ethereum.TokenListener {
@@ -44,8 +44,8 @@ func NewTokenListener(cfg config.Config, ctx context.Context, mutex *sync.RWMute
 		ctx:       ctx,
 		mutex:     mutex,
 
-		rpcInstancesCache: make(map[common.Address]*token.Tokencontract),
-		wsInstancesCache:  make(map[common.Address]*token.TokencontractFilterer),
+		rpcInstancesCache: make(map[common.Address]*tokencontract.Tokencontract),
+		wsInstancesCache:  make(map[common.Address]*tokencontract.TokencontractFilterer),
 
 		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
 	}
@@ -95,14 +95,14 @@ func (l *tokenListener) validateParameters() error {
 	return nil
 }
 
-func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencontract, error) {
+func (l *tokenListener) getRPCInstance(address common.Address) (*tokencontract.Tokencontract, error) {
 	l.mutex.RLock()
 	cacheInstance, ok := l.rpcInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
 
-	newInstance, err := token.NewTokencontract(address, l.rpc)
+	newInstance, err := tokencontract.NewTokencontract(address, l.rpc)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize rpc token factory instance for given address", logan.F{
 			"address": address,
@@ -115,14 +115,14 @@ func (l *tokenListener) getRPCInstance(address common.Address) (*token.Tokencont
 	return newInstance, nil
 }
 
-func (l *tokenListener) getWSInstance(address common.Address) (*token.TokencontractFilterer, error) {
+func (l *tokenListener) getWSInstance(address common.Address) (*tokencontract.TokencontractFilterer, error) {
 	l.mutex.RLock()
 	cacheInstance, ok := l.wsInstancesCache[address]
 	if ok {
 		return cacheInstance, nil
 	}
 
-	newInstance, err := token.NewTokencontractFilterer(address, l.webSocket)
+	newInstance, err := tokencontract.NewTokencontractFilterer(address, l.webSocket)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize ws token factory instance for given address", logan.F{
 			"address": address,
