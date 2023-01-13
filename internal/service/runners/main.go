@@ -35,8 +35,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 
 		time.Sleep(delayBetweenContractInsertions)
 	}
-
-	networks, err := cfg.NetworkConnector().GetNetworks()
+	networkConnector := cfg.NetworkConnector()
+	networks, err := networkConnector.GetNetworks()
 	if err != nil {
 		return errors.Wrap(err, "failed to select networks from the database")
 	}
