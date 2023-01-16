@@ -3,6 +3,7 @@ package runners
 import (
 	"context"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -36,7 +37,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 		time.Sleep(delayBetweenContractInsertions)
 	}
 	networkConnector := cfg.NetworkConnector()
-	networks, err := networkConnector.GetNetworks()
+	networks, err := networkConnector.GetNetworksDetailed()
+	log.Println((*networks).Data[0].ChainId)
 	if err != nil {
 		return errors.Wrap(err, "failed to select networks from the database")
 	}

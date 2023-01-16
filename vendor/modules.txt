@@ -337,11 +337,10 @@ gitlab.com/tokend/nft-books/generator-svc/connector
 gitlab.com/tokend/nft-books/generator-svc/connector/models
 gitlab.com/tokend/nft-books/generator-svc/internal/service/api/requests
 gitlab.com/tokend/nft-books/generator-svc/resources
-# gitlab.com/tokend/nft-books/network-svc v0.0.0-20230113180731-549d312212f9
+# gitlab.com/tokend/nft-books/network-svc v0.0.0-20230116142936-5d99d6c4a983
 ## explicit; go 1.18
 gitlab.com/tokend/nft-books/network-svc/connector
 gitlab.com/tokend/nft-books/network-svc/connector/models
-gitlab.com/tokend/nft-books/network-svc/internal/data
 gitlab.com/tokend/nft-books/network-svc/resources
 # golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 ## explicit; go 1.17
