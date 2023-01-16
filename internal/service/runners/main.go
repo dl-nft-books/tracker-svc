@@ -38,10 +38,10 @@ func Run(cfg config.Config, ctx context.Context) error {
 	}
 	networkConnector := cfg.NetworkConnector()
 	networks, err := networkConnector.GetNetworksDetailed()
-	log.Println((*networks).Data[0].ChainId)
 	if err != nil {
 		return errors.Wrap(err, "failed to select networks from the database")
 	}
+	log.Println("chain_id", (*networks).Data[0].ChainId)
 
 	// factoryCombiner would run producer and consumer for a factory contract
 	// and, after consumer processes the event, consumer will
