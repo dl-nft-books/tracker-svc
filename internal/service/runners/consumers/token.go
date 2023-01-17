@@ -180,6 +180,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							Signature:    task.Attributes.Signature,
 							BookId:       task.Attributes.BookId,
 							PaymentId:    paymentId,
+							ChainId:      book.Data.Attributes.ChainId,
 						}); err != nil {
 							return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 						}
