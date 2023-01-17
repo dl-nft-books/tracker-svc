@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"reflect"
 	"time"
 
@@ -14,17 +13,11 @@ import (
 
 const trackersYamlKey = "trackers"
 
-type FactorySettings struct {
-	FirstBlock uint64         `fig:"first_block"`
-	Address    common.Address `fig:"address"`
-}
-
 type Trackers struct {
 	Prefix                string          `fig:"prefix"`
 	MaxDepth              uint64          `fig:"max_depth"`
 	DelayBetweenIntervals time.Duration   `fig:"delay_between_intervals"`
 	Backoff               BackoffSettings `fig:"backoff_settings"`
-	Factory               FactorySettings `fig:"factory"`
 }
 
 var defaultTrackers = Trackers{
@@ -32,10 +25,6 @@ var defaultTrackers = Trackers{
 	MaxDepth:              5000,
 	DelayBetweenIntervals: 500 * time.Millisecond,
 	Backoff:               defaultBackoffSettings,
-	Factory: FactorySettings{
-		FirstBlock: 0,
-		Address:    etherdata.NullAddress,
-	},
 }
 
 func (c *config) Trackers() Trackers {

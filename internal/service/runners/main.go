@@ -2,6 +2,7 @@ package runners
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"log"
 	"time"
@@ -28,7 +29,6 @@ func Run(cfg config.Config, ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to select contracts from the database")
 	}
-
 	for _, contract := range contracts {
 		go func(contract data.Contract) {
 			deployedTokensCh <- contract.Address()
@@ -47,13 +47,13 @@ func Run(cfg config.Config, ctx context.Context) error {
 	// and, after consumer processes the event, consumer will
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
-	tokenRoutiner.Watch(deployedTokensCh)
+	fmt.Println(networks)
 	for _, network := range networks.Data {
-		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, common.HexToAddress(network.FactoryAddress))
+		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, network)
 		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
 
 		time.Sleep(delayBetweenCombinerCalls)
 	}
-
+	tokenRoutiner.Watch(deployedTokensCh)
 	return nil
 }

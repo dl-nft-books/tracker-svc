@@ -3,6 +3,7 @@ package combiners
 import (
 	"context"
 	"gitlab.com/distributed_lab/logan/v3"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,11 +21,11 @@ type FactoryCombiner struct {
 	mutex    *sync.RWMutex
 }
 
-func NewFactoryCombiner(cfg config.Config, ctx context.Context, address common.Address) *FactoryCombiner {
+func NewFactoryCombiner(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *FactoryCombiner {
 	return &FactoryCombiner{
 		logger: cfg.Log(),
 
-		tracker:  trackers.NewFactoryTracker(cfg, ctx, address),
+		tracker:  trackers.NewFactoryTracker(cfg, ctx, network),
 		consumer: consumers.NewFactoryConsumer(cfg, ctx),
 	}
 }
