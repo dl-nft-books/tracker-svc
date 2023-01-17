@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/fatih/structs"
@@ -57,7 +58,10 @@ func (q *paymentsQ) FilterById(id ...int64) data.PaymentsQ {
 }
 
 func (q *paymentsQ) FilterByPayer(payer ...string) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsPayerAddress: payer})
+	for i := range payer {
+		payer[i] = strings.ToLower(payer[i])
+	}
+	q.selector = q.selector.Where(squirrel.Eq{fmt.Sprintf("lower(%v)", paymentsPayerAddress): payer})
 	return q
 }
 
@@ -72,7 +76,10 @@ func (q *paymentsQ) FilterByContractId(contractId ...int64) data.PaymentsQ {
 }
 
 func (q *paymentsQ) FilterByContractAddress(contractAddress ...string) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsContractAddress: contractAddress})
+	for i := range contractAddress {
+		contractAddress[i] = strings.ToLower(contractAddress[i])
+	}
+	q.selector = q.selector.Where(squirrel.Eq{fmt.Sprintf("lower(%v)", paymentsContractAddress): contractAddress})
 	return q
 }
 
