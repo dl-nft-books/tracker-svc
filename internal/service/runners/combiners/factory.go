@@ -3,6 +3,7 @@ package combiners
 import (
 	"context"
 	"gitlab.com/distributed_lab/logan/v3"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,18 +21,17 @@ type FactoryCombiner struct {
 	mutex    *sync.RWMutex
 }
 
-func NewFactoryCombiner(cfg config.Config, ctx context.Context) *FactoryCombiner {
+func NewFactoryCombiner(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *FactoryCombiner {
 	return &FactoryCombiner{
 		logger: cfg.Log(),
 
-		tracker:  trackers.NewFactoryTracker(cfg, ctx),
+		tracker:  trackers.NewFactoryTracker(cfg, ctx, network),
 		consumer: consumers.NewFactoryConsumer(cfg, ctx),
 	}
 }
 
 func (c *FactoryCombiner) ProduceAndConsumeDeployEvents(routinerChannel chan<- common.Address) {
 	c.logger.Info("Running producer and consumer for a factory contract")
-
 	go func() {
 		internalChannel := make(chan etherdata.ContractDeployedEvent)
 		go c.tracker.TrackDeployEvents(internalChannel)

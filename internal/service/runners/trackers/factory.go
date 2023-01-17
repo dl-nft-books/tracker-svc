@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -13,6 +14,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/listeners/factory"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 )
 
@@ -25,9 +27,10 @@ type FactoryTracker struct {
 	listener ethereum.FactoryListener
 	cfg      config.Trackers
 	mutex    *sync.RWMutex
+	network  models.NetworkDetailedResponse
 }
 
-func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
+func NewFactoryTracker(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *FactoryTracker {
 	mutex := new(sync.RWMutex)
 
 	return &FactoryTracker{
@@ -36,8 +39,9 @@ func NewFactoryTracker(cfg config.Config, ctx context.Context) *FactoryTracker {
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
 		mutex:    mutex,
+		network:  network,
 		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex).
-			WithAddress(cfg.Trackers().Factory.Address).
+			WithAddress(common.HexToAddress(network.FactoryAddress)).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}
@@ -53,7 +57,6 @@ func (t *FactoryTracker) TrackDeployEvents(ch chan<- etherdata.ContractDeployedE
 			if err != nil {
 				return errors.Wrap(err, "failed to get previous block")
 			}
-
 			listener := t.listener.From(startBlock).WithCtx(ctx)
 			return listener.WatchContractCreatedEvents(ch)
 		},
@@ -77,9 +80,10 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 	}
 
 	cursorUInt64 := cast.ToUint64(cursorKV.Value)
-	if cursorUInt64 > t.cfg.Factory.FirstBlock {
+	if cursorUInt64 > uint64(t.network.FirstBlock) {
 		return cursorUInt64, nil
 	}
 
-	return t.cfg.Factory.FirstBlock, nil
+	return uint64(t.network.FirstBlock), nil
+	return 0, nil
 }

@@ -2,7 +2,9 @@ package runners
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -13,11 +15,11 @@ import (
 )
 
 const delayBetweenContractInsertions = time.Second
+const delayBetweenCombinerCalls = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	var (
-		factoryCombiner = combiners.NewFactoryCombiner(cfg, ctx)
-		tokenRoutiner   = combiners.NewTokenRoutiner(cfg, ctx)
+		tokenRoutiner = combiners.NewTokenRoutiner(cfg, ctx)
 
 		// Channel connecting factory deploy consumer and routiner
 		deployedTokensCh = make(chan common.Address)
@@ -27,7 +29,6 @@ func Run(cfg config.Config, ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to select contracts from the database")
 	}
-
 	for _, contract := range contracts {
 		go func(contract data.Contract) {
 			deployedTokensCh <- contract.Address()
@@ -35,13 +36,24 @@ func Run(cfg config.Config, ctx context.Context) error {
 
 		time.Sleep(delayBetweenContractInsertions)
 	}
+	networkConnector := cfg.NetworkConnector()
+	networks, err := networkConnector.GetNetworksDetailed()
+	if err != nil {
+		return errors.Wrap(err, "failed to select networks from the database")
+	}
+	log.Println("chain_id", (*networks).Data[0].ChainId)
 
 	// factoryCombiner would run producer and consumer for a factory contract
 	// and, after consumer processes the event, consumer will
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
-	factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
-	tokenRoutiner.Watch(deployedTokensCh)
+	fmt.Println(networks)
+	for _, network := range networks.Data {
+		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, network)
+		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
 
+		time.Sleep(delayBetweenCombinerCalls)
+	}
+	tokenRoutiner.Watch(deployedTokensCh)
 	return nil
 }
