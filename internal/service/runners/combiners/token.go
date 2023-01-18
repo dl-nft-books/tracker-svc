@@ -8,26 +8,23 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/trackers"
-	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 )
 
 type TokenCombiner struct {
 	tracker  *trackers.TokenTracker
 	consumer *consumers.TokenConsumer
-	network  models.NetworkDetailedResponse
 	logger   *logan.Entry
 	ctx      context.Context
 	address  common.Address
 }
 
-func NewTokenCombiner(cfg config.Config, ctx context.Context, address common.Address, network models.NetworkDetailedResponse) *TokenCombiner {
+func NewTokenCombiner(cfg config.Config, ctx context.Context, deployedToken consumers.DeployedToken) *TokenCombiner {
 	return &TokenCombiner{
-		tracker:  trackers.NewTokenTracker(cfg, ctx, network),
-		consumer: consumers.NewTokenConsumer(cfg, ctx),
-		network:  network,
+		tracker:  trackers.NewTokenTracker(cfg, ctx, deployedToken.Network),
+		consumer: consumers.NewTokenConsumer(cfg, ctx, deployedToken.Network),
 		logger:   cfg.Log(),
 		ctx:      ctx,
-		address:  address,
+		address:  deployedToken.Address,
 	}
 }
 

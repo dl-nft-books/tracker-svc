@@ -73,6 +73,11 @@ func (q *contractsQ) Insert(contract data.Contract) (id int64, err error) {
 	return id, err
 }
 
+func (q *contractsQ) FilterByChainId(chainId int64) data.ContractsQ {
+	q.selector = q.selector.Where(squirrel.Eq{contractsChainID: chainId})
+	return q
+}
+
 func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {
 	statement := squirrel.Update(contractsTable).
 		Set(contractsPreviousMintBlock, lastBlock).

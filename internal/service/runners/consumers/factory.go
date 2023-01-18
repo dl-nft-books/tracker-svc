@@ -2,9 +2,9 @@ package consumers
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -18,29 +18,38 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/key_value"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
+	networkModel "gitlab.com/tokend/nft-books/network-svc/connector/models"
+	networkModels "gitlab.com/tokend/nft-books/network-svc/connector/models"
 )
 
 const deployConsumerSuffix = "-factory-deploy"
+
+type DeployedToken struct {
+	Address common.Address
+	Network networkModel.NetworkDetailedResponse
+}
 
 type FactoryConsumer struct {
 	logger   *logan.Entry
 	cfg      config.Runner
 	ctx      context.Context
 	booker   *booker.Connector
+	network  networkModels.NetworkDetailedResponse
 	database data.DB
 }
 
-func NewFactoryConsumer(cfg config.Config, ctx context.Context) *FactoryConsumer {
+func NewFactoryConsumer(cfg config.Config, ctx context.Context, network networkModels.NetworkDetailedResponse) *FactoryConsumer {
 	return &FactoryConsumer{
 		logger:   cfg.Log(),
 		ctx:      ctx,
 		cfg:      cfg.Consumers(),
+		network:  network,
 		booker:   cfg.BookerConnector(),
 		database: postgres.NewDB(cfg.DB()),
 	}
 }
 
-func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata.ContractDeployedEvent, routinerChannel chan<- common.Address) {
+func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata.ContractDeployedEvent, routinerChannel chan<- DeployedToken) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -57,7 +66,10 @@ func (c *FactoryConsumer) ConsumeDeployedEvents(internalChannel <-chan etherdata
 					// Only if we found a book corresponding to a contract, we call a routiner
 					// to add consumer and producer for it
 					if foundBook {
-						routinerChannel <- event.Address
+						routinerChannel <- DeployedToken{
+							Address: event.Address,
+							Network: c.network,
+						}
 					}
 				}
 			}
@@ -75,6 +87,7 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 	eventTokenId := int64(event.TokenId)
 	bookResponse, err := c.booker.ListBooks(models.ListBooksParams{
 		TokenId: []int64{eventTokenId},
+		ChainId: []int64{c.network.ChainId},
 	})
 	if err != nil {
 		return false, errors.Wrap(err, "failed to call a list books function from booker", logan.F{
@@ -93,13 +106,13 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 	switch event.Status {
 	case types.ReceiptStatusSuccessful:
 		// Validating whether the contract from event is already in the database
-		entry, err := c.database.Contracts().GetByAddress(event.Address.String())
+		entry, err := c.database.Contracts().FilterByChainId(c.network.ChainId).GetByAddress(event.Address.String())
 		if err != nil {
 			return true, errors.Wrap(err, "failed to validate whether the contract already exists")
 		}
 		// If contract already exists, throw a warning and omit
 		if entry != nil {
-			c.logger.Warnf("Entry with address %s already exists. Omitting\n", event.Address.String())
+			c.logger.Warnf("Entry with address %s on network with chain id %v already exists. Omitting\n", event.Address.String(), book.Attributes.ChainId)
 			return true, nil
 		}
 
@@ -110,7 +123,7 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 				Name:              event.Name,
 				Symbol:            event.Symbol,
 				PreviousMintBLock: event.BlockNumber,
-				ChainId:           book.Attributes.ChainId,
+				ChainId:           c.network.ChainId,
 			})
 			if err != nil {
 				return errors.Wrap(err, "failed to insert contract into the database")

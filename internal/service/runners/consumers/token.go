@@ -20,6 +20,7 @@ import (
 	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 	generatorerResources "gitlab.com/tokend/nft-books/generator-svc/resources"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 )
 
 const (
@@ -37,20 +38,20 @@ type TokenConsumer struct {
 	ctx      context.Context
 	database data.DB
 
-	ipfsLoader *helpers.IpfsLoader
-
+	ipfsLoader  *helpers.IpfsLoader
+	network     models.NetworkDetailedResponse
 	booker      *booker.Connector
 	generatorer *generatorer.Connector
 	documenter  *documenter.Connector
 }
 
-func NewTokenConsumer(cfg config.Config, ctx context.Context) *TokenConsumer {
+func NewTokenConsumer(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *TokenConsumer {
 	return &TokenConsumer{
-		logger:   cfg.Log(),
-		ctx:      ctx,
-		cfg:      cfg.Consumers(),
-		database: postgres.NewDB(cfg.DB()),
-
+		logger:     cfg.Log(),
+		ctx:        ctx,
+		cfg:        cfg.Consumers(),
+		database:   postgres.NewDB(cfg.DB()),
+		network:    network,
 		ipfsLoader: helpers.NewIpfsLoader(cfg),
 
 		booker:      cfg.BookerConnector(),
@@ -71,7 +72,9 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 					logField := logan.F{"contract_address": address.String()}
 
 					// Validating that event was not previously already processed
-					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{})
+					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
+						ChainId: []int64{c.network.ChainId},
+					})
 					if err != nil {
 						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
 							"metadata_hash": event.Uri,

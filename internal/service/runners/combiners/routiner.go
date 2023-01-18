@@ -2,11 +2,10 @@ package combiners
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/running"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/network-svc/connector/models"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
 )
 
 const tokensRoutinerSuffix = "-tokens"
@@ -17,15 +16,13 @@ type TokenRoutiner struct {
 
 	ctx            context.Context
 	cfg            config.Config
-	network        models.NetworkDetailedResponse
 	routinesNumber uint64
 }
 
-func NewTokenRoutiner(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *TokenRoutiner {
+func NewTokenRoutiner(cfg config.Config, ctx context.Context) *TokenRoutiner {
 	return &TokenRoutiner{
 		logger:    cfg.Log(),
 		runnerCfg: cfg.Routiner(),
-		network:   network,
 		cfg:       cfg,
 		ctx:       ctx,
 	}
@@ -33,7 +30,7 @@ func NewTokenRoutiner(cfg config.Config, ctx context.Context, network models.Net
 
 // Watch listens to the newly deployed token contracts and runs
 // consumer and producer for them while acting as a sort of 'routines' manager
-func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
+func (r *TokenRoutiner) Watch(ch <-chan consumers.DeployedToken) {
 	running.WithBackOff(
 		r.ctx,
 		r.logger,
@@ -41,11 +38,10 @@ func (r *TokenRoutiner) Watch(ch <-chan common.Address) {
 		func(ctx context.Context) error {
 			for {
 				select {
-				case address := <-ch:
+				case deployedToken := <-ch:
 					r.routinesNumber++
 					r.logger.Infof("Caught new token to run combiner for. Current number of tokens to process: %d\n", r.routinesNumber)
-
-					NewTokenCombiner(r.cfg, r.ctx, address, r.network).ProduceAndConsumeAllEvents()
+					NewTokenCombiner(r.cfg, r.ctx, deployedToken).ProduceAndConsumeAllEvents()
 				}
 			}
 		},

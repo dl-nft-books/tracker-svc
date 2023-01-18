@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum/converters"
 	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
@@ -37,7 +36,7 @@ type tokenListener struct {
 	wsInstancesCache map[common.Address]*tokencontract.TokencontractFilterer
 }
 
-func NewTokenListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex, network models.NetworkDetailedResponse) ethereum.TokenListener {
+func NewTokenListener(ctx context.Context, mutex *sync.RWMutex, network models.NetworkDetailedResponse) ethereum.TokenListener {
 	rpc := network.RpcUrl
 	nativeToken := etherdata.Erc20Info{
 		Name:     network.TokenName,

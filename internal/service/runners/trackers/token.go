@@ -41,7 +41,7 @@ func NewTokenTracker(cfg config.Config, ctx context.Context, network models.Netw
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
 		listener: token_listeners.
-			NewTokenListener(cfg, ctx, mutex, network).
+			NewTokenListener(ctx, mutex, network).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}
