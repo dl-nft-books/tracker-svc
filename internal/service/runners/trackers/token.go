@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -31,7 +32,7 @@ type TokenTracker struct {
 	listener ethereum.TokenListener
 }
 
-func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
+func NewTokenTracker(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *TokenTracker {
 	mutex := new(sync.RWMutex)
 
 	return &TokenTracker{
@@ -40,7 +41,7 @@ func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
 		listener: token_listeners.
-			NewTokenListener(cfg, ctx, mutex).
+			NewTokenListener(cfg, ctx, mutex, network).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}

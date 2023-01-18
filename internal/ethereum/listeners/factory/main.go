@@ -2,6 +2,8 @@ package factory_listeners
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 	"time"
 
@@ -37,20 +39,23 @@ type factoryListener struct {
 	mutex *sync.RWMutex
 }
 
-func NewFactoryListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex) ethereum.FactoryListener {
-	rpc := cfg.EtherClient().Rpc
-
+func NewFactoryListener(cfg config.Config, ctx context.Context, mutex *sync.RWMutex, network models.NetworkDetailedResponse) ethereum.FactoryListener {
+	rpc := network.RpcUrl
+	nativeToken := etherdata.Erc20Info{
+		Name:     network.TokenName,
+		Symbol:   network.TokenSymbol,
+		Decimals: uint8(network.Decimals),
+	}
 	return &factoryListener{
 		logger:    cfg.Log(),
-		webSocket: cfg.EtherClient().WebSocket,
+		webSocket: network.WsUrl,
 		rpc:       rpc,
 		ctx:       ctx,
 		mutex:     mutex,
 
 		rpcInstancesCache: make(map[common.Address]*tokenfactory.Tokenfactory),
 		wsInstancesCache:  make(map[common.Address]*tokenfactory.TokenfactoryFilterer),
-
-		converter: converters.NewEventConverter(rpc, ctx, cfg.NativeToken()),
+		converter:         converters.NewEventConverter(rpc, ctx, nativeToken),
 	}
 }
 
