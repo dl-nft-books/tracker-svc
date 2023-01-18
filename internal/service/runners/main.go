@@ -2,7 +2,6 @@ package runners
 
 import (
 	"context"
-	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 	"log"
 	"time"
@@ -19,7 +18,6 @@ const delayBetweenCombinerCalls = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	var (
-		tokenRoutiner = combiners.NewTokenRoutiner(cfg, ctx)
 
 		// Channel connecting factory deploy consumer and routiner
 		deployedTokensCh = make(chan common.Address)
@@ -47,13 +45,14 @@ func Run(cfg config.Config, ctx context.Context) error {
 	// and, after consumer processes the event, consumer will
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
-	fmt.Println(networks)
+
 	for _, network := range networks.Data {
 		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, network)
 		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
 
+		tokenRoutiner := combiners.NewTokenRoutiner(cfg, ctx, network)
+		tokenRoutiner.Watch(deployedTokensCh)
 		time.Sleep(delayBetweenCombinerCalls)
 	}
-	tokenRoutiner.Watch(deployedTokensCh)
 	return nil
 }

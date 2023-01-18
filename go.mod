@@ -25,7 +25,7 @@ require (
 	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d
 	gitlab.com/tokend/nft-books/book-svc v0.0.0-20230116153550-1162d842f0a5
 	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230117143507-1b8058500e54
-	gitlab.com/tokend/nft-books/network-svc v0.0.0-20230116151119-db17fd71a09b
+	gitlab.com/tokend/nft-books/network-svc v0.0.0-20230118102948-d86bddb48897
 )
 
 require (

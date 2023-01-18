@@ -40,7 +40,7 @@ func NewFactoryTracker(cfg config.Config, ctx context.Context, network models.Ne
 		database: postgres.NewDB(cfg.DB()),
 		mutex:    mutex,
 		network:  network,
-		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex).
+		listener: factory_listeners.NewFactoryListener(cfg, ctx, mutex, network).
 			WithAddress(common.HexToAddress(network.FactoryAddress)).
 			WithMaxDepth(cfg.Trackers().MaxDepth).
 			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),

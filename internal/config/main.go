@@ -8,7 +8,6 @@ import (
 	"gitlab.com/distributed_lab/kit/pgdb"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
@@ -27,10 +26,6 @@ type Config interface {
 	infura.Infurer
 	pinata.Pinater
 	IpfsLoader() ipfs.Uploader
-
-	// Addr trackers
-	EtherClient() EtherClient
-	NativeToken() etherdata.Erc20Info
 
 	Trackers() Trackers
 	Consumers() Runner
@@ -56,12 +51,10 @@ type config struct {
 	ipfsLoaderOnce comfig.Once
 
 	// Addr trackers
-	getter          kv.Getter
-	trackersOnce    comfig.Once
-	consumersOnce   comfig.Once
-	routinerOnce    comfig.Once
-	nativeTokenOnce comfig.Once
-	ethererOnce     comfig.Once
+	getter        kv.Getter
+	trackersOnce  comfig.Once
+	consumersOnce comfig.Once
+	routinerOnce  comfig.Once
 
 	// Connectors
 	booker.Booker
