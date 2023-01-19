@@ -175,7 +175,7 @@ func (t *TokenTracker) TrackVoucherUpdateEvents(address common.Address, ch chan<
 				return errors.Wrap(err, "failed to get block to begin with")
 			}
 			if block != nil {
-				startBlock = block.UpdateBlock
+				startBlock = block.VoucherUpdateBlock
 			}
 
 			return listener.

@@ -118,9 +118,10 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 			// Add contract starting blocks
 			// (it does not exist for sure since blocks table has a foreign key to the contracts table)
 			if _, err = c.database.Blocks().Insert(data.Blocks{
-				ContractId:    id,
-				TransferBlock: event.BlockNumber,
-				UpdateBlock:   event.BlockNumber,
+				ContractId:         id,
+				TransferBlock:      event.BlockNumber,
+				UpdateBlock:        event.BlockNumber,
+				VoucherUpdateBlock: event.BlockNumber,
 			}); err != nil {
 				return errors.Wrap(err, "failed to insert starting blocks into the database")
 			}
