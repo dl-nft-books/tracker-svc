@@ -7,7 +7,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/combiners"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
-	"log"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,17 +16,22 @@ import (
 
 const delayBetweenContractInsertions = time.Second
 const delayBetweenCombinerCalls = time.Second
+const delayBetweenNetworkSVCCalls = time.Second
 
 func Run(cfg config.Config, ctx context.Context) error {
 	// Channel connecting factory deploy consumer and routiner
 	var deployedTokensCh = make(chan consumers.DeployedToken)
 
 	networkConnector := cfg.NetworkConnector()
-	networks, err := networkConnector.GetNetworksDetailed()
-	if err != nil {
-		return errors.Wrap(err, "failed to select networks from the database")
+	var networks *models.NetworkDetailedListResponse
+	var err error
+	for networks == nil {
+		networks, err = networkConnector.GetNetworksDetailed()
+		if err != nil {
+			cfg.Log().Error(errors.Wrap(err, "failed to select networks from the database"))
+		}
+		time.Sleep(delayBetweenNetworkSVCCalls)
 	}
-	log.Println("chain_id", (*networks).Data[0].ChainId)
 
 	// factoryCombiner would run producer and consumer for a factory contract
 	// and, after consumer processes the event, consumer will
