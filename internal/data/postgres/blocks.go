@@ -13,10 +13,11 @@ import (
 const (
 	blocksTable = "blocks"
 
-	blocksIdColumn            = "id"
-	blocksContractIdColumn    = "contract_id"
-	blocksTransferBlockColumn = "transfer_block"
-	blocksUpdateBlockColumn   = "update_block"
+	blocksIdColumn                 = "id"
+	blocksContractIdColumn         = "contract_id"
+	blocksTransferBlockColumn      = "transfer_block"
+	blocksUpdateBlockColumn        = "update_block"
+	blocksVoucherUpdateBlockColumn = "voucher_update_block"
 )
 
 type blocksQ struct {
@@ -64,6 +65,13 @@ func (q *blocksQ) UpdateTransferBlock(newTransferBlock uint64, id int64) error {
 func (q *blocksQ) UpdateParamsUpdateBlock(newUpdateBlock uint64, id int64) error {
 	statement := squirrel.Update(blocksTable).
 		Set(blocksUpdateBlockColumn, newUpdateBlock).
+		Where(squirrel.Eq{blocksIdColumn: id})
+	return q.db.Exec(statement)
+}
+
+func (q *blocksQ) UpdateParamsVoucherUpdateBlock(newVoucherUpdateBlock uint64, id int64) error {
+	statement := squirrel.Update(blocksTable).
+		Set(blocksVoucherUpdateBlockColumn, newVoucherUpdateBlock).
 		Where(squirrel.Eq{blocksIdColumn: id})
 	return q.db.Exec(statement)
 }

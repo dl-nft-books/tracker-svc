@@ -344,9 +344,11 @@ func (c *TokenConsumer) ConsumeVoucherUpdateEvents(address common.Address, ch <-
 						continue
 					}
 
-					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
-					voucherToken := event.VoucherTokenAddress.String()
-					voucherTokenAmount := event.VoucherTokenAmount.String()
+					var (
+						bookId             = cast.ToInt64(bookResponse.Data[0].Key.ID)
+						voucherToken       = event.VoucherTokenAddress.String()
+						voucherTokenAmount = event.VoucherTokenAmount.String()
+					)
 
 					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
 						Id:                 bookId,
