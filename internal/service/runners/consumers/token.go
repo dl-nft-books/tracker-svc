@@ -155,45 +155,37 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							return errors.Wrap(err, "failed to load file to the ipfs", logField)
 						}
 
-						checkPayment, err := c.database.Payments().FilterByBookUrl(baseURI + task.Attributes.FileIpfsHash).Get()
-
+						// Inserting information about payment
+						paymentId, err := c.database.Payments().Insert(data.Payment{
+							ContractId:        contract.Id,
+							ContractAddress:   contract.Addr,
+							PayerAddress:      event.Recipient.String(),
+							TokenAddress:      event.Erc20Info.TokenAddress.String(),
+							TokenSymbol:       event.Erc20Info.Symbol,
+							TokenName:         event.Erc20Info.Name,
+							TokenDecimals:     event.Erc20Info.Decimals,
+							Amount:            event.Amount.String(),
+							PriceMinted:       event.MintedTokenPrice.String(),
+							PriceToken:        event.PaymentTokenPrice.String(),
+							PurchaseTimestamp: event.Timestamp,
+							BookUrl:           baseURI + task.Attributes.FileIpfsHash,
+						})
 						if err != nil {
 							return errors.Wrap(err, "failed to add payment to the table", logField)
 						}
 
-						if checkPayment == nil {
-							// Inserting information about payment
-							paymentId, err := c.database.Payments().Insert(data.Payment{
-								ContractId:        contract.Id,
-								ContractAddress:   contract.Addr,
-								PayerAddress:      event.Recipient.String(),
-								TokenAddress:      event.Erc20Info.TokenAddress.String(),
-								TokenSymbol:       event.Erc20Info.Symbol,
-								TokenName:         event.Erc20Info.Name,
-								TokenDecimals:     event.Erc20Info.Decimals,
-								Amount:            event.Amount.String(),
-								PriceMinted:       event.MintedTokenPrice.String(),
-								PriceToken:        event.PaymentTokenPrice.String(),
-								PurchaseTimestamp: event.Timestamp,
-								BookUrl:           baseURI + task.Attributes.FileIpfsHash,
-							})
-							if err != nil {
-								return errors.Wrap(err, "failed to add payment to the table", logField)
-							}
-
-							// Inserting information about token
-							if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
-								Account:      event.Recipient.String(),
-								MetadataHash: task.Attributes.MetadataIpfsHash,
-								Status:       generatorerResources.TokenFinishedUploading,
-								TokenId:      event.TokenId,
-								Signature:    task.Attributes.Signature,
-								BookId:       task.Attributes.BookId,
-								PaymentId:    paymentId,
-								ChainId:      book.Data.Attributes.ChainId,
-							}); err != nil {
-								return errors.Wrap(err, "failed to create new token or token is already exists", logField)
-							}
+						// Inserting information about token
+						if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
+							Account:      event.Recipient.String(),
+							MetadataHash: task.Attributes.MetadataIpfsHash,
+							Status:       generatorerResources.TokenFinishedUploading,
+							TokenId:      event.TokenId,
+							Signature:    task.Attributes.Signature,
+							BookId:       task.Attributes.BookId,
+							PaymentId:    paymentId,
+							ChainId:      book.Data.Attributes.ChainId,
+						}); err != nil {
+							return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 						}
 
 						// Updating task info
