@@ -39,7 +39,6 @@ func Run(cfg config.Config, ctx context.Context) error {
 	// producer and consumer for it
 
 	for _, network := range networks.Data {
-		fmt.Println("NETWOOORK", network.Name)
 		contracts, err := postgres.NewContractsQ(cfg.DB()).FilterByChainId(network.ChainId).Select()
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("failed to select contracts from the database for network %v", network.Name))

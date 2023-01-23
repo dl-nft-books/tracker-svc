@@ -109,7 +109,8 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 		select {
 		case err = <-subscription.Err():
 			subscription.Unsubscribe()
-			return errors.Wrap(err, "failed to listen to a subscription")
+			//errors.Wrap(err, "failed to listen to a subscription")
+			continue
 		case raw := <-eventsChannel:
 			if raw == nil {
 				continue
