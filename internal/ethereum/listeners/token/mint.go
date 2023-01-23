@@ -1,6 +1,7 @@
 package token_listeners
 
 import (
+	"github.com/ethereum/go-ethereum/log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -108,8 +109,8 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 	for {
 		select {
 		case err = <-subscription.Err():
-			subscription.Unsubscribe()
-			//errors.Wrap(err, "failed to listen to a subscription")
+			//subscription.Unsubscribe()
+			log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
 			continue
 		case raw := <-eventsChannel:
 			if raw == nil {
