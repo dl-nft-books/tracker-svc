@@ -161,8 +161,9 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 
 		// Setting new cursor value
 		return true, c.database.KeyValue().Upsert(data.KeyValue{
-			Key:   key_value.FactoryTrackerCursor,
-			Value: strconv.FormatUint(event.BlockNumber, 10),
+			Key:     key_value.FactoryTrackerCursor,
+			Value:   strconv.FormatUint(event.BlockNumber, 10),
+			ChainId: c.network.ChainId,
 		})
 	case types.ReceiptStatusFailed:
 		// If tx has failed, just update a status that it has failed

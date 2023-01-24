@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -68,14 +69,16 @@ func (t *FactoryTracker) TrackDeployEvents(ch chan<- etherdata.ContractDeployedE
 
 // GetStartBlock gets the block to begin with based on config and KV cursor values
 func (t *FactoryTracker) GetStartBlock() (uint64, error) {
-	cursorKV, err := t.database.KeyValue().Get(key_value.FactoryTrackerCursor)
+	cursorKV, err := t.database.KeyValue().Get(key_value.FactoryTrackerCursor, t.network.ChainId)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get cursor value")
 	}
 	if cursorKV == nil {
+		fmt.Println("cursor = nil")
 		cursorKV = &data.KeyValue{
-			Key:   key_value.FactoryTrackerCursor,
-			Value: "0",
+			Key:     key_value.FactoryTrackerCursor,
+			Value:   "0",
+			ChainId: t.network.ChainId,
 		}
 	}
 
@@ -85,5 +88,4 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 	}
 
 	return uint64(t.network.FirstBlock), nil
-	return 0, nil
 }
