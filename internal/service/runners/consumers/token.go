@@ -71,22 +71,6 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 				case event := <-ch:
 					logField := logan.F{"contract_address": address.String()}
 
-					// Validating that event was not previously already processed
-					tokensResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
-						ChainId: []int64{c.network.ChainId},
-					})
-					if err != nil {
-						return errors.Wrap(err, "failed to list tokens", logField.Merge(logan.F{
-							"metadata_hash": event.Uri,
-						}))
-					}
-					if len(tokensResponse.Data) > 0 {
-						c.logger.
-							WithFields(logField.Merge(logan.F{"metadata_hash": event.Uri})).
-							Warn("token with specified metadata hash already exists")
-						continue
-					}
-
 					// Getting task by hash (uri)
 					tasksResponse, err := c.generatorer.ListTasks(generatorerModels.ListTasksRequest{IpfsHash: &event.Uri})
 					if err != nil {
