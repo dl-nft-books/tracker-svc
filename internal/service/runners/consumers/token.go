@@ -29,7 +29,7 @@ const (
 	updateConsumerSuffix        = "-token-update"
 	updateVoucherConsumerSuffix = "-voucher-update"
 
-	baseURI = "https://ipfs.io/ipfs/"
+	baseURI = "https://ipfs.tokend.io/ipfs/ipfs"
 )
 
 type TokenConsumer struct {

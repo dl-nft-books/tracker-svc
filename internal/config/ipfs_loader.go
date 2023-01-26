@@ -16,6 +16,7 @@ func (c *config) implementationsMap() map[string]ipfs.Uploader {
 	return map[string]ipfs.Uploader{
 		"infura": c.InfuraImplementation(),
 		"pinata": c.PinataImplementation(),
+		"tokend": c.TokenDIpfsImplementation(),
 	}
 }
 
