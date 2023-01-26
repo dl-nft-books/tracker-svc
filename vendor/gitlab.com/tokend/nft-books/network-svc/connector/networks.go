@@ -18,15 +18,11 @@ func (c *Connector) GetNetworkDetailedByChainID(chainID int64) (*models.NetworkD
 
 	// setting full endpoint
 	fullEndpoint := fmt.Sprintf("%s/%s/%v", c.baseUrl, networksDetailedEndpoint, chainID)
-	log.Println("NETWORK CHAIN ID", chainID)
-	log.Println("NETWORK CHAIN FULL ENDPOINT", fullEndpoint)
 	// getting response
 	if err := c.get(fullEndpoint, &result); err != nil {
 		// errors are already wrapped
-		log.Println("NET ERR", err)
 		return nil, err
 	}
-	log.Println("NETWORK RES", result)
 
 	rpc, err := ethclient.Dial(result.Data.Attributes.RpcUrl)
 	if err != nil {
@@ -55,7 +51,6 @@ func (c *Connector) GetNetworksDetailed() (*models.NetworkDetailedListResponse, 
 
 	// setting full endpoint
 	fullEndpoint := fmt.Sprintf("%s/%s", c.baseUrl, networksDetailedEndpoint)
-	log.Println("NETWORK CHAIN FULL ENDPOINT", fullEndpoint)
 	// getting response
 	if err := c.get(fullEndpoint, &result); err != nil {
 		// errors are already wrapped

@@ -139,6 +139,17 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							return errors.Wrap(err, "failed to load file to the ipfs", logField)
 						}
 
+						//Check if Payment with such book_url is already exists
+						check, err := c.database.Payments().FilterByBookUrl(baseURI + task.Attributes.FileIpfsHash).Get()
+
+						if err != nil {
+							return errors.Wrap(err, "failed to check is payment exist", logField)
+						}
+						if check != nil {
+							c.logger.WithFields(logan.F{"book_url": baseURI + task.Attributes.FileIpfsHash}).Warn("payment with such book_url is already exist")
+							return errors.New("payment with such book_url is already exist")
+						}
+
 						// Inserting information about payment
 						paymentId, err := c.database.Payments().Insert(data.Payment{
 							ContractId:        contract.Id,

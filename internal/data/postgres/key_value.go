@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"fmt"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	sq "github.com/Masterminds/squirrel"
@@ -57,7 +56,6 @@ func (q *keyValueQ) get(key string, chainId int64, forUpdate bool) (*data.KeyVal
 	var value data.KeyValue
 
 	err := q.db.Get(&value, stmt)
-	fmt.Println(stmt.ToSql())
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
