@@ -11,6 +11,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
+	tokend_uploader "gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/tokend-uploader"
 	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
 	networker "gitlab.com/tokend/nft-books/network-svc/connector"
 )
@@ -25,6 +26,7 @@ type Config interface {
 	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
+	tokend_uploader.TokenDIpfsUploader
 	IpfsLoader() ipfs.Uploader
 
 	Trackers() Trackers
@@ -48,6 +50,7 @@ type config struct {
 	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
+	tokend_uploader.TokenDIpfsUploader
 	ipfsLoaderOnce comfig.Once
 
 	// Addr trackers
@@ -73,6 +76,7 @@ func New(getter kv.Getter) Config {
 		Documenter:            documenter.NewDocumenter(getter),
 		Infurer:               infura.NewInfurer(getter),
 		Pinater:               pinata.NewPinater(getter),
+		TokenDIpfsUploader:    tokend_uploader.NewTokenDIpfsUploader(getter),
 		Booker:                booker.NewBooker(getter),
 		NetworkConfigurator:   networker.NewNetworkConfigurator(getter),
 		GeneratorConfigurator: generatorer.NewGeneratorConfigurator(getter),
