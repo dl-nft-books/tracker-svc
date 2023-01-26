@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"gitlab.com/tokend/nft-books/network-svc/resources"
-	"log"
 )
 
 const (
