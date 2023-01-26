@@ -56,7 +56,6 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 		t.cfg.Prefix+transferTrackerSuffix,
 		func(ctx context.Context) error {
 			startBlock := uint64(0)
-
 			contract, err := t.database.Contracts().GetByAddress(address.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to get contract by address")
@@ -73,6 +72,7 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 			if block != nil {
 				startBlock = block.TransferBlock
 			}
+			t.log.Info("start tracking transfer events from block ", startBlock)
 
 			return listener.
 				From(startBlock).
@@ -103,6 +103,7 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 				return nil
 			}
 
+			t.log.Info("start tracking mint events from block ", contractEntry.PreviousMintBLock)
 			return listener.
 				From(contractEntry.PreviousMintBLock).
 				WithCtx(ctx).
@@ -140,6 +141,7 @@ func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- ether
 			if block != nil {
 				startBlock = block.UpdateBlock
 			}
+			t.log.Info("start tracking update events from block ", startBlock)
 
 			return listener.
 				From(startBlock).
@@ -179,6 +181,7 @@ func (t *TokenTracker) TrackVoucherUpdateEvents(address common.Address, ch chan<
 				startBlock = block.VoucherUpdateBlock
 			}
 
+			t.log.Info("start tracking vaucher update events from block ", startBlock)
 			return listener.
 				From(startBlock).
 				WithCtx(ctx).

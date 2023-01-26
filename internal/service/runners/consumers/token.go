@@ -296,7 +296,6 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 						c.logger.WithFields(logField).Warnf("Contract with specified address was not found")
 						continue
 					}
-					fmt.Println(event.BlockNumber)
 					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
 					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
 						Id:     bookId,

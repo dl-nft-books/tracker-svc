@@ -1,7 +1,7 @@
 package token_listeners
 
 import (
-	"github.com/ethereum/go-ethereum/log"
+	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -103,8 +103,9 @@ func (l *tokenListener) listenUpdateEvents(ch chan<- etherdata.UpdateEvent) (err
 	for {
 		select {
 		case err = <-subscription.Err():
-			//subscription.Unsubscribe()
-			log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
+			subscription.Unsubscribe()
+			log.Println("failed to listen to a subscription", err)
+			//log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
 			continue
 		case raw := <-eventsChannel:
 			if raw == nil {
