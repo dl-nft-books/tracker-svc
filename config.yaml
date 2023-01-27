@@ -37,6 +37,7 @@ documenter:
 
 uploader:
   mode: pinata # Either 'infura' or 'pinata'
+  base_uri: https://gateway.pinata.cloud/ipfs/
 
 infura_connector: # You might not specify these fields if uploader mode is not infura
   endpoint: https://ipfs.infura.io:5001

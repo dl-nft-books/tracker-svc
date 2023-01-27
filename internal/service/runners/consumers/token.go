@@ -28,8 +28,6 @@ const (
 	mintConsumerSuffix          = "-token-mint"
 	updateConsumerSuffix        = "-token-update"
 	updateVoucherConsumerSuffix = "-voucher-update"
-
-	baseURI = "https://ipfs.tokend.io/ipfs/ipfs/"
 )
 
 type TokenConsumer struct {
@@ -129,7 +127,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
 							Description: book.Data.Attributes.Description,
 							Image:       bannerLink.Data.Attributes.Url,
-							FileURL:     baseURI + task.Attributes.FileIpfsHash,
+							FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
 						}); err != nil {
 							return errors.Wrap(err, "failed to load metadata to the ipfs")
 						}
@@ -140,13 +138,13 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}
 
 						//Check if Payment with such book_url is already exists
-						check, err := c.database.Payments().FilterByBookUrl(baseURI + task.Attributes.FileIpfsHash).Get()
+						check, err := c.database.Payments().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash).Get()
 
 						if err != nil {
 							return errors.Wrap(err, "failed to check is payment exist", logField)
 						}
 						if check != nil {
-							c.logger.WithFields(logan.F{"book_url": baseURI + task.Attributes.FileIpfsHash}).Warn("payment with such book_url is already exist")
+							c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash}).Warn("payment with such book_url is already exist")
 							return errors.New("payment with such book_url is already exist")
 						}
 
@@ -163,7 +161,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							PriceMinted:       event.MintedTokenPrice.String(),
 							PriceToken:        event.PaymentTokenPrice.String(),
 							PurchaseTimestamp: event.Timestamp,
-							BookUrl:           baseURI + task.Attributes.FileIpfsHash,
+							BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
 						})
 						if err != nil {
 							return errors.Wrap(err, "failed to add payment to the table", logField)

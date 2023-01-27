@@ -8,7 +8,6 @@ import (
 	"gitlab.com/distributed_lab/kit/pgdb"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
 	tokend_uploader "gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/tokend-uploader"
@@ -27,7 +26,7 @@ type Config interface {
 	infura.Infurer
 	pinata.Pinater
 	tokend_uploader.TokenDIpfsUploader
-	IpfsLoader() ipfs.Uploader
+	IpfsLoader() IpfsLoader
 
 	Trackers() Trackers
 	Consumers() Runner
