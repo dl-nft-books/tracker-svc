@@ -21,6 +21,7 @@ import (
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 	generatorerResources "gitlab.com/tokend/nft-books/generator-svc/resources"
 	"gitlab.com/tokend/nft-books/network-svc/connector/models"
+	"log"
 )
 
 const (
@@ -138,7 +139,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}
 
 						//Check if Payment with such book_url is already exists
-						check, err := c.database.Payments().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash).Get()
+						check, err := c.database.Payments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash).Get()
 
 						if err != nil {
 							return errors.Wrap(err, "failed to check is payment exist", logField)
@@ -149,7 +150,7 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						}
 
 						// Inserting information about payment
-						paymentId, err := c.database.Payments().Insert(data.Payment{
+						paymentId, err := c.database.Payments().New().Insert(data.Payment{
 							ContractId:        contract.Id,
 							ContractAddress:   contract.Addr,
 							PayerAddress:      event.Recipient.String(),
@@ -166,7 +167,8 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						if err != nil {
 							return errors.Wrap(err, "failed to add payment to the table", logField)
 						}
-
+						log.Println("PAYMENT_ID ", paymentId)
+						log.Println("BOOK_URL ", c.ipfsLoader.BaseUri+task.Attributes.FileIpfsHash)
 						// Inserting information about token
 						if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
 							Account:      event.Recipient.String(),
