@@ -111,8 +111,7 @@ func (l *factoryListener) listenContractCreatedEvents(ch chan<- etherdata.Contra
 	for {
 		select {
 		case err = <-subscription.Err():
-			subscription.Unsubscribe()
-			log.Println("failed to listen to a subscription", err)
+			log.Println("failed to listen to a subscription", err.Error())
 			//log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
 			continue
 		case raw := <-eventsChannel:

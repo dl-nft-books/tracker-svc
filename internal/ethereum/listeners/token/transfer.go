@@ -103,7 +103,6 @@ func (l *tokenListener) listenTransferEvents(ch chan<- etherdata.TransferEvent) 
 	for {
 		select {
 		case err = <-subscription.Err():
-			subscription.Unsubscribe()
 			log.Println("failed to listen to a subscription", err)
 			//log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
 			continue

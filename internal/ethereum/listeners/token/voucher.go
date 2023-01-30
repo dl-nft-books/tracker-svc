@@ -103,8 +103,7 @@ func (l *tokenListener) listenVoucherUpdateEvents(ch chan<- etherdata.VoucherUpd
 	for {
 		select {
 		case err = <-subscription.Err():
-			subscription.Unsubscribe()
-			log.Println("failed to listen to a subscription", err)
+			log.Println("failed to listen to a subscription", err.Error())
 			//log.Error(errors.Wrap(err, "failed to listen to a subscription").Error())
 			continue
 		case raw := <-eventsChannel:
