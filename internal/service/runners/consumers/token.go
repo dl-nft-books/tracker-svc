@@ -21,7 +21,6 @@ import (
 	generatorerModels "gitlab.com/tokend/nft-books/generator-svc/connector/models"
 	generatorerResources "gitlab.com/tokend/nft-books/generator-svc/resources"
 	"gitlab.com/tokend/nft-books/network-svc/connector/models"
-	"log"
 )
 
 const (
@@ -167,8 +166,6 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						if err != nil {
 							return errors.Wrap(err, "failed to add payment to the table", logField)
 						}
-						log.Println("PAYMENT_ID ", paymentId)
-						log.Println("BOOK_URL ", c.ipfsLoader.BaseUri+task.Attributes.FileIpfsHash)
 						// Inserting information about token
 						if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
 							Account:      event.Recipient.String(),
@@ -306,6 +303,13 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 						return errors.Wrap(err, "failed to update book parameters")
 					}
 
+					contract, err := c.database.Contracts().GetByAddress(address.String())
+					if err != nil {
+						return errors.Wrap(err, "failed to get contract")
+					}
+					if err = c.database.Blocks().UpdateParamsUpdateBlock(event.BlockNumber, contract.Id); err != nil {
+						return errors.Wrap(err, "failed to update block")
+					}
 					c.logger.WithFields(logField).Infof("Successfully processed update event with a block number of %d", event.BlockNumber)
 				}
 			}
@@ -350,6 +354,14 @@ func (c *TokenConsumer) ConsumeVoucherUpdateEvents(address common.Address, ch <-
 						VoucherTokenAmount: &voucherTokenAmount,
 					}); err != nil {
 						return errors.Wrap(err, "failed to update book parameters")
+					}
+
+					contract, err := c.database.Contracts().GetByAddress(address.String())
+					if err != nil {
+						return errors.Wrap(err, "failed to get contract")
+					}
+					if err = c.database.Blocks().UpdateParamsVoucherUpdateBlock(event.BlockNumber, contract.Id); err != nil {
+						return errors.Wrap(err, "failed to update block")
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed voucher update event with a block number of %d", event.BlockNumber)
