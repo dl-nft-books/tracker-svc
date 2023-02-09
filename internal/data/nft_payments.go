@@ -1,6 +1,7 @@
 package data
 
 import (
+	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"time"
 
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -25,6 +26,7 @@ type NftPaymentsQ interface {
 	FilterById(id ...int64) NftPaymentsQ
 	FilterByPayer(payer ...string) NftPaymentsQ
 	FilterByNftAddress(nftAddress ...string) NftPaymentsQ
+	FilterByNftId(nftId ...int64) NftPaymentsQ
 	FilterByContractAddress(contractAddress ...string) NftPaymentsQ
 	FilterByContractId(contractId ...int64) NftPaymentsQ
 	FilterByBookUrl(bookUrl ...string) NftPaymentsQ
@@ -39,22 +41,17 @@ type NftPaymentsQ interface {
 	Delete(id int64) error
 }
 
-//func (p *NftPayment) Resource() (*resources.Payment, error) {
-//	return &resources.Payment{
-//		Key: resources.NewKeyInt64(p.Id, resources.PAYMENT),
-//		Attributes: resources.PaymentAttributes{
-//			Amount:            p.Amount,
-//			PayerAddress:      p.PayerAddress,
-//			PaymentTokenPrice: p.PriceToken,
-//			MintedTokenPrice:  p.PriceMinted,
-//			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
-//			BookUrl:           p.BookUrl,
-//			Erc20Data: resources.Erc20Data{
-//				Address:  p.TokenAddress,
-//				Name:     p.TokenName,
-//				Symbol:   p.TokenSymbol,
-//				Decimals: int32(p.TokenDecimals),
-//			},
-//		},
-//	}, nil
-//}
+func (p *NftPayment) Resource() (*resources.NftPayment, error) {
+	return &resources.NftPayment{
+		Key: resources.NewKeyInt64(p.Id, resources.PAYMENT),
+		Attributes: resources.NftPaymentAttributes{
+			NftAddress:        p.NftAddress,
+			NftId:             int32(p.NftId),
+			FloorPrice:        p.FloorPrice,
+			PayerAddress:      p.PayerAddress,
+			MintedTokenPrice:  p.PriceMinted,
+			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
+			BookUrl:           p.BookUrl,
+		},
+	}, nil
+}

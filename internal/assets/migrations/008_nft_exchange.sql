@@ -6,6 +6,7 @@ ADD column IF NOT EXISTS previous_mint_by_nft_block bigint;
 create table nft_payments
 (
     id                 bigserial primary key,
+    contract_id        bigint    references contracts(id),
     contract_address   text      references contracts(address),
     payer_address      text,
     nft_address        text,

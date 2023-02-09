@@ -19,6 +19,7 @@ const (
 	nftPaymentsContractAddress = "contract_address"
 	nftPaymentsPayerAddress    = "payer_address"
 	nftPaymentsNftAddress      = "nft_address"
+	nftPaymentsNftId           = "nft_id"
 	nftPaymentsBookUrl         = "book_url"
 )
 
@@ -66,6 +67,11 @@ func (q *nftPaymentsQ) FilterByPayer(payer ...string) data.NftPaymentsQ {
 
 func (q *nftPaymentsQ) FilterByNftAddress(nftAddress ...string) data.NftPaymentsQ {
 	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsNftAddress: nftAddress})
+	return q
+}
+
+func (q *nftPaymentsQ) FilterByNftId(nftId ...int64) data.NftPaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsNftId: nftId})
 	return q
 }
 
