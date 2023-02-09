@@ -70,13 +70,40 @@ func (c *EventConverter) SuccessfulMint(raw tokencontract.TokencontractSuccessfu
 		Recipient:         raw.Recipient,
 		TokenId:           raw.MintedTokenInfo.TokenId.Int64(),
 		Uri:               raw.MintedTokenInfo.TokenURI,
-		MintedTokenPrice:  raw.MintedTokenInfo.PricePerOneToken,
+		MintedTokenPrice:  raw.MintedTokenInfo.MintedTokenPrice,
 		Erc20Info:         *erc20Data,
 		Amount:            raw.PaidTokensAmount,
 		PaymentTokenPrice: raw.PaymentTokenPrice,
 		Status:            receipt.Status,
 		BlockNumber:       raw.Raw.BlockNumber,
 		Timestamp:         *purchaseTimestamp,
+	}, nil
+}
+
+func (c *EventConverter) SuccessfulMintByNft(raw tokencontract.TokencontractSuccessfullyMintedByNFT) (*etherdata.SuccessfullyMintedByNftEvent, error) {
+	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
+			"tx_hash": raw.Raw.TxHash.String(),
+		})
+	}
+
+	purchaseTimestamp, err := c.getBlockTimestamp(raw.Raw.BlockNumber)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get block timestamp")
+	}
+
+	return &etherdata.SuccessfullyMintedByNftEvent{
+		Recipient:        raw.Recipient,
+		TokenId:          raw.MintedTokenInfo.TokenId.Int64(),
+		Uri:              raw.MintedTokenInfo.TokenURI,
+		MintedTokenPrice: raw.MintedTokenInfo.MintedTokenPrice,
+		NftFloorPrice:    raw.NftFloorPrice,
+		NftAddress:       raw.NftAddress,
+		NftId:            raw.TokenId.Int64(),
+		Status:           receipt.Status,
+		BlockNumber:      raw.Raw.BlockNumber,
+		Timestamp:        *purchaseTimestamp,
 	}, nil
 }
 

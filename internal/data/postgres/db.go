@@ -31,6 +31,10 @@ func (db *db) Payments() data.PaymentsQ {
 	return NewPaymentsQ(db.raw)
 }
 
+func (db *db) NftPayments() data.NftPaymentsQ {
+	return NewNftPaymentsQ(db.raw)
+}
+
 func (db *db) Blocks() data.BlocksQ {
 	return NewBlocksQ(db.raw)
 }

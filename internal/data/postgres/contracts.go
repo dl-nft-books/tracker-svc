@@ -13,12 +13,13 @@ import (
 const (
 	contractsTable = "contracts"
 
-	contractsId                = "id"
-	contractsAddress           = "address"
-	contractsName              = "name"
-	contractsSymbol            = "symbol"
-	contractsPreviousMintBlock = "previous_mint_block"
-	contractsChainID           = "chain_id"
+	contractsId                     = "id"
+	contractsAddress                = "address"
+	contractsName                   = "name"
+	contractsSymbol                 = "symbol"
+	contractsPreviousMintBlock      = "previous_mint_block"
+	contractsPreviousMintByNftBlock = "previous_mint_by_nft_block"
+	contractsChainID                = "chain_id"
 )
 
 type contractsQ struct {
@@ -81,6 +82,13 @@ func (q *contractsQ) FilterByChainId(chainId int64) data.ContractsQ {
 func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {
 	statement := squirrel.Update(contractsTable).
 		Set(contractsPreviousMintBlock, lastBlock).
+		Where(squirrel.Eq{contractsId: id})
+	return q.database.Exec(statement)
+}
+
+func (q *contractsQ) UpdatePreviousMintByNftBlock(lastBlock uint64, id int64) error {
+	statement := squirrel.Update(contractsTable).
+		Set(contractsPreviousMintByNftBlock, lastBlock).
 		Where(squirrel.Eq{contractsId: id})
 	return q.database.Exec(statement)
 }

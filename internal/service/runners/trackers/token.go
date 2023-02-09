@@ -20,6 +20,7 @@ import (
 const (
 	transferTrackerSuffix      = "-token-transfer"
 	mintTrackerSuffix          = "-token-mint"
+	mintByNftTrackerSuffix     = "-token-mint-by-nft"
 	updateTrackerSuffix        = "-token-update"
 	updateVoucherTrackerSuffix = "-update-voucher"
 )
@@ -108,6 +109,36 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 				From(contractEntry.PreviousMintBLock).
 				WithCtx(ctx).
 				WatchSuccessfulMintEvents(ch)
+		},
+		t.cfg.Backoff.NormalPeriod,
+		t.cfg.Backoff.MinAbnormalPeriod,
+		t.cfg.Backoff.MaxAbnormalPeriod,
+	)
+}
+
+func (t *TokenTracker) TrackMintByNftEvents(address common.Address, ch chan<- etherdata.SuccessfullyMintedByNftEvent) {
+	listener := t.listener.WithAddress(address)
+
+	running.WithBackOff(
+		t.ctx,
+		t.log,
+		t.cfg.Prefix+mintByNftTrackerSuffix,
+		func(ctx context.Context) error {
+			contractEntry, err := t.database.Contracts().GetByAddress(address.String())
+			if err != nil {
+				return errors.Wrap(err, "failed to get contract from the database")
+			}
+
+			if contractEntry == nil {
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return nil
+			}
+
+			t.log.Info("start tracking mint by NFT events from block ", contractEntry.PreviousMintByNftBLock)
+			return listener.
+				From(contractEntry.PreviousMintByNftBLock).
+				WithCtx(ctx).
+				WatchSuccessfulMintByNftEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,

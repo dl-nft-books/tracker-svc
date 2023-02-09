@@ -29,6 +29,7 @@ type (
 		WithDelayBetweenIntervals(delay time.Duration) TokenListener
 
 		WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) error
+		WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
 		WatchTransferEvents(ch chan<- etherdata.TransferEvent) error
 		WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) error
 		WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) error

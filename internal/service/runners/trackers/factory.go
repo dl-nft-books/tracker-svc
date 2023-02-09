@@ -2,7 +2,6 @@ package trackers
 
 import (
 	"context"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -74,7 +73,6 @@ func (t *FactoryTracker) GetStartBlock() (uint64, error) {
 		return 0, errors.Wrap(err, "failed to get cursor value")
 	}
 	if cursorKV == nil {
-		fmt.Println("cursor = nil")
 		cursorKV = &data.KeyValue{
 			Key:     key_value.FactoryTrackerCursor,
 			Value:   "0",

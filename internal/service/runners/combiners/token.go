@@ -38,6 +38,16 @@ func (c *TokenCombiner) ProduceAndConsumeMintEvents() {
 	}()
 }
 
+func (c *TokenCombiner) ProduceAndConsumeMintByNftEvents() {
+	// Running tracker (producer) and consumer with a combinersChannel joining them
+	c.logger.Infof("Initializing mint by NFT event consumer and producer for %s", c.address.String())
+	go func() {
+		ch := make(chan etherdata.SuccessfullyMintedByNftEvent)
+		go c.tracker.TrackMintByNftEvents(c.address, ch)
+		go c.consumer.ConsumeMintByNftEvents(c.address, ch)
+	}()
+}
+
 func (c *TokenCombiner) ProduceAndConsumeTransferEvents() {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
 	c.logger.Infof("Initializing transfer event consumer and producer for %s", c.address.String())
@@ -73,4 +83,5 @@ func (c *TokenCombiner) ProduceAndConsumeAllEvents() {
 	c.ProduceAndConsumeTransferEvents()
 	c.ProduceAndConsumeUpdateEvents()
 	c.ProduceAndConsumeVoucherUpdateEvents()
+	c.ProduceAndConsumeMintByNftEvents()
 }
