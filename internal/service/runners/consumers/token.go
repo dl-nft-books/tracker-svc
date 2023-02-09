@@ -295,10 +295,11 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 					}
 					bookId := cast.ToInt64(bookResponse.Data[0].Key.ID)
 					if err = c.booker.UpdateBook(bookerModels.UpdateBookParams{
-						Id:     bookId,
-						Title:  &event.Name,
-						Symbol: &event.Symbol,
-						Price:  &event.Price,
+						Id:           bookId,
+						Title:        &event.Name,
+						Symbol:       &event.Symbol,
+						Price:        &event.Price,
+						ContractName: &event.Name,
 					}); err != nil {
 						return errors.Wrap(err, "failed to update book parameters")
 					}
