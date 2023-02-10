@@ -82,9 +82,10 @@ func (c *EventConverter) SuccessfulMint(raw tokencontract.TokencontractSuccessfu
 
 func (c *EventConverter) Transfer(raw tokencontract.TokencontractTransfer) etherdata.TransferEvent {
 	return etherdata.TransferEvent{
-		From:    raw.From,
-		To:      raw.To,
-		TokenId: raw.TokenId.Uint64(),
+		From:        raw.From,
+		To:          raw.To,
+		TokenId:     raw.TokenId.Uint64(),
+		BlockNumber: raw.Raw.BlockNumber,
 	}
 }
 

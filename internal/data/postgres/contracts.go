@@ -85,6 +85,20 @@ func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {
 	return q.database.Exec(statement)
 }
 
+func (q *contractsQ) UpdateName(name string, id int64) error {
+	statement := squirrel.Update(contractsTable).
+		Set(contractsName, name).
+		Where(squirrel.Eq{contractsId: id})
+	return q.database.Exec(statement)
+}
+
+func (q *contractsQ) UpdateSymbol(symbol string, id int64) error {
+	statement := squirrel.Update(contractsTable).
+		Set(contractsSymbol, symbol).
+		Where(squirrel.Eq{contractsId: id})
+	return q.database.Exec(statement)
+}
+
 func (q *contractsQ) Select() (contracts []data.Contract, err error) {
 	err = q.database.Select(&contracts, q.selector)
 	return

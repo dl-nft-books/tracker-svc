@@ -24,6 +24,8 @@ type ContractsQ interface {
 	FilterByChainId(chainId int64) ContractsQ
 	Insert(contract Contract) (int64, error)
 	UpdatePreviousMintBlock(lastBlock uint64, id int64) error
+	UpdateName(name string, id int64) error
+	UpdateSymbol(name string, id int64) error
 }
 
 func (c *Contract) Address() common.Address {

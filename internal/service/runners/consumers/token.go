@@ -228,6 +228,15 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 						continue
 					}
 
+					contract, err := c.database.Contracts().GetByAddress(address.String())
+					lastUpdateBlock, err := c.database.Blocks().FilterByContractId(contract.Id).Get()
+					if err != nil {
+						return errors.Wrap(err, "failed to get last block to the given address", logField)
+					}
+					if lastUpdateBlock.TransferBlock > event.BlockNumber {
+						c.logger.WithFields(logField).Warnf("Event has been already consumed with a block number of %d", event.BlockNumber)
+						continue
+					}
 					tokenId := int64(event.TokenId)
 					tokenResponse, err := c.generatorer.ListTokens(generatorerModels.ListTokensRequest{
 						TokenId: &tokenId,
@@ -261,6 +270,9 @@ func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan 
 							return errors.Wrap(err, "failed to update token using generatorer connector")
 						}
 
+						if err = c.database.Blocks().UpdateTransferBlock(event.BlockNumber, contract.Id); err != nil {
+							return errors.Wrap(err, "failed to update block")
+						}
 						c.logger.WithFields(logField).Infof("Successfully processed transfer event of a token with id %d", event.TokenId)
 					}
 				}
@@ -282,7 +294,15 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 				select {
 				case event := <-ch:
 					logField := logan.F{"contract_address": address.String()}
-
+					contract, err := c.database.Contracts().GetByAddress(address.String())
+					lastUpdateBlock, err := c.database.Blocks().FilterByContractId(contract.Id).Get()
+					if err != nil {
+						return errors.Wrap(err, "failed to get last block to the given address", logField)
+					}
+					if lastUpdateBlock.UpdateBlock > event.BlockNumber {
+						c.logger.WithFields(logField).Warnf("Event has been already consumed with a block number of %d", event.BlockNumber)
+						continue
+					}
 					bookResponse, err := c.booker.ListBooks(bookerModels.ListBooksParams{
 						Contract: []string{address.String()},
 					})
@@ -304,9 +324,18 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 						return errors.Wrap(err, "failed to update book parameters")
 					}
 
-					contract, err := c.database.Contracts().GetByAddress(address.String())
 					if err != nil {
 						return errors.Wrap(err, "failed to get contract")
+					}
+					if contract.Name != event.Name {
+						if err = c.database.Contracts().UpdateName(event.Name, contract.Id); err != nil {
+							return errors.Wrap(err, "failed to update contract name")
+						}
+					}
+					if contract.Symbol != event.Symbol {
+						if err = c.database.Contracts().UpdateSymbol(event.Symbol, contract.Id); err != nil {
+							return errors.Wrap(err, "failed to update contract symbol")
+						}
 					}
 					if err = c.database.Blocks().UpdateParamsUpdateBlock(event.BlockNumber, contract.Id); err != nil {
 						return errors.Wrap(err, "failed to update block")
@@ -332,6 +361,15 @@ func (c *TokenConsumer) ConsumeVoucherUpdateEvents(address common.Address, ch <-
 				case event := <-ch:
 					logField := logan.F{"contract_address": address.String()}
 
+					contract, err := c.database.Contracts().GetByAddress(address.String())
+					lastUpdateBlock, err := c.database.Blocks().FilterByContractId(contract.Id).Get()
+					if err != nil {
+						return errors.Wrap(err, "failed to get last block to the given address", logField)
+					}
+					if lastUpdateBlock.VoucherUpdateBlock > event.BlockNumber {
+						c.logger.WithFields(logField).Warnf("Event has been already consumed with a block number of %d", event.BlockNumber)
+						continue
+					}
 					bookResponse, err := c.booker.ListBooks(bookerModels.ListBooksParams{
 						Contract: []string{address.String()},
 					})
@@ -357,7 +395,6 @@ func (c *TokenConsumer) ConsumeVoucherUpdateEvents(address common.Address, ch <-
 						return errors.Wrap(err, "failed to update book parameters")
 					}
 
-					contract, err := c.database.Contracts().GetByAddress(address.String())
 					if err != nil {
 						return errors.Wrap(err, "failed to get contract")
 					}
