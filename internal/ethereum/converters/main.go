@@ -120,6 +120,7 @@ func (c *EventConverter) Update(raw tokencontract.TokencontractTokenContractPara
 		Name:        raw.TokenName,
 		Symbol:      raw.TokenSymbol,
 		Price:       raw.NewPrice.String(),
+		FloorPrice:  raw.NewMinNFTFloorPrice.String(),
 		BlockNumber: raw.Raw.BlockNumber,
 	}
 }

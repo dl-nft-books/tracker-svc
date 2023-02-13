@@ -452,6 +452,7 @@ func (c *TokenConsumer) ConsumeUpdateEvents(address common.Address, ch <-chan et
 						Symbol:       &event.Symbol,
 						Price:        &event.Price,
 						ContractName: &event.Name,
+						FloorPrice:   &event.FloorPrice,
 					}); err != nil {
 						return errors.Wrap(err, "failed to update book parameters")
 					}
