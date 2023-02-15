@@ -69,16 +69,14 @@ func (t *FactoryTracker) TrackDeployEvents(ch chan<- etherdata.ContractDeployedE
 
 // GetStartBlock gets the block to begin with based on config and KV cursor values
 func (t *FactoryTracker) GetStartBlock() (uint64, error) {
-	cursorKV, err := t.database.KeyValue().Get(key_value.FactoryTrackerCursor, t.network.ChainId)
+	cursorKV, err := t.database.KeyValue().Get(fmt.Sprintf("%d-%s", t.network.ChainId, key_value.FactoryTrackerCursor))
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get cursor value")
 	}
 	if cursorKV == nil {
-		fmt.Println("cursor = nil")
 		cursorKV = &data.KeyValue{
-			Key:     key_value.FactoryTrackerCursor,
-			Value:   "0",
-			ChainId: t.network.ChainId,
+			Key:   fmt.Sprintf("%d-%s", t.network.ChainId, key_value.FactoryTrackerCursor),
+			Value: "0",
 		}
 	}
 

@@ -24,12 +24,14 @@ const (
 type contractsQ struct {
 	database *pgdb.DB
 	selector squirrel.SelectBuilder
+	updater  squirrel.UpdateBuilder
 }
 
 func NewContractsQ(database *pgdb.DB) data.ContractsQ {
 	return &contractsQ{
 		database: database,
 		selector: squirrel.Select(fmt.Sprintf("%s.*", contractsTable)).From(contractsTable),
+		updater:  squirrel.Update(contractsTable),
 	}
 }
 
@@ -73,30 +75,28 @@ func (q *contractsQ) Insert(contract data.Contract) (id int64, err error) {
 	return id, err
 }
 
+func (q *contractsQ) Update(id int64) (err error) {
+	return q.database.Exec(q.updater.Where(squirrel.Eq{contractsId: id}))
+}
+
 func (q *contractsQ) FilterByChainId(chainId int64) data.ContractsQ {
 	q.selector = q.selector.Where(squirrel.Eq{contractsChainID: chainId})
 	return q
 }
 
-func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64, id int64) error {
-	statement := squirrel.Update(contractsTable).
-		Set(contractsPreviousMintBlock, lastBlock).
-		Where(squirrel.Eq{contractsId: id})
-	return q.database.Exec(statement)
+func (q *contractsQ) UpdatePreviousMintBlock(lastBlock uint64) data.ContractsQ {
+	q.updater = q.updater.Set(contractsPreviousMintBlock, lastBlock)
+	return q
 }
 
-func (q *contractsQ) UpdateName(name string, id int64) error {
-	statement := squirrel.Update(contractsTable).
-		Set(contractsName, name).
-		Where(squirrel.Eq{contractsId: id})
-	return q.database.Exec(statement)
+func (q *contractsQ) UpdateName(name string) data.ContractsQ {
+	q.updater = q.updater.Set(contractsName, name)
+	return q
 }
 
-func (q *contractsQ) UpdateSymbol(symbol string, id int64) error {
-	statement := squirrel.Update(contractsTable).
-		Set(contractsSymbol, symbol).
-		Where(squirrel.Eq{contractsId: id})
-	return q.database.Exec(statement)
+func (q *contractsQ) UpdateSymbol(symbol string) data.ContractsQ {
+	q.updater = q.updater.Set(contractsSymbol, symbol)
+	return q
 }
 
 func (q *contractsQ) Select() (contracts []data.Contract, err error) {

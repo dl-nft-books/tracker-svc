@@ -2,6 +2,7 @@ package consumers
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"strconv"
 
@@ -161,9 +162,8 @@ func (c *FactoryConsumer) processDeployEvent(event etherdata.ContractDeployedEve
 
 		// Setting new cursor value
 		return true, c.database.KeyValue().Upsert(data.KeyValue{
-			Key:     key_value.FactoryTrackerCursor,
-			Value:   strconv.FormatUint(event.BlockNumber, 10),
-			ChainId: c.network.ChainId,
+			Key:   fmt.Sprintf("%d-%s", c.network.ChainId, key_value.FactoryTrackerCursor),
+			Value: strconv.FormatUint(event.BlockNumber, 10),
 		})
 	case types.ReceiptStatusFailed:
 		// If tx has failed, just update a status that it has failed

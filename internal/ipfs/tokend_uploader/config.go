@@ -10,14 +10,14 @@ type TokenDIpfsUploader interface {
 	TokenDIpfsImplementation() ipfs.Uploader
 }
 
-type tokend_uploader struct {
+type tokendUploader struct {
 	getter kv.Getter
 }
 
 func NewTokenDIpfsUploader(getter kv.Getter) TokenDIpfsUploader {
-	return &tokend_uploader{getter: getter}
+	return &tokendUploader{getter: getter}
 }
 
-func (t *tokend_uploader) TokenDIpfsImplementation() ipfs.Uploader {
+func (t *tokendUploader) TokenDIpfsImplementation() ipfs.Uploader {
 	return NewTokenDLoader(ipfsApi.NewShell("https://ipfs.tokend.io/api"))
 }
