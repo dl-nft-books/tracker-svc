@@ -24,8 +24,11 @@ type ContractsQ interface {
 	GetByAddress(address string) (*Contract, error)
 	FilterByChainId(chainId int64) ContractsQ
 	Insert(contract Contract) (int64, error)
-	UpdatePreviousMintBlock(lastBlock uint64, id int64) error
-	UpdatePreviousMintByNftBlock(lastBlock uint64, id int64) error
+	Update(id int64) error
+	UpdatePreviousMintBlock(lastBlock uint64) ContractsQ
+	UpdatePreviousMintByNftBlock(lastBlock uint64) ContractsQ
+	UpdateName(name string) ContractsQ
+	UpdateSymbol(name string) ContractsQ
 }
 
 func (c *Contract) Address() common.Address {

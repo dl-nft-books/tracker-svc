@@ -109,9 +109,10 @@ func (c *EventConverter) SuccessfulMintByNft(raw tokencontract.TokencontractSucc
 
 func (c *EventConverter) Transfer(raw tokencontract.TokencontractTransfer) etherdata.TransferEvent {
 	return etherdata.TransferEvent{
-		From:    raw.From,
-		To:      raw.To,
-		TokenId: raw.TokenId.Uint64(),
+		From:        raw.From,
+		To:          raw.To,
+		TokenId:     raw.TokenId.Uint64(),
+		BlockNumber: raw.Raw.BlockNumber,
 	}
 }
 

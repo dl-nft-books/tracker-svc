@@ -14,17 +14,21 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 )
 
-const delayBetweenContractInsertions = time.Second
-const delayBetweenCombinerCalls = time.Second
-const delayBetweenNetworkSVCCalls = time.Second
+const (
+	delayBetweenContractInsertions = time.Second
+	delayBetweenCombinerCalls      = time.Second
+	delayBetweenNetworkSVCCalls    = time.Second
+)
 
 func Run(cfg config.Config, ctx context.Context) error {
 	// Channel connecting factory deploy consumer and routiner
-	var deployedTokensCh = make(chan consumers.DeployedToken)
+	var (
+		deployedTokensCh = make(chan consumers.DeployedToken)
+		networks         *models.NetworkDetailedListResponse
+		err              error
+	)
 
 	networkConnector := cfg.NetworkConnector()
-	var networks *models.NetworkDetailedListResponse
-	var err error
 	for networks == nil {
 		networks, err = networkConnector.GetNetworksDetailed()
 		if err != nil {
