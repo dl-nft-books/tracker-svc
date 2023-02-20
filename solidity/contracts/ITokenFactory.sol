@@ -12,6 +12,7 @@ interface ITokenFactory {
      * @param pricePerOneToken the price per one token
      * @param voucherTokenContract the address of the voucher token contract
      * @param voucherTokensAmount the amount of voucher tokens
+     * @param minNFTFloorPrice the minimal NFT floor price
      */
     struct DeployTokenContractParams {
         uint256 tokenContractId;
@@ -20,6 +21,7 @@ interface ITokenFactory {
         uint256 pricePerOneToken;
         address voucherTokenContract;
         uint256 voucherTokensAmount;
+        uint256 minNFTFloorPrice;
     }
 
     /**
@@ -144,9 +146,9 @@ interface ITokenFactory {
      * @return tokenContractsInfoArr_ athe array of BaseTokenContractInfo structures with basic information
      */
     function getBaseTokenContractsInfo(address[] memory tokenContractsArr_)
-        external
-        view
-        returns (BaseTokenContractInfo[] memory tokenContractsInfoArr_);
+    external
+    view
+    returns (BaseTokenContractInfo[] memory tokenContractsInfoArr_);
 
     /**
      * @notice The function that returns information about the user's NFT
@@ -154,9 +156,9 @@ interface ITokenFactory {
      * @return userNFTsInfoArr_ the array of BaseTokenContractInfo structures with basic information
      */
     function getUserNFTsInfo(address userAddr_)
-        external
-        view
-        returns (UserNFTsInfo[] memory userNFTsInfoArr_);
+    external
+    view
+    returns (UserNFTsInfo[] memory userNFTsInfoArr_);
 
     /**
      * @notice The function that returns the current admins array
@@ -190,7 +192,7 @@ interface ITokenFactory {
      * @return array with the addresses of the token contracts
      */
     function getTokenContractsPart(uint256 offset_, uint256 limit_)
-        external
-        view
-        returns (address[] memory);
+    external
+    view
+    returns (address[] memory);
 }

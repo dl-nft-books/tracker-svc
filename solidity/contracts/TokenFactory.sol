@@ -19,9 +19,9 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     using Paginator for EnumerableSet.AddressSet;
 
     bytes32 internal constant _CREATE_TYPEHASH =
-        keccak256(
-            "Create(uint256 tokenContractId,bytes32 tokenName,bytes32 tokenSymbol,uint256 pricePerOneToken,address voucherTokenContract,uint256 voucherTokensAmount)"
-        );
+    keccak256(
+        "Create(uint256 tokenContractId,bytes32 tokenName,bytes32 tokenSymbol,uint256 pricePerOneToken,address voucherTokenContract,uint256 voucherTokensAmount,uint256 minNFTFloorPrice)"
+    );
 
     ProxyBeacon public override tokenContractsBeacon;
     uint8 public override priceDecimals;
@@ -50,9 +50,9 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function setBaseTokenContractsURI(string memory baseTokenContractsURI_)
-        external
-        override
-        onlyOwner
+    external
+    override
+    onlyOwner
     {
         baseTokenContractsURI = baseTokenContractsURI_;
 
@@ -66,9 +66,9 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function updateAdmins(address[] calldata adminsToUpdate_, bool isAdding_)
-        external
-        override
-        onlyOwner
+    external
+    override
+    onlyOwner
     {
         _updateAddressSet(_admins, adminsToUpdate_, isAdding_);
 
@@ -94,7 +94,8 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
                 keccak256(abi.encodePacked(params_.tokenSymbol)),
                 params_.pricePerOneToken,
                 params_.voucherTokenContract,
-                params_.voucherTokensAmount
+                params_.voucherTokensAmount,
+                params_.minNFTFloorPrice
             )
         );
 
@@ -106,12 +107,15 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
         );
 
         ITokenContract(newTokenContract_).__TokenContract_init(
-            params_.tokenName,
-            params_.tokenSymbol,
-            address(this),
-            params_.pricePerOneToken,
-            params_.voucherTokenContract,
-            params_.voucherTokensAmount
+            ITokenContract.TokenContractInitParams(
+                params_.tokenName,
+                params_.tokenSymbol,
+                address(this),
+                params_.pricePerOneToken,
+                params_.voucherTokenContract,
+                params_.voucherTokensAmount,
+                params_.minNFTFloorPrice
+            )
         );
 
         _tokenContracts.add(newTokenContract_);
@@ -129,19 +133,19 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function getTokenContractsPart(uint256 offset_, uint256 limit_)
-        external
-        view
-        override
-        returns (address[] memory)
+    external
+    view
+    override
+    returns (address[] memory)
     {
         return _tokenContracts.part(offset_, limit_);
     }
 
     function getBaseTokenContractsInfo(address[] memory tokenContractsArr_)
-        external
-        view
-        override
-        returns (BaseTokenContractInfo[] memory tokenContractsInfoArr_)
+    external
+    view
+    override
+    returns (BaseTokenContractInfo[] memory tokenContractsInfoArr_)
     {
         tokenContractsInfoArr_ = new BaseTokenContractInfo[](tokenContractsArr_.length);
 
@@ -154,10 +158,10 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function getUserNFTsInfo(address userAddr_)
-        external
-        view
-        override
-        returns (UserNFTsInfo[] memory userNFTsInfoArr_)
+    external
+    view
+    override
+    returns (UserNFTsInfo[] memory userNFTsInfoArr_)
     {
         uint256 tokenContractsCount_ = _tokenContracts.length();
 

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -17,20 +18,21 @@ import "./interfaces/ITokenContract.sol";
 import "./interfaces/IOwnable.sol";
 
 contract TokenContract is
-    ITokenContract,
-    IOwnable,
-    ERC721EnumerableUpgradeable,
-    EIP712Upgradeable,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable
+ITokenContract,
+IOwnable,
+ERC721EnumerableUpgradeable,
+EIP712Upgradeable,
+PausableUpgradeable,
+ReentrancyGuardUpgradeable,
+ERC721Holder
 {
     using DecimalsConverter for uint256;
     using SafeERC20 for IERC20Metadata;
 
     bytes32 internal constant _MINT_TYPEHASH =
-        keccak256(
-            "Mint(address paymentTokenAddress,uint256 paymentTokenPrice,uint256 discount,uint256 endTimestamp,bytes32 tokenURI)"
-        );
+    keccak256(
+        "Mint(address paymentTokenAddress,uint256 paymentTokenPrice,uint256 discount,uint256 endTimestamp,bytes32 tokenURI)"
+    );
 
     ITokenFactory public override tokenFactory;
     uint256 public override pricePerOneToken;
@@ -47,6 +49,10 @@ contract TokenContract is
     address public override voucherTokenContract;
     uint256 public override voucherTokensAmount;
 
+    // v1.1.0
+
+    uint256 public override minNFTFloorPrice;
+
     modifier onlyAdmin() {
         require(
             tokenFactory.isAdmin(msg.sender),
@@ -60,48 +66,63 @@ contract TokenContract is
         _;
     }
 
-    function __TokenContract_init(
-        string memory tokenName_,
-        string memory tokenSymbol_,
-        address tokenFactoryAddr_,
-        uint256 pricePerOneToken_,
-        address voucherTokenContract_,
-        uint256 voucherTokensAmount_
-    ) external override initializer {
-        __ERC721_init(tokenName_, tokenSymbol_);
-        __EIP712_init(tokenName_, "1");
+    function __TokenContract_init(TokenContractInitParams calldata initParams_)
+    external
+    override
+    initializer
+    {
+        __ERC721_init(initParams_.tokenName, initParams_.tokenSymbol);
+        __EIP712_init(initParams_.tokenName, "1");
         __Pausable_init();
         __ReentrancyGuard_init();
 
-        tokenFactory = ITokenFactory(tokenFactoryAddr_);
+        tokenFactory = ITokenFactory(initParams_.tokenFactoryAddr);
 
-        _updateTokenContractParams(pricePerOneToken_, tokenName_, tokenSymbol_);
-        _updateVoucherParams(voucherTokenContract_, voucherTokensAmount_);
+        _updateTokenContractParams(
+            initParams_.pricePerOneToken,
+            initParams_.minNFTFloorPrice,
+            initParams_.tokenName,
+            initParams_.tokenSymbol
+        );
+        _updateVoucherParams(initParams_.voucherTokenContract, initParams_.voucherTokensAmount);
     }
 
     function updateTokenContractParams(
         uint256 newPrice_,
+        uint256 newMinNFTFloorPrice_,
         string memory newTokenName_,
         string memory newTokenSymbol_
-    ) external onlyAdmin {
-        _updateTokenContractParams(newPrice_, newTokenName_, newTokenSymbol_);
+    ) external override onlyAdmin {
+        _updateTokenContractParams(
+            newPrice_,
+            newMinNFTFloorPrice_,
+            newTokenName_,
+            newTokenSymbol_
+        );
     }
 
     function updateVoucherParams(address newVoucherTokenContract_, uint256 newVoucherTokensAmount_)
-        external
-        onlyAdmin
+    external
+    override
+    onlyAdmin
     {
         _updateVoucherParams(newVoucherTokenContract_, newVoucherTokensAmount_);
     }
 
     function updateAllParams(
         uint256 newPrice_,
+        uint256 newMinNFTFloorPrice_,
         address newVoucherTokenContract_,
         uint256 newVoucherTokensAmount_,
         string memory newTokenName_,
         string memory newTokenSymbol_
-    ) external onlyAdmin {
-        _updateTokenContractParams(newPrice_, newTokenName_, newTokenSymbol_);
+    ) external override onlyAdmin {
+        _updateTokenContractParams(
+            newPrice_,
+            newMinNFTFloorPrice_,
+            newTokenName_,
+            newTokenSymbol_
+        );
         _updateVoucherParams(newVoucherTokenContract_, newVoucherTokensAmount_);
     }
 
@@ -114,16 +135,16 @@ contract TokenContract is
     }
 
     function withdrawPaidTokens(address tokenAddr_, address recipient_)
-        external
-        override
-        onlyOwner
+    external
+    override
+    onlyOwner
     {
         IERC20Metadata token_ = IERC20Metadata(tokenAddr_);
         bool isNativeCurrency_ = tokenAddr_ == address(0);
 
         uint256 amount_ = isNativeCurrency_
-            ? address(this).balance
-            : token_.balanceOf(address(this));
+        ? address(this).balance
+        : token_.balanceOf(address(this));
 
         require(amount_ > 0, "TokenContract: Nothing to withdraw.");
 
@@ -149,23 +170,16 @@ contract TokenContract is
         bytes32 s_,
         uint8 v_
     ) external payable override whenNotPaused nonReentrant {
-        require(!existingTokenURIs[tokenURI_], "TokenContract: Token URI already exists.");
-
-        bytes32 structHash_ = keccak256(
-            abi.encode(
-                _MINT_TYPEHASH,
-                paymentTokenAddress_,
-                paymentTokenPrice_,
-                discount_,
-                endTimestamp_,
-                keccak256(abi.encodePacked(tokenURI_))
-            )
+        _verifySignature(
+            paymentTokenAddress_,
+            paymentTokenPrice_,
+            discount_,
+            endTimestamp_,
+            tokenURI_,
+            r_,
+            s_,
+            v_
         );
-
-        address signer_ = ECDSA.recover(_hashTypedDataV4(structHash_), v_, r_, s_);
-        require(tokenFactory.isAdmin(signer_), "TokenContract: Invalid signature.");
-
-        require(block.timestamp <= endTimestamp_, "TokenContract: Signature expired.");
 
         uint256 amountToPay_;
 
@@ -182,11 +196,7 @@ contract TokenContract is
         }
 
         uint256 currentTokenId_ = _tokenId++;
-
-        _mint(msg.sender, currentTokenId_);
-
-        _tokenURIs[currentTokenId_] = tokenURI_;
-        existingTokenURIs[tokenURI_] = true;
+        _mintToken(currentTokenId_, tokenURI_);
 
         emit SuccessfullyMinted(
             msg.sender,
@@ -198,11 +208,46 @@ contract TokenContract is
         );
     }
 
+    function mintTokenByNFT(
+        address nftAddress_,
+        uint256 nftFloorPrice_,
+        uint256 tokenId_,
+        uint256 endTimestamp_,
+        string memory tokenURI_,
+        bytes32 r_,
+        bytes32 s_,
+        uint8 v_
+    ) external override whenNotPaused nonReentrant {
+        _verifySignature(
+            nftAddress_,
+            nftFloorPrice_,
+            0, // Discount is zero for NFT by NFT option
+            endTimestamp_,
+            tokenURI_,
+            r_,
+            s_,
+            v_
+        );
+
+        _payWithNFT(IERC721Upgradeable(nftAddress_), nftFloorPrice_, tokenId_);
+
+        uint256 currentTokenId_ = _tokenId++;
+        _mintToken(currentTokenId_, tokenURI_);
+
+        emit SuccessfullyMintedByNFT(
+            msg.sender,
+            MintedTokenInfo(currentTokenId_, minNFTFloorPrice, tokenURI_),
+            nftAddress_,
+            tokenId_,
+            nftFloorPrice_
+        );
+    }
+
     function getUserTokenIDs(address userAddr_)
-        external
-        view
-        override
-        returns (uint256[] memory tokenIDs_)
+    external
+    view
+    override
+    returns (uint256[] memory tokenIDs_)
     {
         uint256 _tokensCount = balanceOf(userAddr_);
 
@@ -223,11 +268,11 @@ contract TokenContract is
         string memory baseURI_ = _baseURI();
 
         return
-            bytes(baseURI_).length > 0
-                ? string(
-                    abi.encodePacked(tokenFactory.baseTokenContractsURI(), _tokenURIs[tokenId_])
-                )
-                : "";
+        bytes(baseURI_).length > 0
+        ? string(
+            abi.encodePacked(tokenFactory.baseTokenContractsURI(), _tokenURIs[tokenId_])
+        )
+        : "";
     }
 
     function name() public view override returns (string memory) {
@@ -240,15 +285,22 @@ contract TokenContract is
 
     function _updateTokenContractParams(
         uint256 newPrice_,
+        uint256 newMinNFTFloorPrice_,
         string memory newTokenName_,
         string memory newTokenSymbol_
     ) internal {
         pricePerOneToken = newPrice_;
+        minNFTFloorPrice = newMinNFTFloorPrice_;
 
         _tokenName = newTokenName_;
         _tokenSymbol = newTokenSymbol_;
 
-        emit TokenContractParamsUpdated(newPrice_, newTokenName_, newTokenSymbol_);
+        emit TokenContractParamsUpdated(
+            newPrice_,
+            newMinNFTFloorPrice_,
+            newTokenName_,
+            newTokenSymbol_
+        );
     }
 
     function _updateVoucherParams(
@@ -269,8 +321,8 @@ contract TokenContract is
         require(msg.value == 0, "TokenContract: Currency amount must be a zero.");
 
         uint256 amountToPay_ = tokenPrice_ != 0
-            ? _getAmountAfterDiscount((pricePerOneToken * DECIMAL) / tokenPrice_, discount_)
-            : voucherTokensAmount;
+        ? _getAmountAfterDiscount((pricePerOneToken * DECIMAL) / tokenPrice_, discount_)
+        : voucherTokensAmount;
 
         tokenAddr_.safeTransferFrom(
             msg.sender,
@@ -299,6 +351,59 @@ contract TokenContract is
         return amountToPay_;
     }
 
+    function _payWithNFT(
+        IERC721Upgradeable nft_,
+        uint256 nftFloorPrice_,
+        uint256 tokenId_
+    ) internal {
+        require(
+            nftFloorPrice_ >= minNFTFloorPrice,
+            "TokenContract: NFT floor price is less than the minimal."
+        );
+        require(
+            IERC721Upgradeable(nft_).ownerOf(tokenId_) == msg.sender,
+            "TokenContract: Sender is not the owner."
+        );
+
+        nft_.safeTransferFrom(msg.sender, address(this), tokenId_);
+    }
+
+    function _mintToken(uint256 mintTokenId_, string memory tokenURI_) internal {
+        _mint(msg.sender, mintTokenId_);
+
+        _tokenURIs[mintTokenId_] = tokenURI_;
+        existingTokenURIs[tokenURI_] = true;
+    }
+
+    function _verifySignature(
+        address paymentTokenAddress_,
+        uint256 paymentTokenPrice_,
+        uint256 discount_,
+        uint256 endTimestamp_,
+        string memory tokenURI_,
+        bytes32 r_,
+        bytes32 s_,
+        uint8 v_
+    ) internal view {
+        require(!existingTokenURIs[tokenURI_], "TokenContract: Token URI already exists.");
+
+        bytes32 structHash_ = keccak256(
+            abi.encode(
+                _MINT_TYPEHASH,
+                paymentTokenAddress_,
+                paymentTokenPrice_,
+                discount_,
+                endTimestamp_,
+                keccak256(abi.encodePacked(tokenURI_))
+            )
+        );
+
+        address signer_ = ECDSA.recover(_hashTypedDataV4(structHash_), v_, r_, s_);
+
+        require(tokenFactory.isAdmin(signer_), "TokenContract: Invalid signature.");
+        require(block.timestamp <= endTimestamp_, "TokenContract: Signature expired.");
+    }
+
     function _baseURI() internal view override returns (string memory) {
         return tokenFactory.baseTokenContractsURI();
     }
@@ -308,9 +413,9 @@ contract TokenContract is
     }
 
     function _getAmountAfterDiscount(uint256 amount_, uint256 discount_)
-        internal
-        pure
-        returns (uint256)
+    internal
+    pure
+    returns (uint256)
     {
         return (amount_ * (PERCENTAGE_100 - discount_)) / PERCENTAGE_100;
     }
