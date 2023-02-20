@@ -3,6 +3,8 @@
 ALTER table contracts
 ADD column IF NOT EXISTS previous_mint_by_nft_block bigint;
 
+UPDATE contracts SET previous_mint_by_nft_block = previous_mint_block;
+
 create table nft_payments
 (
     id                 bigserial primary key,
