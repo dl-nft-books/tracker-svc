@@ -344,14 +344,15 @@ func (c *TokenConsumer) MintUpdating(
 		}
 		// Inserting information about token
 		if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
-			Account:      event.Recipient.String(),
-			MetadataHash: task.Attributes.MetadataIpfsHash,
-			Status:       generatorerResources.TokenFinishedUploading,
-			TokenId:      event.TokenId,
-			Signature:    task.Attributes.Signature,
-			BookId:       task.Attributes.BookId,
-			PaymentId:    paymentId,
-			ChainId:      book.Data.Attributes.ChainId,
+			Account:        event.Recipient.String(),
+			MetadataHash:   task.Attributes.MetadataIpfsHash,
+			Status:         generatorerResources.TokenFinishedUploading,
+			TokenId:        event.TokenId,
+			Signature:      task.Attributes.Signature,
+			BookId:         task.Attributes.BookId,
+			PaymentId:      paymentId,
+			ChainId:        book.Data.Attributes.ChainId,
+			IsTokenPayment: true,
 		}); err != nil {
 			return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 		}
