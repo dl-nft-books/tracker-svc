@@ -108,8 +108,16 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							Warn("could not find book")
 						continue
 					}
-					if err = c.MintUpdating(address, book, *tasksResponse, event); err != nil {
-						return errors.Wrap(err, "transaction failed")
+					if err = c.database.Transaction(func() error {
+						if err = c.UpdatingTransaction(address, book, task); err != nil {
+							return err
+						}
+						if err = c.MintUpdating(address, book.Data.Attributes.ChainId, task, event); err != nil {
+							return err
+						}
+						return nil
+					}); err != nil {
+						return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a token with id %d", event.TokenId)
@@ -162,12 +170,6 @@ func (c *TokenConsumer) ConsumeMintByNftEvents(address common.Address, ch <-chan
 						continue
 					}
 
-					// Getting nft banner img link
-					bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
-					if err != nil {
-						return errors.Wrap(err, "failed to get banner image link", logField)
-					}
-
 					// Updating status to loading on IPFS
 					status := generatorerResources.TaskUploading
 					if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
@@ -179,89 +181,16 @@ func (c *TokenConsumer) ConsumeMintByNftEvents(address common.Address, ch <-chan
 						}))
 					}
 
-					// Getting contract by address
-					contract, err := c.database.Contracts().GetByAddress(address.String())
-					if err != nil {
-						return errors.Wrap(err, "failed to update status", logField)
-					}
-
 					if err = c.database.Transaction(func() error {
-						// Uploading metadata
-						if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-							Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
-							Description: book.Data.Attributes.Description,
-							Image:       bannerLink.Data.Attributes.Url,
-							FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-						}); err != nil {
-							return errors.Wrap(err, "failed to load metadata to the ipfs")
+						if err = c.UpdatingTransaction(address, book, task); err != nil {
+							return err
 						}
-
-						// Uploading file
-						if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
-							return errors.Wrap(err, "failed to load file to the ipfs", logField)
+						if err = c.MintNftUpdating(address, book.Data.Attributes.ChainId, task, event); err != nil {
+							return err
 						}
-
-						//Check if Payment with such book_url is already exists
-						check, err := c.database.NftPayments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash).Get()
-
-						if err != nil {
-							return errors.Wrap(err, "failed to check is payment exist", logField)
-						}
-						if check != nil {
-							c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash}).Warn("payment with such book_url is already exist")
-							return errors.New("payment with such book_url is already exist")
-						}
-
-						// Inserting information about payment
-						paymentId, err := c.database.NftPayments().New().Insert(data.NftPayment{
-							ContractId:        contract.Id,
-							ContractAddress:   contract.Addr,
-							PayerAddress:      event.Recipient.String(),
-							NftAddress:        event.NftAddress.String(),
-							NftId:             event.NftId,
-							FloorPrice:        event.NftFloorPrice.String(),
-							PriceMinted:       event.MintedTokenPrice.String(),
-							PurchaseTimestamp: event.Timestamp,
-							BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-						})
-						if err != nil {
-							return errors.Wrap(err, "failed to add payment to the table", logField)
-						}
-						// Inserting information about token
-						if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
-							Account:        event.Recipient.String(),
-							MetadataHash:   task.Attributes.MetadataIpfsHash,
-							Status:         generatorerResources.TokenFinishedUploading,
-							TokenId:        event.TokenId,
-							Signature:      task.Attributes.Signature,
-							BookId:         task.Attributes.BookId,
-							PaymentId:      paymentId,
-							ChainId:        book.Data.Attributes.ChainId,
-							IsTokenPayment: false,
-						}); err != nil {
-							return errors.Wrap(err, "failed to create new token or token is already exists", logField)
-						}
-
-						// Updating task info
-						taskStatus := generatorerResources.TaskFinishedUploading
-						if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
-							Id:      cast.ToInt64(task.ID),
-							Status:  &taskStatus,
-							TokenId: &event.TokenId,
-						}); err != nil {
-							return errors.Wrap(err, "failed to update task`s token id and status", logField)
-						}
-
-						// Updating contract`s last mint block
-						if err = c.database.Contracts().UpdatePreviousMintByNftBlock(event.BlockNumber).Update(contract.Id); err != nil {
-							return errors.Wrap(err, "failed to update contract`s last mint by nft block", logField.Merge(logan.F{
-								"contract_id": contract.Id,
-							}))
-						}
-
 						return nil
 					}); err != nil {
-						return errors.Wrap(err, "transaction failed")
+						return errors.Wrap(err, "failed to create new token or token is already exists", logField)
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a token with id %d", event.TokenId)
@@ -286,96 +215,162 @@ func (c *TokenConsumer) CheckPayment(bookUrl string, f logan.F) error {
 	}
 	return nil
 }
-func (c *TokenConsumer) MintUpdating(
+
+func (c *TokenConsumer) UpdatingTransaction(
 	address common.Address,
 	book *bookerModels.GetBookResponse,
-	taskResponse generatorerModels.ListTasksResponse,
-	event etherdata.SuccessfulMintEvent) error {
+	task generatorerResources.Task) error {
 	logField := logan.F{"contract_address": address.String()}
-	task := taskResponse.Data[0]
 	// Getting nft banner img link
 	bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
 	if err != nil {
 		return errors.Wrap(err, "failed to get banner image link", logField)
 	}
-	return c.database.Transaction(func() error {
-		// Getting contract by address
-		contract, err := c.database.Contracts().GetByAddress(address.String())
-		if err != nil {
-			return errors.Wrap(err, "failed to update status", logField)
-		}
-		// Uploading metadata
-		if err := c.ipfsLoader.UploadMetadata(opensea.Metadata{
-			Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
-			Description: book.Data.Attributes.Description,
-			Image:       bannerLink.Data.Attributes.Url,
-			FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-		}); err != nil {
-			return errors.Wrap(err, "failed to load metadata to the ipfs")
-		}
+	// Uploading metadata
+	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
+		Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, book.Data.Attributes.TokenId),
+		Description: book.Data.Attributes.Description,
+		Image:       bannerLink.Data.Attributes.Url,
+		FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
+	}); err != nil {
+		return errors.Wrap(err, "failed to load metadata to the ipfs")
+	}
 
-		// Uploading file
-		if err := c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
-			return errors.Wrap(err, "failed to load file to the ipfs", logField)
-		}
+	// Uploading file
+	if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
+		return errors.Wrap(err, "failed to load file to the ipfs", logField)
+	}
 
-		//Check if Payment with such book_url is already exists
-		if err := c.CheckPayment(c.ipfsLoader.BaseUri+task.Attributes.FileIpfsHash, logField); err != nil {
-			return err
-		}
+	// Updating task info
+	taskStatus := generatorerResources.TaskFinishedUploading
+	if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
+		Id:      cast.ToInt64(task.ID),
+		Status:  &taskStatus,
+		TokenId: &book.Data.Attributes.TokenId,
+	}); err != nil {
+		return errors.Wrap(err, "failed to update task`s token id and status", logField)
+	}
 
-		// Inserting information about payment
-		paymentId, err := c.database.Payments().New().Insert(data.Payment{
-			ContractId:        contract.Id,
-			ContractAddress:   contract.Addr,
-			PayerAddress:      event.Recipient.String(),
-			TokenAddress:      event.Erc20Info.TokenAddress.String(),
-			TokenSymbol:       event.Erc20Info.Symbol,
-			TokenName:         event.Erc20Info.Name,
-			TokenDecimals:     event.Erc20Info.Decimals,
-			Amount:            event.Amount.String(),
-			PriceMinted:       event.MintedTokenPrice.String(),
-			PriceToken:        event.PaymentTokenPrice.String(),
-			PurchaseTimestamp: event.Timestamp,
-			BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to add payment to the table", logField)
-		}
-		// Inserting information about token
-		if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
-			Account:        event.Recipient.String(),
-			MetadataHash:   task.Attributes.MetadataIpfsHash,
-			Status:         generatorerResources.TokenFinishedUploading,
-			TokenId:        event.TokenId,
-			Signature:      task.Attributes.Signature,
-			BookId:         task.Attributes.BookId,
-			PaymentId:      paymentId,
-			ChainId:        book.Data.Attributes.ChainId,
-			IsTokenPayment: true,
-		}); err != nil {
-			return errors.Wrap(err, "failed to create new token or token is already exists", logField)
-		}
+	return nil
+}
 
-		// Updating task info
-		taskStatus := generatorerResources.TaskFinishedUploading
-		if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
-			Id:      cast.ToInt64(task.ID),
-			Status:  &taskStatus,
-			TokenId: &event.TokenId,
-		}); err != nil {
-			return errors.Wrap(err, "failed to update task`s token id and status", logField)
-		}
-
-		// Updating contract`s last mint block
-		if err = c.database.Contracts().UpdatePreviousMintBlock(event.BlockNumber).Update(contract.Id); err != nil {
-			return errors.Wrap(err, "failed to update contract`s last mint block", logField.Merge(logan.F{
-				"contract_id": contract.Id,
-			}))
-		}
-
-		return nil
+func (c *TokenConsumer) MintUpdating(
+	address common.Address,
+	chainId int64,
+	task generatorerResources.Task,
+	event etherdata.SuccessfulMintEvent) error {
+	logField := logan.F{"contract_address": address.String()}
+	// Getting contract by address
+	contract, err := c.database.Contracts().GetByAddress(address.String())
+	if err != nil {
+		return errors.Wrap(err, "failed to update status", logField)
+	}
+	//Check if Payment with such book_url is already exists
+	if err := c.CheckPayment(c.ipfsLoader.BaseUri+task.Attributes.FileIpfsHash, logField); err != nil {
+		return err
+	}
+	// Inserting information about payment
+	paymentId, err := c.database.Payments().New().Insert(data.Payment{
+		ContractId:        contract.Id,
+		ContractAddress:   contract.Addr,
+		PayerAddress:      event.Recipient.String(),
+		TokenAddress:      event.Erc20Info.TokenAddress.String(),
+		TokenSymbol:       event.Erc20Info.Symbol,
+		TokenName:         event.Erc20Info.Name,
+		TokenDecimals:     event.Erc20Info.Decimals,
+		Amount:            event.Amount.String(),
+		PriceMinted:       event.MintedTokenPrice.String(),
+		PriceToken:        event.PaymentTokenPrice.String(),
+		PurchaseTimestamp: event.Timestamp,
+		BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
 	})
+	if err != nil {
+		return errors.Wrap(err, "failed to add payment to the table", logField)
+	}
+	// Inserting information about token
+	if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
+		Account:        event.Recipient.String(),
+		MetadataHash:   task.Attributes.MetadataIpfsHash,
+		Status:         generatorerResources.TokenFinishedUploading,
+		TokenId:        event.TokenId,
+		Signature:      task.Attributes.Signature,
+		BookId:         task.Attributes.BookId,
+		PaymentId:      paymentId,
+		ChainId:        chainId,
+		IsTokenPayment: true,
+	}); err != nil {
+		return errors.Wrap(err, "failed to create new token or token is already exists", logField)
+	}
+
+	// Updating contract`s last mint block
+	if err = c.database.Contracts().UpdatePreviousMintBlock(event.BlockNumber).Update(contract.Id); err != nil {
+		return errors.Wrap(err, "failed to update contract`s last mint block", logField.Merge(logan.F{
+			"contract_id": contract.Id,
+		}))
+	}
+	return nil
+}
+
+func (c *TokenConsumer) MintNftUpdating(
+	address common.Address,
+	chainId int64,
+	task generatorerResources.Task,
+	event etherdata.SuccessfullyMintedByNftEvent) error {
+	logField := logan.F{"contract_address": address.String()}
+	// Getting contract by address
+	contract, err := c.database.Contracts().GetByAddress(address.String())
+	if err != nil {
+		return errors.Wrap(err, "failed to update status", logField)
+	}
+
+	//Check if Payment with such book_url is already exists
+	check, err := c.database.NftPayments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash).Get()
+
+	if err != nil {
+		return errors.Wrap(err, "failed to check is payment exist", logField)
+	}
+	if check != nil {
+		c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash}).Warn("payment with such book_url is already exist")
+		return errors.New("payment with such book_url is already exist")
+	}
+
+	// Inserting information about payment
+	paymentId, err := c.database.NftPayments().New().Insert(data.NftPayment{
+		ContractId:        contract.Id,
+		ContractAddress:   contract.Addr,
+		PayerAddress:      event.Recipient.String(),
+		NftAddress:        event.NftAddress.String(),
+		NftId:             event.NftId,
+		FloorPrice:        event.NftFloorPrice.String(),
+		PriceMinted:       event.MintedTokenPrice.String(),
+		PurchaseTimestamp: event.Timestamp,
+		BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to add payment to the table", logField)
+	}
+	// Inserting information about token
+	if _, err = c.generatorer.CreateToken(generatorerModels.CreateTokenParams{
+		Account:        event.Recipient.String(),
+		MetadataHash:   task.Attributes.MetadataIpfsHash,
+		Status:         generatorerResources.TokenFinishedUploading,
+		TokenId:        event.TokenId,
+		Signature:      task.Attributes.Signature,
+		BookId:         task.Attributes.BookId,
+		PaymentId:      paymentId,
+		ChainId:        chainId,
+		IsTokenPayment: false,
+	}); err != nil {
+		return errors.Wrap(err, "failed to create new token or token is already exists", logField)
+	}
+
+	// Updating contract`s last mint block
+	if err = c.database.Contracts().UpdatePreviousMintByNftBlock(event.BlockNumber).Update(contract.Id); err != nil {
+		return errors.Wrap(err, "failed to update contract`s last mint by nft block", logField.Merge(logan.F{
+			"contract_id": contract.Id,
+		}))
+	}
+	return nil
 }
 func (c *TokenConsumer) ConsumeTransferEvents(address common.Address, ch <-chan etherdata.TransferEvent) {
 	running.WithBackOff(
