@@ -108,7 +108,26 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 						continue
 					}
 
-					if err = c.MintUpdating(address, book, *tasksResponse, event); err != nil {
+					// Getting nft banner img link
+					bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
+					if err != nil {
+						return errors.Wrap(err, "failed to get banner image link", logField)
+					}
+					// Uploading metadata
+					if err := c.ipfsLoader.UploadMetadata(opensea.Metadata{
+						Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
+						Description: book.Data.Attributes.Description,
+						Image:       bannerLink.Data.Attributes.Url,
+						FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
+					}); err != nil {
+						return errors.Wrap(err, "failed to load metadata to the ipfs")
+					}
+
+					// Uploading file
+					if err := c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
+						return errors.Wrap(err, "failed to load file to the ipfs", logField)
+					}
+					if err = c.MintUpdating(address, book, task, event); err != nil {
 						return errors.Wrap(err, "transaction failed")
 					}
 
@@ -137,34 +156,14 @@ func (c *TokenConsumer) CheckPayment(bookUrl string, f logan.F) error {
 func (c *TokenConsumer) MintUpdating(
 	address common.Address,
 	book *bookerModels.GetBookResponse,
-	taskResponse generatorerModels.ListTasksResponse,
+	task generatorerResources.Task,
 	event etherdata.SuccessfulMintEvent) error {
 	logField := logan.F{"contract_address": address.String()}
-	task := taskResponse.Data[0]
-	// Getting nft banner img link
-	bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
-	if err != nil {
-		return errors.Wrap(err, "failed to get banner image link", logField)
-	}
 	return c.database.Transaction(func() error {
 		// Getting contract by address
 		contract, err := c.database.Contracts().GetByAddress(address.String())
 		if err != nil {
 			return errors.Wrap(err, "failed to update status", logField)
-		}
-		// Uploading metadata
-		if err := c.ipfsLoader.UploadMetadata(opensea.Metadata{
-			Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
-			Description: book.Data.Attributes.Description,
-			Image:       bannerLink.Data.Attributes.Url,
-			FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-		}); err != nil {
-			return errors.Wrap(err, "failed to load metadata to the ipfs")
-		}
-
-		// Uploading file
-		if err := c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
-			return errors.Wrap(err, "failed to load file to the ipfs", logField)
 		}
 
 		//Check if Payment with such book_url is already exists
