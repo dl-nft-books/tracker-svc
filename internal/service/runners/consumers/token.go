@@ -228,7 +228,7 @@ func (c *TokenConsumer) UpdatingTransaction(
 	}
 	// Uploading metadata
 	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-		Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, book.Data.Attributes.TokenId),
+		Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
 		Description: book.Data.Attributes.Description,
 		Image:       bannerLink.Data.Attributes.Url,
 		FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
