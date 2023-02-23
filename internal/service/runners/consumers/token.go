@@ -180,6 +180,25 @@ func (c *TokenConsumer) ConsumeMintByNftEvents(address common.Address, ch <-chan
 							"task_id": task.ID,
 						}))
 					}
+					// Getting nft banner img link
+					bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
+					if err != nil {
+						return errors.Wrap(err, "failed to get banner image link", logField)
+					}
+					// Uploading metadata
+					if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
+						Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
+						Description: book.Data.Attributes.Description,
+						Image:       bannerLink.Data.Attributes.Url,
+						FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
+					}); err != nil {
+						return errors.Wrap(err, "failed to load metadata to the ipfs")
+					}
+
+					// Uploading file
+					if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
+						return errors.Wrap(err, "failed to load file to the ipfs", logField)
+					}
 
 					if err = c.database.Transaction(func() error {
 						if err = c.UpdatingTransaction(address, book, task); err != nil {
@@ -221,29 +240,10 @@ func (c *TokenConsumer) UpdatingTransaction(
 	book *bookerModels.GetBookResponse,
 	task generatorerResources.Task) error {
 	logField := logan.F{"contract_address": address.String()}
-	// Getting nft banner img link
-	bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
-	if err != nil {
-		return errors.Wrap(err, "failed to get banner image link", logField)
-	}
-	// Uploading metadata
-	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-		Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
-		Description: book.Data.Attributes.Description,
-		Image:       bannerLink.Data.Attributes.Url,
-		FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
-	}); err != nil {
-		return errors.Wrap(err, "failed to load metadata to the ipfs")
-	}
-
-	// Uploading file
-	if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
-		return errors.Wrap(err, "failed to load file to the ipfs", logField)
-	}
 
 	// Updating task info
 	taskStatus := generatorerResources.TaskFinishedUploading
-	if err = c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
+	if err := c.generatorer.UpdateTask(generatorerModels.UpdateTaskParams{
 		Id:      cast.ToInt64(task.ID),
 		Status:  &taskStatus,
 		TokenId: &book.Data.Attributes.TokenId,
