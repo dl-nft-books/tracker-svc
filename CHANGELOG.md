@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2022-02-23
+
+### Added
+- Support for NFT exchange: add floor price to book
+
+### Fixed
+- Rollback of book updates after losing connection in the tracker
+
+## [1.1.0] - 2022-01-27
+
+### Added
+- Support for various networks
+- Voucher update event
+
+### Fixed
+- Duplicate payments
+
 ## [1.0.0] - 2022-12-09
  
 ### Added
