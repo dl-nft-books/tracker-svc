@@ -107,7 +107,26 @@ func (c *TokenConsumer) ConsumeMintEvents(address common.Address, ch <-chan ethe
 							WithFields(logField.Merge(logan.F{"book_id": task.Attributes.BookId})).
 							Warn("could not find book")
 						continue
+					} // Getting nft banner img link
+					bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
+					if err != nil {
+						return errors.Wrap(err, "failed to get banner image link", logField)
 					}
+					// Uploading metadata
+					if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
+						Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
+						Description: book.Data.Attributes.Description,
+						Image:       bannerLink.Data.Attributes.Url,
+						FileURL:     c.ipfsLoader.BaseUri + task.Attributes.FileIpfsHash,
+					}); err != nil {
+						return errors.Wrap(err, "failed to load metadata to the ipfs")
+					}
+
+					// Uploading file
+					if err = c.ipfsLoader.UploadFile(task.Attributes.FileIpfsHash); err != nil {
+						return errors.Wrap(err, "failed to load file to the ipfs", logField)
+					}
+
 					if err = c.database.Transaction(func() error {
 						if err = c.UpdatingTransaction(address, book, task); err != nil {
 							return err
