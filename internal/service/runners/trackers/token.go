@@ -2,7 +2,6 @@ package trackers
 
 import (
 	"context"
-	"fmt"
 	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 
@@ -201,9 +200,9 @@ func (t *TokenTracker) TrackVoucherUpdateEvents(address common.Address, ch chan<
 				return errors.Wrap(err, "failed to get contract by address")
 			}
 			if contract == nil {
-				return errors.New(fmt.Sprintf("The following contract is not contained in the database: %s", address.String()))
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchVoucherUpdateEvents(ch)
 			}
-
 			block, err := t.database.Blocks().FilterByContractId(contract.Id).Get()
 			if err != nil {
 				return errors.Wrap(err, "failed to get block to begin with")
