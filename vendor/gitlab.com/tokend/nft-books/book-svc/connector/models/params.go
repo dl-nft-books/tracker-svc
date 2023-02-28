@@ -30,7 +30,7 @@ type (
 		DeployStatus       *resources.DeployStatus `json:"deploy_status,omitempty"`
 		Symbol             *string                 `json:"symbol,omitempty"`
 		Price              *string                 `json:"price,omitempty"`
-		FloorPrice         *string                 `json:"price,omitempty"`
+		FloorPrice         *string                 `json:"floor_price,omitempty"`
 		VoucherToken       *string                 `json:"voucher_token,omitempty"`
 		VoucherTokenAmount *string                 `json:"voucher_token_amount,omitempty"`
 	}
