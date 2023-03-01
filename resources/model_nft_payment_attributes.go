@@ -5,6 +5,7 @@
 package resources
 
 type NftPaymentAttributes struct {
+	// Url to see the book
 	BookUrl string `json:"book_url"`
 	// Floor nft price
 	FloorPrice string `json:"floor_price"`
