@@ -1,15 +1,15 @@
 parameters:
   - name: id
     in: path
-    description: Payment's ID
+    description: NFT Payment's ID
     required: true
     schema:
       type: integer
 get:
   tags:
     - Payments
-  summary: Get payment by its id
-  operationId: get_payment
+  summary: Get NFT payment by its id
+  operationId: get_nft_payment
   responses:
     '200':
       description: Success
@@ -20,7 +20,7 @@ get:
             properties:
               data:
                 type: object
-                $ref: '#/components/schemas/Payment'
+                $ref: '#/components/schemas/NftPayment'
     '400':
       description: Bad Request error
       content:

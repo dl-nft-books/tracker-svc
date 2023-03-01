@@ -1,8 +1,8 @@
 get:
   tags:
     - Payments
-  summary: List payments
-  operationId: list_payments
+  summary: List nft payments
+  operationId: list_nft_payments
   parameters:
     - $ref: '#/components/parameters/pageNumberParam'
     - $ref: '#/components/parameters/pageLimitParam'
@@ -24,15 +24,24 @@ get:
         type: array
         items:
           type: integer
-    - name: 'filter[token_address]'
+    - name: 'filter[nft_address]'
       in: query
-      description: Array of token addresses to be included in the payment
+      description: Array of collection addresses to be included in the payment
       explode: false
       required: false
       schema:
         type: array
         items:
           type: string
+    - name: 'filter[nft_id]'
+      in: query
+      description: Array of nft IDs to be included in the payment
+      explode: false
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
   responses:
     '200':
       description: Success
@@ -43,7 +52,7 @@ get:
             properties:
               data:
                 type: object
-                $ref: '#/components/schemas/PaymentsArray'
+                $ref: '#/components/schemas/NftPaymentsArray'
     '400':
       description: Bad Request error
       content:
