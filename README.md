@@ -1,8 +1,25 @@
-# 
+# Contract-tracker
 
 ## Description
 
-Service that catches mint events from the smart contract and loads corresponding pdf to the ipfs
+Contract Tracker service is responsible for tracking events from factory and token contracts. You might read about service functionality in more details below.  
+
+### Factory Tracker
+- Listen to the newly deployed contracts.
+
+### Token Tracker
+- Listen to successful mint events, get book file ipfs hash, download file from the s3 storage and upload it to the IPFS using either _Pinata_ or _Infura_ clients.
+- Listen to transfer events.
+- Listen to update events.
+
+The service contains metadata and files IPFS uploading logic. The uploader client is configurable. Currently, there is a support just for _Infura_ and _Pinata_ clients (_Infura_ is not recommended as it was proven to process files way too slowly)
+
+## Tracking Flow
+
+Tracking flow functions as follows: we firstly initialize a `factory_tracker` and `factory_consumer` for a factory contract using `factory_combiner`. That is, `factory_tracker` runs a web socket and when it catches a deploy event, sends it to the internal channel `internalCh`. Then the `factory_consumer` catches this event, processes it, and after that sends it to the deployed contracts channel `deployedContractsCh`. Then, the `token_routiner` catches this event and creates a separate `token_combiner` which includes a `token_tracker` and `token_consumer`, similarly to the `factory_combiner`. In some sense, `token_routiner` works as a manager of all goroutines, that is why it is called so :)
+
+![alt text](./docs/images/tracker_structure.png)
+
 
 ## Install
 
@@ -34,16 +51,13 @@ use `./generate.sh --help` to see all available options.
 
 ## Running from docker 
   
-Make sure that docker installed.
-{%_ if (handleHTTP) { _%}
-use `docker run ` with `-p 8080:80` to expose port 80 to 8080
+Make sure that the docker is installed.
+Use `docker run ` with `-p 8080:80` to expose port 80 to 8080
 
-{%_ } _%}
-
-    ```bash
-    docker build -t contract-tracker .
-    docker run -e KV_VIPER_FILE=/config.yaml contract-tracker
-    ```
+```bash
+docker build -t contract-tracker .
+docker run -e KV_VIPER_FILE=/config.yaml contract-tracker
+```
 
 ## Running from Source
 
@@ -59,9 +73,9 @@ You can [install it locally](https://www.postgresql.org/download/) or use [docke
 
 
 ### Third-party services
+- RPC and Websocket — [Alchemy](https://www.alchemy.com/) in this particular case.
+- IPFS Uploader Client — either [Pinata](https://www.pinata.cloud/) or [Infura](https://www.infura.io/). We recommend using former.  
 
+## Contacts
 
-## Contact
-
-Responsible Dmytro Zakharov
-The primary contact for this project is  ZamDimon
+Dmytro Zakharov is responsible for this service. Can be contacted via the _Telegram_ (`@ZamDimon`)
