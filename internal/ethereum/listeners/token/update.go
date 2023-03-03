@@ -1,7 +1,7 @@
 package token_listeners
 
 import (
-	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"gitlab.com/distributed_lab/logan/v3"
@@ -9,7 +9,7 @@ import (
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ethereum"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/token"
+	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
 )
 
 func (l *tokenListener) readUpdatesInterval(interval helpers.Interval, ch chan<- etherdata.UpdateEvent) error {
@@ -34,7 +34,7 @@ func (l *tokenListener) readUpdatesInterval(interval helpers.Interval, ch chan<-
 		})
 	}
 
-	defer func(iterator *token.TokencontractTokenContractParamsUpdatedIterator) {
+	defer func(iterator *tokencontract.TokencontractTokenContractParamsUpdatedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -51,10 +51,6 @@ func (l *tokenListener) readUpdatesInterval(interval helpers.Interval, ch chan<-
 }
 
 func (l *tokenListener) readUpdateEvents(ch chan<- etherdata.UpdateEvent) (err error) {
-	// Since l.to - l.from might exceed the max depth allowed in the chain,
-	// we split the reading operation into several parallel processes
-	// that are all sending caught events to the events channel
-
 	lastChainBlock, err := l.rpc.BlockNumber(l.ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block in chain")
@@ -71,28 +67,20 @@ func (l *tokenListener) readUpdateEvents(ch chan<- etherdata.UpdateEvent) (err e
 		l.to = &lastChainBlock
 	}
 
-	var (
-		wg        = new(sync.WaitGroup)
-		intervals = helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth)
-	)
+	for _, interval := range helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth) {
+		if err = l.readUpdatesInterval(interval, ch); err != nil {
+			return errors.Wrap(err, "failed to read update interval", logan.F{
+				"from": interval.From,
+				"to":   interval.To,
+			})
+		}
 
-	// Waitgroup is not necessary here, as we can simply run both listener and readers separately,
-	// yet to just give a better sense of control over the parallel processing we will keep it as it is
-	wg.Add(len(intervals))
-
-	for _, interval := range intervals {
-		go func(readerInterval helpers.Interval) {
-			defer wg.Done()
-
-			if tempErr := l.readUpdatesInterval(readerInterval, ch); tempErr != nil {
-				err = tempErr
-				return
-			}
-		}(interval)
+		if l.delayBetweenIntervals != nil {
+			time.Sleep(*l.delayBetweenIntervals)
+		}
 	}
 
-	wg.Wait()
-	return err
+	return nil
 }
 
 func (l *tokenListener) listenUpdateEvents(ch chan<- etherdata.UpdateEvent) (err error) {
@@ -105,7 +93,7 @@ func (l *tokenListener) listenUpdateEvents(ch chan<- etherdata.UpdateEvent) (err
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *token.TokencontractTokenContractParamsUpdated)
+	eventsChannel := make(chan *tokencontract.TokencontractTokenContractParamsUpdated)
 	subscription, err := filterer.WatchTokenContractParamsUpdated(&opts, eventsChannel)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch update events")

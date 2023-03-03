@@ -23,8 +23,9 @@ require (
 	gitlab.com/distributed_lab/running v1.6.0
 	gitlab.com/distributed_lab/urlval v3.0.0+incompatible
 	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d
-	gitlab.com/tokend/nft-books/book-svc v0.0.0-20221209002637-1b58106f5357
-	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20221209105908-76e918717c61
+	gitlab.com/tokend/nft-books/book-svc v0.0.0-20230228160144-6852ac514928
+	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230228161040-e9785ea79bd4
+	gitlab.com/tokend/nft-books/network-svc v0.0.0-20230228124725-092327ef3392
 )
 
 require (

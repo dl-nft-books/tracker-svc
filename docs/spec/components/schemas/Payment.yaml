@@ -38,6 +38,7 @@ allOf:
           book_url:
             type: string
             example: "ipfs.io/ipfs/url goes brrrrrrr"
+            description: Url to see the book
           erc20_data:
             allOf:
               - $ref: '#/components/schemas/Erc20Data'

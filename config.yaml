@@ -8,25 +8,14 @@ database:
 listener:
   addr: :7687
 
-ethereum_client: # Rpc and WS addresses
-  rpc: https://eth-goerli.g.alchemy.com/v2/DTb8jEsvO6jtXEwUM9Ri3k3cufBIJX-R
-  web_socket: wss://eth-goerli.g.alchemy.com/v2/DTb8jEsvO6jtXEwUM9Ri3k3cufBIJX-R
-
-native_token: # Info about native token
-  name: Ethereum
-  symbol: ETH
-  decimals: 18
-
 trackers:
   prefix: tracker # Name prefix to be displayed in logs
   max_depth: 10000
+  delay_between_intervals: 500ms
   backoff: # running.WithBackoff settings
     normal_period: 10s
     min_abnormal_period: 10s
     max_abnormal_period: 10s
-  factory: # Settings of factory tracker
-    first_block: 7832143  # A block to begin from for the factory contract
-    address: 0x123132
 
 consumers:
   prefix: consumer # Name prefix to be displayed in logs
@@ -46,12 +35,9 @@ documenter:
   url: http://localhost:8000
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHg0MDk3NDhkZmIzMWNhMTQyNGQxMzE2NjM5MThjN2E0NWYyZWE2NTA3IiwicHVycG9zZSI6InNlc3Npb24iLCJleHAiOjMyODY4MDU0NzR9.5Z7FBn4UrgjaNNOGSy0j98cb3M9san4A8kvGzq98Fsg
 
-networker:
-  url:
-  token:
-
 uploader:
   mode: pinata # Either 'infura' or 'pinata'
+  base_uri: https://gateway.pinata.cloud/ipfs/
 
 infura_connector: # You might not specify these fields if uploader mode is not infura
   endpoint: https://ipfs.infura.io:5001

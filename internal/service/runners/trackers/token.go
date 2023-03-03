@@ -2,6 +2,7 @@ package trackers
 
 import (
 	"context"
+	"gitlab.com/tokend/nft-books/network-svc/connector/models"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,9 +18,11 @@ import (
 )
 
 const (
-	transferTrackerSuffix = "-token-transfer"
-	mintTrackerSuffix     = "-token-mint"
-	updateTrackerSuffix   = "-token-update"
+	transferTrackerSuffix      = "-token-transfer"
+	mintTrackerSuffix          = "-token-mint"
+	mintByNftTrackerSuffix     = "-token-mint-by-nft"
+	updateTrackerSuffix        = "-token-update"
+	updateVoucherTrackerSuffix = "-update-voucher"
 )
 
 type TokenTracker struct {
@@ -28,10 +31,9 @@ type TokenTracker struct {
 	ctx      context.Context
 	database data.DB
 	listener ethereum.TokenListener
-	mutex    *sync.RWMutex
 }
 
-func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
+func NewTokenTracker(cfg config.Config, ctx context.Context, network models.NetworkDetailedResponse) *TokenTracker {
 	mutex := new(sync.RWMutex)
 
 	return &TokenTracker{
@@ -39,20 +41,22 @@ func NewTokenTracker(cfg config.Config, ctx context.Context) *TokenTracker {
 		ctx:      ctx,
 		cfg:      cfg.Trackers(),
 		database: postgres.NewDB(cfg.DB()),
-		listener: token_listeners.NewTokenListener(cfg, ctx, mutex).
-			WithMaxDepth(cfg.Trackers().MaxDepth),
-		mutex: mutex,
+		listener: token_listeners.
+			NewTokenListener(ctx, mutex, network).
+			WithMaxDepth(cfg.Trackers().MaxDepth).
+			WithDelayBetweenIntervals(cfg.Trackers().DelayBetweenIntervals),
 	}
 }
 
 func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- etherdata.TransferEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
 		t.cfg.Prefix+transferTrackerSuffix,
 		func(ctx context.Context) error {
 			startBlock := uint64(0)
-
 			contract, err := t.database.Contracts().GetByAddress(address.String())
 			if err != nil {
 				return errors.Wrap(err, "failed to get contract by address")
@@ -69,9 +73,12 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 			if block != nil {
 				startBlock = block.TransferBlock
 			}
+			t.log.Info("start tracking transfer events from block ", startBlock)
 
-			listener := t.listener.From(startBlock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchTransferEvents(ch)
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchTransferEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
@@ -80,6 +87,8 @@ func (t *TokenTracker) TrackTransferEvents(address common.Address, ch chan<- eth
 }
 
 func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherdata.SuccessfulMintEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -92,11 +101,44 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 
 			if contractEntry == nil {
 				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
-				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchSuccessfulMintEvents(ch)
+				return nil
 			}
 
-			listener := t.listener.From(contractEntry.PreviousMintBLock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchSuccessfulMintEvents(ch)
+			t.log.Info("start tracking mint events from block ", contractEntry.PreviousMintBLock)
+			return listener.
+				From(contractEntry.PreviousMintBLock).
+				WithCtx(ctx).
+				WatchSuccessfulMintEvents(ch)
+		},
+		t.cfg.Backoff.NormalPeriod,
+		t.cfg.Backoff.MinAbnormalPeriod,
+		t.cfg.Backoff.MaxAbnormalPeriod,
+	)
+}
+
+func (t *TokenTracker) TrackMintByNftEvents(address common.Address, ch chan<- etherdata.SuccessfullyMintedByNftEvent) {
+	listener := t.listener.WithAddress(address)
+
+	running.WithBackOff(
+		t.ctx,
+		t.log,
+		t.cfg.Prefix+mintByNftTrackerSuffix,
+		func(ctx context.Context) error {
+			contractEntry, err := t.database.Contracts().GetByAddress(address.String())
+			if err != nil {
+				return errors.Wrap(err, "failed to get contract from the database")
+			}
+
+			if contractEntry == nil {
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return nil
+			}
+
+			t.log.Info("start tracking mint by NFT events from block ", contractEntry.PreviousMintByNftBLock)
+			return listener.
+				From(contractEntry.PreviousMintByNftBLock).
+				WithCtx(ctx).
+				WatchSuccessfulMintByNftEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,
@@ -105,6 +147,8 @@ func (t *TokenTracker) TrackMintEvents(address common.Address, ch chan<- etherda
 }
 
 func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- etherdata.UpdateEvent) {
+	listener := t.listener.WithAddress(address)
+
 	running.WithBackOff(
 		t.ctx,
 		t.log,
@@ -128,9 +172,50 @@ func (t *TokenTracker) TrackUpdateEvents(address common.Address, ch chan<- ether
 			if block != nil {
 				startBlock = block.UpdateBlock
 			}
+			t.log.Info("start tracking update events from block ", startBlock)
 
-			listener := t.listener.From(startBlock).WithCtx(ctx).WithAddress(address)
-			return listener.WatchUpdateEvents(ch)
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchUpdateEvents(ch)
+		},
+		t.cfg.Backoff.NormalPeriod,
+		t.cfg.Backoff.MinAbnormalPeriod,
+		t.cfg.Backoff.MaxAbnormalPeriod,
+	)
+}
+
+func (t *TokenTracker) TrackVoucherUpdateEvents(address common.Address, ch chan<- etherdata.VoucherUpdateEvent) {
+	listener := t.listener.WithAddress(address)
+
+	running.WithBackOff(
+		t.ctx,
+		t.log,
+		t.cfg.Prefix+updateVoucherTrackerSuffix,
+		func(ctx context.Context) error {
+			startBlock := uint64(0)
+
+			contract, err := t.database.Contracts().GetByAddress(address.String())
+			if err != nil {
+				return errors.Wrap(err, "failed to get contract by address")
+			}
+			if contract == nil {
+				t.log.Warnf("The following contract is not contained in the database: %s", address.String())
+				return t.listener.From(0).WithCtx(ctx).WithAddress(address).WatchVoucherUpdateEvents(ch)
+			}
+			block, err := t.database.Blocks().FilterByContractId(contract.Id).Get()
+			if err != nil {
+				return errors.Wrap(err, "failed to get block to begin with")
+			}
+			if block != nil {
+				startBlock = block.VoucherUpdateBlock
+			}
+
+			t.log.Info("start tracking vaucher update events from block ", startBlock)
+			return listener.
+				From(startBlock).
+				WithCtx(ctx).
+				WatchVoucherUpdateEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,

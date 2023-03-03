@@ -20,10 +20,10 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
 
     bytes32 internal constant _CREATE_TYPEHASH =
     keccak256(
-        "Create(uint256 tokenContractId,bytes32 tokenName,bytes32 tokenSymbol,uint256 pricePerOneToken)"
+        "Create(uint256 tokenContractId,bytes32 tokenName,bytes32 tokenSymbol,uint256 pricePerOneToken,address voucherTokenContract,uint256 voucherTokensAmount,uint256 minNFTFloorPrice)"
     );
 
-    ProxyBeacon public override poolsBeacon;
+    ProxyBeacon public override tokenContractsBeacon;
     uint8 public override priceDecimals;
     string public override baseTokenContractsURI;
 
@@ -40,7 +40,7 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
         __Ownable_init();
         __EIP712_init("TokenFactory", "1");
 
-        poolsBeacon = new ProxyBeacon();
+        tokenContractsBeacon = new ProxyBeacon();
         priceDecimals = priceDecimals_;
         baseTokenContractsURI = baseTokenContractsURI_;
 
@@ -60,8 +60,8 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function setNewImplementation(address newImplementation_) external override onlyOwner {
-        if (poolsBeacon.implementation() != newImplementation_) {
-            poolsBeacon.upgrade(newImplementation_);
+        if (tokenContractsBeacon.implementation() != newImplementation_) {
+            tokenContractsBeacon.upgrade(newImplementation_);
         }
     }
 
@@ -76,55 +76,56 @@ contract TokenFactory is ITokenFactory, OwnableUpgradeable, UUPSUpgradeable, EIP
     }
 
     function deployTokenContract(
-        uint256 tokenContractId_,
-        string memory tokenName_,
-        string memory tokenSymbol_,
-        uint256 pricePerOneToken_,
+        DeployTokenContractParams calldata params_,
         bytes32 r_,
         bytes32 s_,
         uint8 v_
     ) external override {
         require(
-            tokenContractByIndex[tokenContractId_] == address(0),
+            tokenContractByIndex[params_.tokenContractId] == address(0),
             "TokenFactory: TokenContract with such id already exists."
         );
 
         bytes32 structHash_ = keccak256(
             abi.encode(
                 _CREATE_TYPEHASH,
-                tokenContractId_,
-                keccak256(abi.encodePacked(tokenName_)),
-                keccak256(abi.encodePacked(tokenSymbol_)),
-                pricePerOneToken_
+                params_.tokenContractId,
+                keccak256(abi.encodePacked(params_.tokenName)),
+                keccak256(abi.encodePacked(params_.tokenSymbol)),
+                params_.pricePerOneToken,
+                params_.voucherTokenContract,
+                params_.voucherTokensAmount,
+                params_.minNFTFloorPrice
             )
         );
 
         address signer_ = ECDSA.recover(_hashTypedDataV4(structHash_), v_, r_, s_);
         require(isAdmin(signer_), "TokenFactory: Invalid signature.");
 
-        address newTokenContract_ = address(new PublicBeaconProxy(address(poolsBeacon), ""));
+        address newTokenContract_ = address(
+            new PublicBeaconProxy(address(tokenContractsBeacon), "")
+        );
 
         ITokenContract(newTokenContract_).__TokenContract_init(
-            tokenName_,
-            tokenSymbol_,
-            address(this),
-            pricePerOneToken_
+            ITokenContract.TokenContractInitParams(
+                params_.tokenName,
+                params_.tokenSymbol,
+                address(this),
+                params_.pricePerOneToken,
+                params_.voucherTokenContract,
+                params_.voucherTokensAmount,
+                params_.minNFTFloorPrice
+            )
         );
 
         _tokenContracts.add(newTokenContract_);
-        tokenContractByIndex[tokenContractId_] = newTokenContract_;
+        tokenContractByIndex[params_.tokenContractId] = newTokenContract_;
 
-        emit TokenContractDeployed(
-            tokenContractId_,
-            newTokenContract_,
-            pricePerOneToken_,
-            tokenName_,
-            tokenSymbol_
-        );
+        emit TokenContractDeployed(newTokenContract_, params_);
     }
 
     function getTokenContractsImpl() external view override returns (address) {
-        return poolsBeacon.implementation();
+        return tokenContractsBeacon.implementation();
     }
 
     function getTokenContractsCount() external view override returns (uint256) {

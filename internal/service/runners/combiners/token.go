@@ -2,7 +2,6 @@ package combiners
 
 import (
 	"context"
-
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
@@ -14,54 +13,75 @@ import (
 type TokenCombiner struct {
 	tracker  *trackers.TokenTracker
 	consumer *consumers.TokenConsumer
-
-	logger *logan.Entry
-	ctx    context.Context
+	logger   *logan.Entry
+	ctx      context.Context
+	address  common.Address
 }
 
-func NewTokenCombiner(cfg config.Config, ctx context.Context) *TokenCombiner {
+func NewTokenCombiner(cfg config.Config, ctx context.Context, deployedToken consumers.DeployedToken) *TokenCombiner {
 	return &TokenCombiner{
-		tracker:  trackers.NewTokenTracker(cfg, ctx),
-		consumer: consumers.NewTokenConsumer(cfg, ctx),
+		tracker:  trackers.NewTokenTracker(cfg, ctx, deployedToken.Network),
+		consumer: consumers.NewTokenConsumer(cfg, ctx, deployedToken.Network),
 		logger:   cfg.Log(),
 		ctx:      ctx,
+		address:  deployedToken.Address,
 	}
 }
 
-func (c *TokenCombiner) ProduceAndConsumeMintEvents(address common.Address) {
+func (c *TokenCombiner) ProduceAndConsumeMintEvents() {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
-	// TODO: Make as a runner.WithBackOff?
-	c.logger.Infof("Initializing mint event consumer and producer for %s", address.String())
+	c.logger.Infof("Initializing mint event consumer and producer for %s", c.address.String())
 	go func() {
 		ch := make(chan etherdata.SuccessfulMintEvent)
-		go c.tracker.TrackMintEvents(address, ch)
-		go c.consumer.ConsumeMintEvents(address, ch)
+		go c.tracker.TrackMintEvents(c.address, ch)
+		go c.consumer.ConsumeMintEvents(c.address, ch)
 	}()
 }
 
-func (c *TokenCombiner) ProduceAndConsumeTransferEvents(address common.Address) {
+func (c *TokenCombiner) ProduceAndConsumeMintByNftEvents() {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
-	c.logger.Infof("Initializing transfer event consumer and producer for %s", address.String())
+	c.logger.Infof("Initializing mint by NFT event consumer and producer for %s", c.address.String())
+	go func() {
+		ch := make(chan etherdata.SuccessfullyMintedByNftEvent)
+		go c.tracker.TrackMintByNftEvents(c.address, ch)
+		go c.consumer.ConsumeMintByNftEvents(c.address, ch)
+	}()
+}
+
+func (c *TokenCombiner) ProduceAndConsumeTransferEvents() {
+	// Running tracker (producer) and consumer with a combinersChannel joining them
+	c.logger.Infof("Initializing transfer event consumer and producer for %s", c.address.String())
 	go func() {
 		ch := make(chan etherdata.TransferEvent)
-		go c.tracker.TrackTransferEvents(address, ch)
-		go c.consumer.ConsumeTransferEvents(address, ch)
+		go c.tracker.TrackTransferEvents(c.address, ch)
+		go c.consumer.ConsumeTransferEvents(c.address, ch)
 	}()
 }
 
-func (c *TokenCombiner) ProduceAndConsumeUpdateEvents(address common.Address) {
+func (c *TokenCombiner) ProduceAndConsumeUpdateEvents() {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
-	c.logger.Infof("Initializing consumer event consumer and producer for %s", address.String())
+	c.logger.Infof("Initializing update event consumer and producer for %s", c.address.String())
 	go func() {
 		ch := make(chan etherdata.UpdateEvent)
-		go c.tracker.TrackUpdateEvents(address, ch)
-		go c.consumer.ConsumeUpdateEvents(address, ch)
+		go c.tracker.TrackUpdateEvents(c.address, ch)
+		go c.consumer.ConsumeUpdateEvents(c.address, ch)
 	}()
 }
 
-func (c *TokenCombiner) ProduceAndConsumeAllEvents(address common.Address) {
-	c.logger.Infof("Initializing all possible consumers and producers for %s", address.String())
-	c.ProduceAndConsumeMintEvents(address)
-	c.ProduceAndConsumeTransferEvents(address)
-	c.ProduceAndConsumeUpdateEvents(address)
+func (c *TokenCombiner) ProduceAndConsumeVoucherUpdateEvents() {
+	c.logger.Infof("Initializing voucher update event consumer and producer for %s", c.address.String())
+	go func() {
+		ch := make(chan etherdata.VoucherUpdateEvent)
+		go c.tracker.TrackVoucherUpdateEvents(c.address, ch)
+		go c.consumer.ConsumeVoucherUpdateEvents(c.address, ch)
+	}()
+}
+
+func (c *TokenCombiner) ProduceAndConsumeAllEvents() {
+	c.logger.Infof("Initializing all possible consumers and producers for %s", c.address.String())
+	c.ProduceAndConsumeMintEvents()
+	c.ProduceAndConsumeTransferEvents()
+	c.ProduceAndConsumeUpdateEvents()
+	c.ProduceAndConsumeVoucherUpdateEvents()
+	c.ProduceAndConsumeMintByNftEvents()
 }

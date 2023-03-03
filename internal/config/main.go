@@ -8,11 +8,11 @@ import (
 	"gitlab.com/distributed_lab/kit/pgdb"
 	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
 	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
 	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
+	tokendUploader "gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/tokend_uploader"
 	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
+	networker "gitlab.com/tokend/nft-books/network-svc/connector"
 )
 
 type Config interface {
@@ -25,11 +25,8 @@ type Config interface {
 	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
-	IpfsLoader() ipfs.Uploader
-
-	// Addr trackers
-	EtherClient() EtherClient
-	NativeToken() etherdata.Erc20Info
+	tokendUploader.TokenDIpfsUploader
+	IpfsLoader() IpfsLoader
 
 	Trackers() Trackers
 	Consumers() Runner
@@ -38,6 +35,7 @@ type Config interface {
 	// Connectors
 	documenter.Documenter
 	booker.Booker
+	networker.NetworkConfigurator
 	generatorer.GeneratorConfigurator
 }
 
@@ -51,18 +49,18 @@ type config struct {
 	// IPFS loaders
 	infura.Infurer
 	pinata.Pinater
+	tokendUploader.TokenDIpfsUploader
 	ipfsLoaderOnce comfig.Once
 
 	// Addr trackers
-	getter          kv.Getter
-	trackersOnce    comfig.Once
-	consumersOnce   comfig.Once
-	routinerOnce    comfig.Once
-	nativeTokenOnce comfig.Once
-	ethererOnce     comfig.Once
+	getter        kv.Getter
+	trackersOnce  comfig.Once
+	consumersOnce comfig.Once
+	routinerOnce  comfig.Once
 
 	// Connectors
 	booker.Booker
+	networker.NetworkConfigurator
 	generatorer.GeneratorConfigurator
 	documenter.Documenter
 }
@@ -77,7 +75,9 @@ func New(getter kv.Getter) Config {
 		Documenter:            documenter.NewDocumenter(getter),
 		Infurer:               infura.NewInfurer(getter),
 		Pinater:               pinata.NewPinater(getter),
+		TokenDIpfsUploader:    tokendUploader.NewTokenDIpfsUploader(getter),
 		Booker:                booker.NewBooker(getter),
+		NetworkConfigurator:   networker.NewNetworkConfigurator(getter),
 		GeneratorConfigurator: generatorer.NewGeneratorConfigurator(getter),
 	}
 }

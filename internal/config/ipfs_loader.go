@@ -16,16 +16,23 @@ func (c *config) implementationsMap() map[string]ipfs.Uploader {
 	return map[string]ipfs.Uploader{
 		"infura": c.InfuraImplementation(),
 		"pinata": c.PinataImplementation(),
+		"tokend": c.TokenDIpfsImplementation(),
 	}
 }
 
-type IpfsLoader struct {
-	Mode string `fig:"mode,required"`
+type ipfsLoader struct {
+	Mode    string `fig:"mode,required"`
+	BaseUri string `fig:"base_uri,required"`
 }
 
-func (c *config) IpfsLoader() ipfs.Uploader {
+type IpfsLoader struct {
+	Uploader ipfs.Uploader
+	BaseUri  string
+}
+
+func (c *config) IpfsLoader() IpfsLoader {
 	return c.ipfsLoaderOnce.Do(func() interface{} {
-		var cfg IpfsLoader
+		var cfg ipfsLoader
 
 		if err := figure.
 			Out(&cfg).
@@ -42,6 +49,9 @@ func (c *config) IpfsLoader() ipfs.Uploader {
 			}))
 		}
 
-		return implementation
-	}).(ipfs.Uploader)
+		return IpfsLoader{
+			Uploader: implementation,
+			BaseUri:  cfg.BaseUri,
+		}
+	}).(IpfsLoader)
 }

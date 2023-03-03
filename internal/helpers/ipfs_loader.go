@@ -20,13 +20,15 @@ type IpfsLoader struct {
 	implementation ipfs.Uploader
 	documenter     *documenter.Connector
 	logger         *logan.Entry
+	BaseUri        string
 }
 
 func NewIpfsLoader(cfg config.Config) *IpfsLoader {
 	return &IpfsLoader{
-		implementation: cfg.IpfsLoader(),
+		implementation: cfg.IpfsLoader().Uploader,
 		documenter:     cfg.DocumenterConnector(),
 		logger:         cfg.Log(),
+		BaseUri:        cfg.IpfsLoader().BaseUri,
 	}
 }
 
