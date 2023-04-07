@@ -129,8 +129,8 @@ github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1 h1:YxFBtfl
 github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1/go.mod h1:tuG5Ti1c4LnFxKyaigIsKwe0y6Falxfb//+rz2+IuuM=
 github.com/dl-nft-books/book-svc v0.0.0-20230331104951-7d7513e5807a h1:Mvqki1Oai4/COezxWjWUMz2Bv2doMtY7IbvayC8HX70=
 github.com/dl-nft-books/book-svc v0.0.0-20230331104951-7d7513e5807a/go.mod h1:E6+den3RHZeiwEJOQ98XJIVWPbHbxk0XjPsEYQvxXB4=
-github.com/dl-nft-books/core-svc v0.0.0-20230405081613-525cf97eb73d h1:yNagPJvTP3d9roIavnaY6LHsxNgD0KSybAda7SaMWzg=
-github.com/dl-nft-books/core-svc v0.0.0-20230405081613-525cf97eb73d/go.mod h1:4j4FIpyDBsdkMZIdKI1bC89d/qO1luINzrN7sfIXNeU=
+github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a h1:DWZD4SHnVAiVOH0l0+kbYjaaaQjolQyO4ebgh/4KQYA=
+github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a/go.mod h1:4j4FIpyDBsdkMZIdKI1bC89d/qO1luINzrN7sfIXNeU=
 github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe h1:dcHuGXbKkGsqb9vainB5Tah9O7jlyBur3cylR0FZh1A=
 github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe/go.mod h1:s3Vq12eYQ3bRigx4Yvr76334YrHMBOMKFTRW0qjVmfo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=

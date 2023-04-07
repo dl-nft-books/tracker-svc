@@ -2,6 +2,7 @@ package consumers
 
 import (
 	"context"
+	"fmt"
 	bookerModels "github.com/dl-nft-books/book-svc/connector/models"
 	coreModels "github.com/dl-nft-books/core-svc/connector/models"
 	coreResources "github.com/dl-nft-books/core-svc/resources"
@@ -130,7 +131,7 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 	}
 	// Uploading metadata
 	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-		//Name:        fmt.Sprintf("%s #%s", book.Data.Attributes.Title, task.ID),
+		Name:        fmt.Sprintf("%s #%s", task.Attributes.TokenName, task.ID),
 		Description: book.Data.Attributes.Description,
 		Image:       bannerLink.Data.Attributes.Url,
 		BannerURL:   c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,

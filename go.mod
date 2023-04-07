@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1
 	github.com/dl-nft-books/book-svc v0.0.0-20230331104951-7d7513e5807a
-	github.com/dl-nft-books/core-svc v0.0.0-20230405081613-525cf97eb73d
+	github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a
 	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fatih/structs v1.1.0
