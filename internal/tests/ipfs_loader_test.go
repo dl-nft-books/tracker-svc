@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/distributed_lab/kit/kv"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
+	"github.com/dl-nft-books/tracker-svc/internal/config"
 )
 
 const (

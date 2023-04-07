@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
 )
 
 type (
@@ -16,8 +16,6 @@ type (
 		WithAddress(address common.Address) FactoryListener
 		WithCtx(ctx context.Context) FactoryListener
 		WithDelayBetweenIntervals(delay time.Duration) FactoryListener
-
-		WatchContractCreatedEvents(ch chan<- etherdata.ContractDeployedEvent) error
 	}
 
 	TokenListener interface {
@@ -30,8 +28,8 @@ type (
 
 		WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) error
 		WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
-		WatchTransferEvents(ch chan<- etherdata.TransferEvent) error
-		WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) error
-		WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) error
+		//WatchTransferEvents(ch chan<- etherdata.TransferEvent) error
+		//WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) error
+		//WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) error
 	}
 )

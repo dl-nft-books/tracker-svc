@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 )
 
 const (
 	paymentsTable = "payments"
 
 	paymentsId              = "id"
-	paymentsContractId      = "contract_id"
+	paymentsChainId         = "chain_id"
 	paymentsContractAddress = "contract_address"
 	paymentsPayerAddress    = "payer_address"
 	paymentsTokenAddress    = "token_address"
@@ -76,8 +76,8 @@ func (q *paymentsQ) FilterByBookUrl(bookUrl ...string) data.PaymentsQ {
 	return q
 }
 
-func (q *paymentsQ) FilterByContractId(contractId ...int64) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsContractId: contractId})
+func (q *paymentsQ) FilterByChainId(chainId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsChainId: chainId})
 	return q
 }
 

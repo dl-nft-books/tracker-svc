@@ -14,6 +14,7 @@ type ListNftPaymentsRequest struct {
 
 	Id         []int64  `filter:"id"`
 	BookId     []int64  `filter:"book_id"`
+	ChainId    []int64  `filter:"chain_id"`
 	NftAddress []string `filter:"nft_address"`
 	NftId      []int64  `filter:"nft_id"`
 }

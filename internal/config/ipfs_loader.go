@@ -5,7 +5,7 @@ import (
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs"
 )
 
 const ipfsLoaderYamlKey = "uploader"

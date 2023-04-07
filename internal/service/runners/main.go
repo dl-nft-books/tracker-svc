@@ -2,32 +2,31 @@ package runners
 
 import (
 	"context"
-	"fmt"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/postgres"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/combiners"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
-	"gitlab.com/tokend/nft-books/network-svc/connector/models"
+	"github.com/dl-nft-books/network-svc/connector/models"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/data/postgres"
+	"github.com/dl-nft-books/tracker-svc/internal/service/runners/combiners"
+	"github.com/dl-nft-books/tracker-svc/internal/service/runners/trackers"
+	"github.com/dl-nft-books/tracker-svc/solidity/generated/contractsregistry"
+	"github.com/ethereum/go-ethereum/common"
+	"strconv"
 	"time"
 
+	"github.com/dl-nft-books/tracker-svc/internal/config"
 	"github.com/pkg/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
 )
 
 const (
-	delayBetweenContractInsertions = time.Second
-	delayBetweenCombinerCalls      = time.Second
-	delayBetweenNetworkSVCCalls    = time.Second
+	delayBetweenNetworkSVCCalls = time.Second
 )
 
 func Run(cfg config.Config, ctx context.Context) error {
 	// Channel connecting factory deploy consumer and routiner
 	var (
-		deployedTokensCh = make(chan consumers.DeployedToken)
+		deployedTokensCh = make(chan trackers.DeployedToken)
 		networks         *models.NetworkDetailedListResponse
 		err              error
 	)
-
 	networkConnector := cfg.NetworkConnector()
 	for networks == nil {
 		networks, err = networkConnector.GetNetworksDetailed()
@@ -36,30 +35,31 @@ func Run(cfg config.Config, ctx context.Context) error {
 		}
 		time.Sleep(delayBetweenNetworkSVCCalls)
 	}
-
+	err = postgres.NewDB(cfg.DB()).KeyValue().Upsert(data.KeyValue{
+		Key:   "stats-chain_id-total",
+		Value: strconv.Itoa(len(networks.Data)),
+	})
+	if err != nil {
+		cfg.Log().WithError(err).Debug("failed to update chains amount")
+		return errors.Wrap(err, "failed to get marketplace contract")
+	}
 	// factoryCombiner would run producer and consumer for a factory contract
 	// and, after consumer processes the event, consumer will
 	// send address to the deployedTokensCh and ask routiner to run
 	// producer and consumer for it
-
 	for _, network := range networks.Data {
-		contracts, err := postgres.NewContractsQ(cfg.DB()).FilterByChainId(network.ChainId).Select()
+		contractsRegistry, err := contractsregistry.NewContractsregistry(common.HexToAddress(network.FactoryAddress), network.RpcUrl)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("failed to select contracts from the database for network %v", network.Name))
+			cfg.Log().WithError(err).Debug("failed to create contract registry")
+			return errors.Wrap(err, "failed to get marketplace contract")
 		}
-		for _, contract := range contracts {
-			go func(contract data.Contract) {
-				deployedTokensCh <- consumers.DeployedToken{
-					Address: contract.Address(),
-					Network: network,
-				}
-			}(contract)
-
-			time.Sleep(delayBetweenContractInsertions)
-		}
-		factoryCombiner := combiners.NewFactoryCombiner(cfg, ctx, network)
-		factoryCombiner.ProduceAndConsumeDeployEvents(deployedTokensCh)
-		time.Sleep(delayBetweenCombinerCalls)
+		marketplaceContract, err := contractsRegistry.GetMarketplaceContract(nil)
+		go func(address common.Address, network models.NetworkDetailedResponse) {
+			deployedTokensCh <- trackers.DeployedToken{
+				Address: marketplaceContract,
+				Network: network,
+			}
+		}(marketplaceContract, network)
 	}
 
 	tokenRoutiner := combiners.NewTokenRoutiner(cfg, ctx)

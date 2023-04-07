@@ -1,0 +1,16 @@
+type: object
+required:
+  - type
+properties:
+  type:
+    type: string
+    example: statistics
+    enum:
+      - statistics
+      - amount-pie-chart
+      - price-pie-chart
+      - chain-pie-chart
+      - tokens
+      - nft-list
+      - date-graph
+      - token-histogram

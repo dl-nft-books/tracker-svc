@@ -5,7 +5,7 @@ import (
 	"fmt"
 	ipfsApi "github.com/ipfs/go-ipfs-api"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs"
 )
 
 type IpfsUploader struct {

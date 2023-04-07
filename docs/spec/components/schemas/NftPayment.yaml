@@ -25,24 +25,24 @@ allOf:
             description: Address of a nft collection
           nft_id:
             type: integer
-            example: "100500"
+            example: '100500'
             description: Nft id
           floor_price:
             type: string
-            example: "100500"
+            example: '100500'
             description: Floor nft price
           minted_token_price:
             type: string
-            example: "103"
-            description: Price of a minted token in $
+            example: '103'
+            description: Price of a minted marketplace in $
           purchase_timestamp:
             type: string
-            example: "2006-01-02"
+            example: '2006-01-02'
             description: Timestamp when the user have purchased a book
           book_url:
             type: string
             description: Url to see the book
-            example: "ipfs.io/ipfs/url goes brrrrrrr"
+            example: ipfs.io/ipfs/url goes brrrrrrr
       relationships:
         type: object
         properties:
@@ -51,6 +51,4 @@ allOf:
             description: Information about related book for nft payment
             properties:
               data:
-                type: object
                 $ref: '#/components/schemas/BookKey'
-

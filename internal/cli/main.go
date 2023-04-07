@@ -2,9 +2,9 @@ package cli
 
 import (
 	"context"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners"
+	"github.com/dl-nft-books/tracker-svc/internal/config"
+	"github.com/dl-nft-books/tracker-svc/internal/service/api"
+	"github.com/dl-nft-books/tracker-svc/internal/service/runners"
 
 	"github.com/alecthomas/kingpin"
 	"gitlab.com/distributed_lab/kit/kv"

@@ -19,7 +19,6 @@ get:
             type: object
             properties:
               data:
-                type: object
                 $ref: '#/components/schemas/NftPayment'
     '400':
       description: Bad Request error

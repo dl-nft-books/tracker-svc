@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 )
 
 type db struct {
@@ -21,10 +21,6 @@ func (db *db) New() data.DB {
 
 func (db *db) KeyValue() data.KeyValueQ {
 	return NewKeyValueQ(db.raw)
-}
-
-func (db *db) Contracts() data.ContractsQ {
-	return NewContractsQ(db.raw)
 }
 
 func (db *db) Payments() data.PaymentsQ {

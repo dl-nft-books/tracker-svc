@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 )
 
 const (
 	nftPaymentsTable = "nft_payments"
 
 	nftPaymentsId              = "id"
-	nftPaymentsContractId      = "contract_id"
+	nftPaymentsChainId         = "chain_id"
 	nftPaymentsContractAddress = "contract_address"
 	nftPaymentsPayerAddress    = "payer_address"
 	nftPaymentsNftAddress      = "nft_address"
@@ -39,8 +39,11 @@ func (q *nftPaymentsQ) New() data.NftPaymentsQ {
 	return NewNftPaymentsQ(q.database.Clone())
 }
 
-func (q *nftPaymentsQ) Page(page pgdb.OffsetPageParams) data.NftPaymentsQ {
-	q.selector = page.ApplyTo(q.selector, "id")
+func (q *nftPaymentsQ) Page(page pgdb.OffsetPageParams, cols ...string) data.NftPaymentsQ {
+	if len(cols) == 0 {
+		cols = append(cols, "id")
+	}
+	q.selector = page.ApplyTo(q.selector, cols...)
 	return q
 }
 
@@ -80,8 +83,8 @@ func (q *nftPaymentsQ) FilterByBookUrl(bookUrl ...string) data.NftPaymentsQ {
 	return q
 }
 
-func (q *nftPaymentsQ) FilterByContractId(contractId ...int64) data.NftPaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsContractId: contractId})
+func (q *nftPaymentsQ) FilterByChainId(chainId ...int64) data.NftPaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsChainId: chainId})
 	return q
 }
 
@@ -93,7 +96,14 @@ func (q *nftPaymentsQ) FilterByContractAddress(contractAddress ...string) data.N
 	return q
 }
 
+func (q *nftPaymentsQ) OrderBy(column ...string) data.NftPaymentsQ {
+
+	q.selector = q.selector.OrderBy()
+	return q
+}
+
 func (q *nftPaymentsQ) Select() (nftPayments []data.NftPayment, err error) {
+	fmt.Println(q.selector.ToSql())
 	err = q.database.Select(&nftPayments, q.selector)
 	return
 }

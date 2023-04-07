@@ -1,10 +1,14 @@
-module gitlab.com/tokend/nft-books/contract-tracker
+module github.com/dl-nft-books/tracker-svc
 
 go 1.18
 
 require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1
+	github.com/dl-nft-books/book-svc v0.0.0-20230331104951-7d7513e5807a
+	github.com/dl-nft-books/core-svc v0.0.0-20230405081613-525cf97eb73d
+	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fatih/structs v1.1.0
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -22,10 +26,6 @@ require (
 	gitlab.com/distributed_lab/logan v3.8.1+incompatible
 	gitlab.com/distributed_lab/running v1.6.0
 	gitlab.com/distributed_lab/urlval v3.0.0+incompatible
-	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d
-	gitlab.com/tokend/nft-books/book-svc v0.0.0-20230228160144-6852ac514928
-	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230228161040-e9785ea79bd4
-	gitlab.com/tokend/nft-books/network-svc v0.0.0-20230228124725-092327ef3392
 )
 
 require (

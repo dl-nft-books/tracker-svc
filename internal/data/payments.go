@@ -4,14 +4,13 @@ import (
 	"time"
 
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"github.com/dl-nft-books/tracker-svc/resources"
 )
 
 const timestampFormat = "2006-01-02"
 
 type Payment struct {
 	Id                int64     `db:"id" structs:"-" json:"-"`
-	ContractId        int64     `db:"contract_id" structs:"contract_id" json:"contract_id"`
 	ContractAddress   string    `db:"contract_address" structs:"contract_address"`
 	PayerAddress      string    `db:"payer_address" structs:"payer_address"`
 	TokenAddress      string    `db:"token_address" structs:"token_address"`
@@ -22,6 +21,7 @@ type Payment struct {
 	PriceToken        string    `db:"price_token" structs:"price_token"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
 	BookUrl           string    `db:"book_url" structs:"book_url"`
+	ChainId           int64     `db:"chain_id" structs:"chain_id"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
 }
 
@@ -32,7 +32,7 @@ type PaymentsQ interface {
 	FilterByPayer(payer ...string) PaymentsQ
 	FilterByTokenAddress(tokenAddress ...string) PaymentsQ
 	FilterByContractAddress(contractAddress ...string) PaymentsQ
-	FilterByContractId(contractId ...int64) PaymentsQ
+	FilterByChainId(chainId ...int64) PaymentsQ
 	FilterByBookUrl(bookUrl ...string) PaymentsQ
 
 	Get() (*Payment, error)

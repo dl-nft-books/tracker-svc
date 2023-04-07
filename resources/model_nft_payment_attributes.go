@@ -9,7 +9,7 @@ type NftPaymentAttributes struct {
 	BookUrl string `json:"book_url"`
 	// Floor nft price
 	FloorPrice string `json:"floor_price"`
-	// Price of a minted token in $
+	// Price of a minted marketplace in $
 	MintedTokenPrice string `json:"minted_token_price"`
 	// Address of a nft collection
 	NftAddress string `json:"nft_address"`

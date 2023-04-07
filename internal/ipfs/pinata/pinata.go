@@ -7,7 +7,7 @@ import (
 	provider "github.com/wealdtech/go-ipfs-provider"
 	pinata "github.com/wealdtech/go-ipfs-provider-pinata"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs"
 )
 
 type PinataLoader struct {

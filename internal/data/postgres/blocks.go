@@ -3,8 +3,8 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"github.com/fatih/structs"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 
 	"github.com/Masterminds/squirrel"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -13,11 +13,11 @@ import (
 const (
 	blocksTable = "blocks"
 
-	blocksIdColumn                 = "id"
-	blocksContractIdColumn         = "contract_id"
-	blocksTransferBlockColumn      = "transfer_block"
-	blocksUpdateBlockColumn        = "update_block"
-	blocksVoucherUpdateBlockColumn = "voucher_update_block"
+	blocksIdColumn              = "id"
+	blocksChainIdColumn         = "chain_id"
+	blocksContractAddressColumn = "contract_address"
+	blocksMintBlockColumn       = "mint_block"
+	blocksMintByNFTBlockColumn  = "mint_by_nft_block"
 )
 
 type blocksQ struct {
@@ -41,8 +41,13 @@ func (q *blocksQ) FilterById(id ...int64) data.BlocksQ {
 	return q
 }
 
-func (q *blocksQ) FilterByContractId(contractId ...int64) data.BlocksQ {
-	q.selector = q.selector.Where(squirrel.Eq{blocksContractIdColumn: contractId})
+func (q *blocksQ) FilterByChainId(id ...int64) data.BlocksQ {
+	q.selector = q.selector.Where(squirrel.Eq{blocksChainIdColumn: id})
+	return q
+}
+
+func (q *blocksQ) FilterByContractAddress(contractAddress ...string) data.BlocksQ {
+	q.selector = q.selector.Where(squirrel.Eq{blocksContractAddressColumn: contractAddress})
 	return q
 }
 
@@ -55,23 +60,16 @@ func (q *blocksQ) Insert(blocks data.Blocks) (id int64, err error) {
 	return id, err
 }
 
-func (q *blocksQ) UpdateTransferBlock(newTransferBlock uint64, id int64) error {
+func (q *blocksQ) UpdateMintBlock(newMintBlock uint64, id int64) error {
 	statement := squirrel.Update(blocksTable).
-		Set(blocksTransferBlockColumn, newTransferBlock).
+		Set(blocksMintBlockColumn, newMintBlock).
 		Where(squirrel.Eq{blocksIdColumn: id})
 	return q.db.Exec(statement)
 }
 
-func (q *blocksQ) UpdateParamsUpdateBlock(newUpdateBlock uint64, id int64) error {
+func (q *blocksQ) UpdateMintByNFTBlock(newMintByNFTBlock uint64, id int64) error {
 	statement := squirrel.Update(blocksTable).
-		Set(blocksUpdateBlockColumn, newUpdateBlock).
-		Where(squirrel.Eq{blocksIdColumn: id})
-	return q.db.Exec(statement)
-}
-
-func (q *blocksQ) UpdateParamsVoucherUpdateBlock(newVoucherUpdateBlock uint64, id int64) error {
-	statement := squirrel.Update(blocksTable).
-		Set(blocksVoucherUpdateBlockColumn, newVoucherUpdateBlock).
+		Set(blocksMintByNFTBlockColumn, newMintByNFTBlock).
 		Where(squirrel.Eq{blocksIdColumn: id})
 	return q.db.Exec(statement)
 }

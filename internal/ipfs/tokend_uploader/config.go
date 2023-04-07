@@ -3,7 +3,7 @@ package tokend_uploader
 import (
 	ipfsApi "github.com/ipfs/go-ipfs-api"
 	"gitlab.com/distributed_lab/kit/kv"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs"
 )
 
 type TokenDIpfsUploader interface {

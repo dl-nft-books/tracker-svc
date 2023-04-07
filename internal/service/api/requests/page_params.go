@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"github.com/dl-nft-books/tracker-svc/resources"
 )
 
 const (

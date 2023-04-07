@@ -26,7 +26,7 @@ get:
           type: integer
     - name: 'filter[token_address]'
       in: query
-      description: Array of token addresses to be included in the payment
+      description: Array of marketplace addresses to be included in the payment
       explode: false
       required: false
       schema:
@@ -42,7 +42,6 @@ get:
             type: object
             properties:
               data:
-                type: object
                 $ref: '#/components/schemas/PaymentsArray'
     '400':
       description: Bad Request error

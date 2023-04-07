@@ -11,7 +11,7 @@ type PaymentAttributes struct {
 	BookUrl string `json:"book_url"`
 	// Token metadata information
 	Erc20Data Erc20Data `json:"erc20_data"`
-	// Price of a minted token in $
+	// Price of a minted marketplace in $
 	MintedTokenPrice string `json:"minted_token_price"`
 	// Address of a user who bought a book
 	PayerAddress string `json:"payer_address"`

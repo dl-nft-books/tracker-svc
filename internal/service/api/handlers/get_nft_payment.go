@@ -3,15 +3,15 @@ package handlers
 import (
 	"net/http"
 
+	booker "github.com/dl-nft-books/book-svc/connector"
+	"github.com/dl-nft-books/book-svc/connector/models"
 	"github.com/spf13/cast"
-	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/book-svc/connector/models"
 
+	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/service/api/requests"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/requests"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
@@ -35,7 +35,7 @@ func GetNftPaymentById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paymentResponse, err := getNftPaymentResponse(*payment, DB(r), Booker(r))
+	paymentResponse, err := getNftPaymentResponse(*payment, Booker(r))
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get payment response")
 		ape.RenderErr(w, problems.InternalError())
@@ -45,10 +45,10 @@ func GetNftPaymentById(w http.ResponseWriter, r *http.Request) {
 	ape.Render(w, *paymentResponse)
 }
 
-func getNftPaymentResponse(payment data.NftPayment, trackerDB data.DB, booker *booker.Connector) (*resources.NftPaymentResponse, error) {
+func getNftPaymentResponse(payment data.NftPayment, booker *booker.Connector) (*resources.NftPaymentResponse, error) {
 	var paymentResponse resources.NftPaymentResponse
 
-	pairRelationships, err := getNftPaymentRelationships(payment, trackerDB, booker)
+	pairRelationships, err := getNftPaymentRelationships(payment, booker)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get pair relationship")
 	}
@@ -63,8 +63,8 @@ func getNftPaymentResponse(payment data.NftPayment, trackerDB data.DB, booker *b
 	return &paymentResponse, nil
 }
 
-func getNftPaymentRelationships(payment data.NftPayment, db data.DB, booker *booker.Connector) (*resources.NftPaymentRelationships, error) {
-	bookId, err := getBookIdFromNftPayment(payment, db, booker)
+func getNftPaymentRelationships(payment data.NftPayment, booker *booker.Connector) (*resources.NftPaymentRelationships, error) {
+	bookId, err := getBookIdFromNftPayment(payment, booker)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get book id from payment")
 	}
@@ -78,19 +78,10 @@ func getNftPaymentRelationships(payment data.NftPayment, db data.DB, booker *boo
 	}, nil
 }
 
-func getBookIdFromNftPayment(payment data.NftPayment, db data.DB, booker *booker.Connector) (*int64, error) {
-	contract, err := db.Contracts().New().Get(payment.ContractId)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get book contract from the database")
-	}
-	if contract == nil {
-		return nil, errors.From(ContractNotFoundErr, logan.F{
-			"contract_id": payment.ContractId,
-		})
-	}
-
+func getBookIdFromNftPayment(payment data.NftPayment, booker *booker.Connector) (*int64, error) {
 	bookResponse, err := booker.ListBooks(models.ListBooksParams{
-		Contract: []string{contract.Addr},
+		Contract: []string{payment.ContractAddress},
+		ChainId:  []int64{payment.ChainId},
 	})
 
 	if err != nil {
@@ -98,7 +89,7 @@ func getBookIdFromNftPayment(payment data.NftPayment, db data.DB, booker *booker
 	}
 	if bookResponse == nil {
 		return nil, errors.From(BookNotFoundErr, logan.F{
-			"book_contract_address": contract.Addr,
+			"book_contract_address": payment.ContractAddress,
 		})
 	}
 

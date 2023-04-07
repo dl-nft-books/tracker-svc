@@ -1,7 +1,7 @@
 package data
 
 import (
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"time"
 
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -9,7 +9,6 @@ import (
 
 type NftPayment struct {
 	Id                int64     `db:"id" structs:"-" json:"-"`
-	ContractId        int64     `db:"contract_id" structs:"contract_id" json:"contract_id"`
 	ContractAddress   string    `db:"contract_address" structs:"contract_address"`
 	PayerAddress      string    `db:"payer_address" structs:"payer_address"`
 	NftAddress        string    `db:"nft_address" structs:"nft_address"`
@@ -17,6 +16,7 @@ type NftPayment struct {
 	FloorPrice        string    `db:"floor_price" structs:"floor_price" json:"floor_price"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
 	BookUrl           string    `db:"book_url" structs:"book_url"`
+	ChainId           int64     `db:"chain_id" structs:"chain_id"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
 }
 
@@ -28,14 +28,15 @@ type NftPaymentsQ interface {
 	FilterByNftAddress(nftAddress ...string) NftPaymentsQ
 	FilterByNftId(nftId ...int64) NftPaymentsQ
 	FilterByContractAddress(contractAddress ...string) NftPaymentsQ
-	FilterByContractId(contractId ...int64) NftPaymentsQ
+	FilterByChainId(chainId ...int64) NftPaymentsQ
 	FilterByBookUrl(bookUrl ...string) NftPaymentsQ
+	OrderBy(column ...string) NftPaymentsQ
 
 	Get() (*NftPayment, error)
 	Select() ([]NftPayment, error)
 
 	Sort(sort pgdb.Sorts) NftPaymentsQ
-	Page(page pgdb.OffsetPageParams) NftPaymentsQ
+	Page(page pgdb.OffsetPageParams, cols ...string) NftPaymentsQ
 
 	Insert(payment NftPayment) (id int64, err error)
 	Delete(id int64) error

@@ -5,7 +5,6 @@ type DB interface {
 	New() DB
 
 	KeyValue() KeyValueQ
-	Contracts() ContractsQ
 	Payments() PaymentsQ
 	NftPayments() NftPaymentsQ
 	Blocks() BlocksQ
