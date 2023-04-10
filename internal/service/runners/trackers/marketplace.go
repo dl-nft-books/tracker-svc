@@ -18,12 +18,8 @@ import (
 )
 
 const (
-	transferTrackerSuffix      = "-marketplace-transfer"
-	deployEventsSuffix         = "-marketplace-deploy"
-	mintTrackerSuffix          = "-marketplace-mint"
-	mintByNftTrackerSuffix     = "-marketplace-mint-by-nft"
-	updateTrackerSuffix        = "-marketplace-update"
-	updateVoucherTrackerSuffix = "-update-voucher"
+	mintTrackerSuffix      = "-marketplace-mint"
+	mintByNftTrackerSuffix = "-marketplace-mint-by-nft"
 )
 
 type DeployedToken struct {
@@ -74,7 +70,10 @@ func (t *MarketPlaceTracker) TrackMintEvents(ch chan<- etherdata.SuccessfulMintE
 				startBlock = block.MintBlock
 			}
 
-			t.log.Info("start tracking mint events from block ", startBlock)
+			t.log.WithFields(logan.F{
+				"marketplace_address": t.marketplaceAddress,
+				"network":             t.network.Name,
+			}).Info("start tracking mint events from block ", startBlock)
 			return listener.
 				From(startBlock).
 				WithCtx(ctx).
@@ -104,7 +103,10 @@ func (t *MarketPlaceTracker) TrackMintByNftEvents(ch chan<- etherdata.Successful
 				startBlock = block.MintByNFTBlock
 			}
 
-			t.log.Info("start tracking mint by NFT events from block ", startBlock)
+			t.log.WithFields(logan.F{
+				"marketplace_address": t.marketplaceAddress,
+				"network":             t.network.Name,
+			}).Info("start tracking mint by NFT events from block ", startBlock)
 			return listener.
 				From(startBlock).
 				WithCtx(ctx).

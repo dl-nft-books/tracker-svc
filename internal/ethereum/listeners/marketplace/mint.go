@@ -3,13 +3,13 @@ package token_listeners
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"gitlab.com/distributed_lab/logan/v3"
-	"gitlab.com/distributed_lab/logan/v3/errors"
 	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
 	"github.com/dl-nft-books/tracker-svc/internal/ethereum"
 	"github.com/dl-nft-books/tracker-svc/internal/helpers"
 	"github.com/dl-nft-books/tracker-svc/solidity/generated/marketplace"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"gitlab.com/distributed_lab/logan/v3"
+	"gitlab.com/distributed_lab/logan/v3/errors"
 )
 
 func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
@@ -61,7 +61,6 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block in chain")
 	}
-
 	if l.maxDepth == nil {
 		return l.readSuccessfulMintInterval(helpers.Interval{
 			From: *l.from,
@@ -128,7 +127,6 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 
 func (l *tokenListener) WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
 	// We firstly range from l.from to the last chain block and then start a listener
-
 	if err = l.validateParameters(); err != nil {
 		return err
 	}

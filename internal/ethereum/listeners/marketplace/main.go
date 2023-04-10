@@ -2,18 +2,18 @@ package token_listeners
 
 import (
 	"context"
-	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
 	"github.com/dl-nft-books/network-svc/connector/models"
+	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
 	"sync"
 	"time"
 
+	"github.com/dl-nft-books/tracker-svc/internal/ethereum"
+	"github.com/dl-nft-books/tracker-svc/internal/ethereum/converters"
+	"github.com/dl-nft-books/tracker-svc/solidity/generated/marketplace"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"github.com/dl-nft-books/tracker-svc/internal/ethereum"
-	"github.com/dl-nft-books/tracker-svc/internal/ethereum/converters"
-	"github.com/dl-nft-books/tracker-svc/solidity/generated/marketplace"
 )
 
 type tokenListener struct {
@@ -110,7 +110,7 @@ func (l *tokenListener) getRPCInstance(address common.Address) (*marketplace.Mar
 
 	newInstance, err := marketplace.NewMarketplace(address, l.rpc)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize rpc marketplace factory instance for given address", logan.F{
+		return nil, errors.Wrap(err, "failed to initialize rpc marketplace instance for given address", logan.F{
 			"address": address,
 		})
 	}
@@ -130,7 +130,7 @@ func (l *tokenListener) getWSInstance(address common.Address) (*marketplace.Mark
 
 	newInstance, err := marketplace.NewMarketplaceFilterer(address, l.webSocket)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize ws marketplace factory instance for given address", logan.F{
+		return nil, errors.Wrap(err, "failed to initialize ws marketplace instance for given address", logan.F{
 			"address": address,
 		})
 	}

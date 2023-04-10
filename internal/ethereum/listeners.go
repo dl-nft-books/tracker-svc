@@ -9,13 +9,13 @@ import (
 )
 
 type (
-	FactoryListener interface {
-		From(from uint64) FactoryListener
-		To(to uint64) FactoryListener
-		WithMaxDepth(maxDepth uint64) FactoryListener
-		WithAddress(address common.Address) FactoryListener
-		WithCtx(ctx context.Context) FactoryListener
-		WithDelayBetweenIntervals(delay time.Duration) FactoryListener
+	MarketplaceListener interface {
+		From(from uint64) MarketplaceListener
+		To(to uint64) MarketplaceListener
+		WithMaxDepth(maxDepth uint64) MarketplaceListener
+		WithAddress(address common.Address) MarketplaceListener
+		WithCtx(ctx context.Context) MarketplaceListener
+		WithDelayBetweenIntervals(delay time.Duration) MarketplaceListener
 	}
 
 	TokenListener interface {
@@ -28,8 +28,5 @@ type (
 
 		WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) error
 		WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
-		//WatchTransferEvents(ch chan<- etherdata.TransferEvent) error
-		//WatchUpdateEvents(ch chan<- etherdata.UpdateEvent) error
-		//WatchVoucherUpdateEvents(ch chan<- etherdata.VoucherUpdateEvent) error
 	}
 )
