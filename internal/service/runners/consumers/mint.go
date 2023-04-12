@@ -132,7 +132,7 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 	}
 	// Uploading metadata
 	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-		Name:        fmt.Sprintf("%s #%s", task.Attributes.TokenName, task.ID),
+		Name:        fmt.Sprintf("%s #%d", task.Attributes.TokenName, task.Attributes.TokenId),
 		Description: book.Data.Attributes.Description,
 		Image:       c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		FileURL:     fileLink.Data.Attributes.Url,
