@@ -51,7 +51,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such book_url is already exist")
 						return errors.New("payment with such book_url is already exist")
 					}
-					spew.Dump(*task)
+
 					book, err := c.GetBook(*task)
 					if err != nil {
 						return errors.Wrap(err, "failed get book", logField)
@@ -130,13 +130,16 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 	if err != nil {
 		return errors.Wrap(err, "failed to get banner image link")
 	}
-	// Uploading metadata
-	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
+
+	openseaData := opensea.Metadata{
 		Name:        fmt.Sprintf("%s #%d", task.Attributes.TokenName, task.Attributes.TokenId),
 		Description: book.Data.Attributes.Description,
-		Image:       task.Attributes.Uri,
+		Image:       c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		FileURL:     fileLink.Data.Attributes.Url,
-	}); err != nil {
+	}
+	spew.Dump(openseaData)
+	// Uploading metadata
+	if err = c.ipfsLoader.UploadMetadata(openseaData); err != nil {
 		return errors.Wrap(err, "failed to load metadata to the ipfs")
 	}
 

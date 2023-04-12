@@ -47,7 +47,7 @@ func (l *IpfsLoader) UploadBanner(uri string) error {
 	l.logger.Debugf("Trying to download via %s", documentUrl)
 
 	downloadedDocument, err := downloadDocument(documentUrl)
-	fmt.Println(documentUrl)
+
 	if err != nil {
 		return errors.Wrap(err, "failed to download document")
 	}
@@ -84,7 +84,7 @@ func (l *IpfsLoader) UploadMetadata(info opensea.Metadata) error {
 	l.logger.Debug("Loading metadata to IPFS...")
 
 	metadataBannerName := l.GetHashOutUri(info.Image) + "-meta"
-	fmt.Println("metadata_hash: ", metadataBannerName)
+
 	response, err := l.implementation.Upload(metadataBannerName, raw)
 	if err != nil {
 		return errors.Wrap(err, "failed to add metadata to the ipfs")
