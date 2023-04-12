@@ -33,7 +33,7 @@ func NewIpfsLoader(cfg config.Config) *IpfsLoader {
 }
 
 func (l *IpfsLoader) UploadBanner(uri string) error {
-	bannerName := fmt.Sprintf("%s.pdf", uri)
+	bannerName := fmt.Sprintf("%s.png", uri)
 
 	l.logger.Debugf("Caught request to process uri %s", uri)
 	l.logger.Debugf("Trying to find banner %s", bannerName)
@@ -47,6 +47,7 @@ func (l *IpfsLoader) UploadBanner(uri string) error {
 	l.logger.Debugf("Trying to download via %s", documentUrl)
 
 	downloadedDocument, err := downloadDocument(documentUrl)
+
 	if err != nil {
 		return errors.Wrap(err, "failed to download document")
 	}
@@ -82,7 +83,8 @@ func (l *IpfsLoader) UploadMetadata(info opensea.Metadata) error {
 	l.logger.Debug("Metadata marshalled successfully")
 	l.logger.Debug("Loading metadata to IPFS...")
 
-	metadataBannerName := l.GetHashOutUri(info.BannerURL) + "-meta"
+	metadataBannerName := l.GetHashOutUri(info.Image) + "-meta"
+
 	response, err := l.implementation.Upload(metadataBannerName, raw)
 	if err != nil {
 		return errors.Wrap(err, "failed to add metadata to the ipfs")

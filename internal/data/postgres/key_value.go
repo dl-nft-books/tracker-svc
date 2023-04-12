@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/dl-nft-books/tracker-svc/internal/data"
 
 	sq "github.com/Masterminds/squirrel"
@@ -41,7 +42,9 @@ func (q *keyValueQ) UpdateStatistics(kvs ...data.KeyValue) error {
 	for _, kv := range kvs {
 		query = query.Values(kv.Key, kv.Value)
 	}
-	return q.db.Exec(query.Suffix("ON CONFLICT (key) DO UPDATE SET value = CAST(value as float) + CAST(EXCLUDED.value as float)"))
+	query = query.Suffix("ON CONFLICT (key) DO UPDATE SET value = CAST(key_value.value as float) + CAST(EXCLUDED.value as float)")
+	fmt.Println(query.ToSql())
+	return q.db.Exec(query)
 }
 
 func (q *keyValueQ) New() data.KeyValueQ {

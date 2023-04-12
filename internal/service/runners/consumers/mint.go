@@ -3,6 +3,7 @@ package consumers
 import (
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	bookerModels "github.com/dl-nft-books/book-svc/connector/models"
 	coreModels "github.com/dl-nft-books/core-svc/connector/models"
 	coreResources "github.com/dl-nft-books/core-svc/resources"
@@ -30,7 +31,7 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					logField := logan.F{"contract_address": c.network.FactoryAddress}
 
 					// Getting task by hash (uri)
-					task, err := c.GetTask(event.Uri, event.TokenId)
+					task, err := c.GetTask(event.Uri)
 					if err != nil {
 						return errors.Wrap(err, "failed get task")
 					}
@@ -84,14 +85,14 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 	)
 }
 
-func (c *MarketPlaceConsumer) GetTask(uri string, tokenId int64) (*coreResources.Task, error) {
+func (c *MarketPlaceConsumer) GetTask(uri string) (*coreResources.Task, error) {
 	// Getting task by hash (uri)
 	tasksResponse, err := c.core.ListTasks(coreModels.ListTasksRequest{IpfsHash: &uri})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get task by ipfs hash")
 	}
 	if len(tasksResponse.Data) == 0 {
-		c.logger.Warn("could not find book")
+		c.logger.Warn("could not find task")
 		return nil, nil
 	}
 	task := tasksResponse.Data[0]
@@ -99,9 +100,8 @@ func (c *MarketPlaceConsumer) GetTask(uri string, tokenId int64) (*coreResources
 	// Updating status to loading on IPFS
 	status := coreResources.TaskUploading
 	if err = c.core.UpdateTask(coreModels.UpdateTaskParams{
-		Id:      cast.ToInt64(task.ID),
-		Status:  &status,
-		TokenId: &tokenId,
+		Id:     cast.ToInt64(task.ID),
+		Status: &status,
 	}); err != nil {
 		return nil, errors.Wrap(err, "failed to update status")
 	}
@@ -124,22 +124,25 @@ func (c *MarketPlaceConsumer) GetBook(task coreResources.Task) (*bookerModels.Ge
 
 func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, task coreResources.Task) error {
 
-	// Getting nft banner img link
-	bannerLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.Banner.Attributes.Key)
+	// Getting nft pdf file link
+	fileLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.File.Attributes.Key)
 	if err != nil {
 		return errors.Wrap(err, "failed to get banner image link")
 	}
-	// Uploading metadata
-	if err = c.ipfsLoader.UploadMetadata(opensea.Metadata{
-		Name:        fmt.Sprintf("%s #%s", task.Attributes.TokenName, task.ID),
+
+	openseaData := opensea.Metadata{
+		Name:        fmt.Sprintf("%s #%d", task.Attributes.TokenName, task.Attributes.TokenId),
 		Description: book.Data.Attributes.Description,
-		Image:       bannerLink.Data.Attributes.Url,
-		BannerURL:   c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
-	}); err != nil {
+		Image:       c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
+		FileURL:     fileLink.Data.Attributes.Url,
+	}
+	spew.Dump(openseaData)
+	// Uploading metadata
+	if err = c.ipfsLoader.UploadMetadata(openseaData); err != nil {
 		return errors.Wrap(err, "failed to load metadata to the ipfs")
 	}
 
-	// Uploading file
+	// Uploading banner
 	if err = c.ipfsLoader.UploadBanner(task.Attributes.BannerIpfsHash); err != nil {
 		return errors.Wrap(err, "failed to load banner to the ipfs")
 	}

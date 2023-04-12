@@ -125,8 +125,8 @@ github.com/denisenkom/go-mssqldb v0.9.0/go.mod h1:xbL0rPBG9cCiLr28tMa8zpbdarY27N
 github.com/dgraph-io/badger v1.6.0/go.mod h1:zwt7syl517jmP8s94KqSxTlM6IMsdhYy6psNgSztDR4=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
-github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1 h1:YxFBtfliodjS0qx61AGRkJz7fiF2XHesPKHmoS2/JFQ=
-github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1/go.mod h1:tuG5Ti1c4LnFxKyaigIsKwe0y6Falxfb//+rz2+IuuM=
+github.com/dl-nft-books/blob-svc v0.0.4-0.20230412083832-9441aef1be89 h1:olE7a2XV/8+gb/bjrBJIY7lRQnEcjEaf8NmTFEhkg6Q=
+github.com/dl-nft-books/blob-svc v0.0.4-0.20230412083832-9441aef1be89/go.mod h1:tuG5Ti1c4LnFxKyaigIsKwe0y6Falxfb//+rz2+IuuM=
 github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f h1:CziJ/Pwfte+3HAM3qKknN3VHuwgXqLE5oEXWvNtHFY8=
 github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f/go.mod h1:E6+den3RHZeiwEJOQ98XJIVWPbHbxk0XjPsEYQvxXB4=
 github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a h1:DWZD4SHnVAiVOH0l0+kbYjaaaQjolQyO4ebgh/4KQYA=

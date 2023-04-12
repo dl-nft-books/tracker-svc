@@ -24,7 +24,7 @@ Tracking flow functions as follows: we firstly initialize a `factory_tracker` an
 ## Install
 
   ```bash
-  git clone contract-runners
+  git clone tracker-svc
   cd 
   go build main.go
   export KV_VIPER_FILE=./config.yaml
