@@ -53,7 +53,7 @@ func (c *Connector) ListBooks(request models.ListBooksParams) (*models.ListBooks
 
 func (c *Connector) GetBookById(bookId int64, chainId ...int64) (*models.GetBookResponse, error) {
 	var result models.GetBookResponse
-
+	fmt.Println("chan_ids", chainId)
 	query := models.GetBookById{
 		ChainId: chainId,
 	}

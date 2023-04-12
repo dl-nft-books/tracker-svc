@@ -3,6 +3,7 @@ package consumers
 import (
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	bookerModels "github.com/dl-nft-books/book-svc/connector/models"
 	coreModels "github.com/dl-nft-books/core-svc/connector/models"
 	coreResources "github.com/dl-nft-books/core-svc/resources"
@@ -50,7 +51,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such book_url is already exist")
 						return errors.New("payment with such book_url is already exist")
 					}
-
+					spew.Dump(*task)
 					book, err := c.GetBook(*task)
 					if err != nil {
 						return errors.Wrap(err, "failed get book", logField)
