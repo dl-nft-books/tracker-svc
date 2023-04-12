@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1
+	github.com/dl-nft-books/blob-svc v0.0.4-0.20230412083832-9441aef1be89
 	github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f
 	github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a
 	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
