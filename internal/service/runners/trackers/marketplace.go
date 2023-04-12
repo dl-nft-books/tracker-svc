@@ -18,8 +18,7 @@ import (
 )
 
 const (
-	mintTrackerSuffix      = "-marketplace-mint"
-	mintByNftTrackerSuffix = "-marketplace-mint-by-nft"
+	tokenSuccessfullyPurchasedSuffix = "-marketplace-successfully-purchased"
 )
 
 type DeployedToken struct {
@@ -54,12 +53,12 @@ func NewMarketPlaceTracker(cfg config.Config, ctx context.Context, deployedToken
 	}
 }
 
-func (t *MarketPlaceTracker) TrackMintEvents(ch chan<- etherdata.SuccessfulMintEvent) {
+func (t *MarketPlaceTracker) TrackTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) {
 	listener := t.listener.WithAddress(t.marketplaceAddress)
 	running.WithBackOff(
 		t.ctx,
 		t.log,
-		t.cfg.Prefix+mintTrackerSuffix,
+		t.cfg.Prefix+tokenSuccessfullyPurchasedSuffix,
 		func(ctx context.Context) error {
 			startBlock := uint64(t.network.FirstBlock)
 			block, err := t.database.Blocks().FilterByContractAddress(t.marketplaceAddress.String()).FilterByChainId(t.network.ChainId).Get()
@@ -77,40 +76,7 @@ func (t *MarketPlaceTracker) TrackMintEvents(ch chan<- etherdata.SuccessfulMintE
 			return listener.
 				From(startBlock).
 				WithCtx(ctx).
-				WatchSuccessfulMintEvents(ch)
-		},
-		t.cfg.Backoff.NormalPeriod,
-		t.cfg.Backoff.MinAbnormalPeriod,
-		t.cfg.Backoff.MaxAbnormalPeriod,
-	)
-}
-
-func (t *MarketPlaceTracker) TrackMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) {
-	listener := t.listener.WithAddress(t.marketplaceAddress)
-
-	running.WithBackOff(
-		t.ctx,
-		t.log,
-		t.cfg.Prefix+mintByNftTrackerSuffix,
-		func(ctx context.Context) error {
-			startBlock := uint64(t.network.FirstBlock)
-
-			block, err := t.database.Blocks().FilterByContractAddress(t.marketplaceAddress.String()).FilterByChainId(t.network.ChainId).Get()
-			if err != nil {
-				return errors.Wrap(err, "failed to get block to begin with")
-			}
-			if block != nil {
-				startBlock = block.MintByNFTBlock
-			}
-
-			t.log.WithFields(logan.F{
-				"marketplace_address": t.marketplaceAddress,
-				"network":             t.network.Name,
-			}).Info("start tracking mint by NFT events from block ", startBlock)
-			return listener.
-				From(startBlock).
-				WithCtx(ctx).
-				WatchSuccessfulMintByNftEvents(ch)
+				WatchTokenSuccessfullyPurchasedEvents(ch)
 		},
 		t.cfg.Backoff.NormalPeriod,
 		t.cfg.Backoff.MinAbnormalPeriod,

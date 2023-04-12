@@ -73,4 +73,3 @@ func (c *Connector) GetBookById(bookId int64, chainId ...int64) (*models.GetBook
 
 	return &result, nil
 }
-

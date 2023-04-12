@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMintEvent) {
+func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan etherdata.TokenSuccessfullyPurchasedEvent) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -70,7 +70,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 						return errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
-					if err = c.MintStatistics(*book, event); err != nil {
+					if err = c.UpdateStatistics(*book, event); err != nil {
 						return errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
@@ -154,7 +154,7 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 	return nil
 }
 
-func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherdata.SuccessfulMintEvent) error {
+func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherdata.TokenSuccessfullyPurchasedEvent) error {
 	// Inserting information about payment
 	_, err := c.database.Payments().New().Insert(data.Payment{
 		PayerAddress:      event.Recipient.String(),
@@ -181,7 +181,7 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 	return nil
 }
 
-func (c *MarketPlaceConsumer) MintStatistics(book bookerModels.GetBookResponse, event etherdata.SuccessfulMintEvent) error {
+func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
 	var usdCurrency big.Int
 	usdCurrency.Mul(event.MintedTokenPrice, event.PaymentTokenPrice)
 	return c.database.KeyValue().UpdateStatistics(

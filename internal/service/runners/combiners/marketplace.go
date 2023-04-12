@@ -28,28 +28,29 @@ func NewTokenCombiner(cfg config.Config, ctx context.Context, deployedToken trac
 	}
 }
 
-func (c *TokenCombiner) ProduceAndConsumeMintEvents() {
+func (c *TokenCombiner) ProduceAndConsumeTokenSuccessfullyPurchasedEvent() {
 	// Running tracker (producer) and consumer with a combinersChannel joining them
 	c.logger.Infof("Initializing mint event consumer and producer for %s", c.marketplaceAddress)
 	go func() {
-		ch := make(chan etherdata.SuccessfulMintEvent)
-		go c.tracker.TrackMintEvents(ch)
-		go c.consumer.ConsumeMintEvents(ch)
+		ch := make(chan etherdata.TokenSuccessfullyPurchasedEvent)
+		go c.tracker.TrackTokenSuccessfullyPurchasedEvents(ch)
+		go c.consumer.ConsumeTokenSuccessfullyPurchasedEvent(ch)
 	}()
 }
 
-func (c *TokenCombiner) ProduceAndConsumeMintByNftEvents() {
-	// Running tracker (producer) and consumer with a combinersChannel joining them
-	c.logger.Infof("Initializing mint by NFT event consumer and producer for %s", c.marketplaceAddress)
-	go func() {
-		ch := make(chan etherdata.SuccessfullyMintedByNftEvent)
-		go c.tracker.TrackMintByNftEvents(ch)
-		go c.consumer.ConsumeMintByNftEvents(ch)
-	}()
-}
+//
+//func (c *TokenCombiner) ProduceAndConsumeMintByNftEvents() {
+//	// Running tracker (producer) and consumer with a combinersChannel joining them
+//	c.logger.Infof("Initializing mint by NFT event consumer and producer for %s", c.marketplaceAddress)
+//	go func() {
+//		ch := make(chan etherdata.TokenSuccessfullyPurchasedEvent)
+//		go c.tracker.TrackTokenSuccessfullyPurchasedEvents(ch)
+//		go c.consumer.ConsumeMintByNftEvents(ch)
+//	}()
+//}
 
 func (c *TokenCombiner) ProduceAndConsumeAllEvents() {
 	c.logger.Infof("Initializing all possible consumers and producers for %s", c.marketplaceAddress)
-	c.ProduceAndConsumeMintEvents()
-	c.ProduceAndConsumeMintByNftEvents()
+	c.ProduceAndConsumeTokenSuccessfullyPurchasedEvent()
+	//c.ProduceAndConsumeMintByNftEvents()
 }

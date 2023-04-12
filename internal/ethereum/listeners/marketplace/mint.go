@@ -12,17 +12,17 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 )
 
-func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch chan<- etherdata.SuccessfulMintEvent) error {
+func (l *tokenListener) readTokenSuccessfullyPurchasedInterval(interval helpers.Interval, ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) error {
 	instance, err := l.getRPCInstance(*l.address)
 	if err != nil {
 		return errors.Wrap(err, "failed to get instance")
 	}
 
-	iterator, err := instance.FilterSuccessfullyMinted(
+	iterator, err := instance.FilterTokenSuccessfullyPurchased(
 		&bind.FilterOpts{
 			Start: interval.From,
 			End:   &interval.To,
-		}, nil, nil, nil,
+		}, nil,
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize an iterator")
@@ -34,7 +34,7 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 		})
 	}
 
-	defer func(iterator *marketplace.MarketplaceSuccessfullyMintedIterator) {
+	defer func(iterator *marketplace.MarketplaceTokenSuccessfullyPurchasedIterator) {
 		if tempErr := iterator.Close(); tempErr != nil {
 			err = tempErr
 		}
@@ -43,8 +43,8 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 	for iterator.Next() {
 		raw := iterator.Event
 		if raw != nil {
-			var event *etherdata.SuccessfulMintEvent
-			event, err = l.converter.SuccessfulMint(*raw)
+			var event *etherdata.TokenSuccessfullyPurchasedEvent
+			event, err = l.converter.TokenSuccessfullyPurchased(*raw)
 			if err != nil {
 				return errors.Wrap(err, "failed to convert raw event to the needed format")
 			}
@@ -56,13 +56,13 @@ func (l *tokenListener) readSuccessfulMintInterval(interval helpers.Interval, ch
 	return nil
 }
 
-func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) readTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) (err error) {
 	lastChainBlock, err := l.rpc.BlockNumber(l.ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get last block in chain")
 	}
 	if l.maxDepth == nil {
-		return l.readSuccessfulMintInterval(helpers.Interval{
+		return l.readTokenSuccessfullyPurchasedInterval(helpers.Interval{
 			From: *l.from,
 			To:   lastChainBlock,
 		}, ch)
@@ -73,7 +73,7 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	}
 
 	for _, interval := range helpers.SplitIntoIntervals(*l.from, *l.to, *l.maxDepth) {
-		if err = l.readSuccessfulMintInterval(interval, ch); err != nil {
+		if err = l.readTokenSuccessfullyPurchasedInterval(interval, ch); err != nil {
 			return errors.Wrap(err, "failed to read mint interval", logan.F{
 				"from": interval.From,
 				"to":   interval.To,
@@ -88,7 +88,7 @@ func (l *tokenListener) readSuccessfulMintEvents(ch chan<- etherdata.SuccessfulM
 	return nil
 }
 
-func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) listenTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) (err error) {
 	opts := bind.WatchOpts{
 		Context: l.ctx,
 	}
@@ -98,8 +98,8 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 		return errors.Wrap(err, "failed to initialize a filterer")
 	}
 
-	eventsChannel := make(chan *marketplace.MarketplaceSuccessfullyMinted)
-	subscription, err := filterer.WatchSuccessfullyMinted(&opts, eventsChannel, nil, nil, nil)
+	eventsChannel := make(chan *marketplace.MarketplaceTokenSuccessfullyPurchased)
+	subscription, err := filterer.WatchTokenSuccessfullyPurchased(&opts, eventsChannel, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch succeesfully minted events")
 	}
@@ -114,8 +114,8 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 				continue
 			}
 
-			var convertedEvent *etherdata.SuccessfulMintEvent
-			convertedEvent, err = l.converter.SuccessfulMint(*raw)
+			var convertedEvent *etherdata.TokenSuccessfullyPurchasedEvent
+			convertedEvent, err = l.converter.TokenSuccessfullyPurchased(*raw)
 			if err != nil {
 				return errors.Wrap(err, "failed to convert event to the needed type")
 			}
@@ -125,16 +125,16 @@ func (l *tokenListener) listenSuccessfulMintEvents(ch chan<- etherdata.Successfu
 	}
 }
 
-func (l *tokenListener) WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) (err error) {
+func (l *tokenListener) WatchTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) (err error) {
 	// We firstly range from l.from to the last chain block and then start a listener
 	if err = l.validateParameters(); err != nil {
 		return err
 	}
-	if err = l.readSuccessfulMintEvents(ch); err != nil {
+	if err = l.readTokenSuccessfullyPurchasedEvents(ch); err != nil {
 		return errors.Wrap(err, "failed to read previous events")
 	}
-	if err = l.listenSuccessfulMintEvents(ch); err != nil {
-		return errors.Wrap(err, "failed to listen to deploy events")
+	if err = l.listenTokenSuccessfullyPurchasedEvents(ch); err != nil {
+		return errors.Wrap(err, "failed to listen to token purchased events")
 	}
 
 	return nil

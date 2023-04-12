@@ -26,7 +26,7 @@ type (
 		WithCtx(ctx context.Context) TokenListener
 		WithDelayBetweenIntervals(delay time.Duration) TokenListener
 
-		WatchSuccessfulMintEvents(ch chan<- etherdata.SuccessfulMintEvent) error
-		WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
+		WatchTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) error
+		//WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
 	}
 )
