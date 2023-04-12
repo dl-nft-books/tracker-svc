@@ -14,4 +14,4 @@ FROM alpine:3.9
 COPY --from=buildbase /usr/local/bin/ /usr/local/bin/
 RUN apk add --no-cache ca-certificates
 
-ENTRYPOINT [""]
+ENTRYPOINT ["tracker-svc"]
