@@ -42,7 +42,7 @@ func (c *MarketPlaceConsumer) ConsumeMintByNftEvents(ch <-chan etherdata.Success
 					})
 
 					//Check if Payment with such book_url is already exists
-					check, err := c.database.Payments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).Get()
+					check, err := c.database.NftPayments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).Get()
 					if err != nil {
 						return errors.Wrap(err, "failed to check is payment exist")
 					}
