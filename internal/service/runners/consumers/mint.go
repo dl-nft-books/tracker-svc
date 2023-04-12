@@ -31,7 +31,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 					logField := logan.F{"contract_address": c.network.FactoryAddress}
 
 					// Getting task by hash (uri)
-					task, err := c.GetTask(event.Uri, event.TokenId)
+					task, err := c.GetTask(event.Uri)
 					if err != nil {
 						return errors.Wrap(err, "failed get task")
 					}
@@ -85,7 +85,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 	)
 }
 
-func (c *MarketPlaceConsumer) GetTask(uri string, tokenId int64) (*coreResources.Task, error) {
+func (c *MarketPlaceConsumer) GetTask(uri string) (*coreResources.Task, error) {
 	// Getting task by hash (uri)
 	tasksResponse, err := c.core.ListTasks(coreModels.ListTasksRequest{IpfsHash: &uri})
 	if err != nil {
@@ -100,9 +100,8 @@ func (c *MarketPlaceConsumer) GetTask(uri string, tokenId int64) (*coreResources
 	// Updating status to loading on IPFS
 	status := coreResources.TaskUploading
 	if err = c.core.UpdateTask(coreModels.UpdateTaskParams{
-		Id:      cast.ToInt64(task.ID),
-		Status:  &status,
-		TokenId: &tokenId,
+		Id:     cast.ToInt64(task.ID),
+		Status: &status,
 	}); err != nil {
 		return nil, errors.Wrap(err, "failed to update status")
 	}

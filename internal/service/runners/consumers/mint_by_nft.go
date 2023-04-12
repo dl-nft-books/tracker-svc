@@ -30,7 +30,7 @@ func (c *MarketPlaceConsumer) ConsumeMintByNftEvents(ch <-chan etherdata.Success
 					logField := logan.F{"contract_address": c.network.FactoryAddress}
 
 					// Getting task by hash (uri)
-					task, err := c.GetTask(event.Uri, event.TokenId)
+					task, err := c.GetTask(event.Uri)
 					if err != nil {
 						return errors.Wrap(err, "failed get task")
 					}
