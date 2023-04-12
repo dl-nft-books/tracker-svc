@@ -124,7 +124,7 @@ func (c *MarketPlaceConsumer) GetBook(task coreResources.Task) (*bookerModels.Ge
 
 func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, task coreResources.Task) error {
 
-	// Getting nft banner img link
+	// Getting nft pdf file link
 	fileLink, err := c.documenter.GetDocumentLink(book.Data.Attributes.File.Attributes.Key)
 	if err != nil {
 		return errors.Wrap(err, "failed to get banner image link")

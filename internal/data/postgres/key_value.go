@@ -41,7 +41,8 @@ func (q *keyValueQ) UpdateStatistics(kvs ...data.KeyValue) error {
 	for _, kv := range kvs {
 		query = query.Values(kv.Key, kv.Value)
 	}
-	return q.db.Exec(query.Suffix("ON CONFLICT (key) DO UPDATE SET value = CAST(value as float) + CAST(EXCLUDED.value as float)"))
+	updateClause := sq.Eq{"value": sq.Expr("CAST(key_value.value as float) + CAST(EXCLUDED.value as float)")}
+	return q.db.Exec(query.Suffix("ON CONFLICT (key) DO UPDATE SET").SetMap(updateClause))
 }
 
 func (q *keyValueQ) New() data.KeyValueQ {
