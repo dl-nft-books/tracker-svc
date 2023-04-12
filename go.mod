@@ -5,8 +5,9 @@ go 1.18
 require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dl-nft-books/blob-svc v0.0.4-0.20230329152701-87d01e0d57b1
-	github.com/dl-nft-books/book-svc v0.0.0-20230331104951-7d7513e5807a
+	github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f
 	github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a
 	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
 	github.com/ethereum/go-ethereum v1.10.26
@@ -36,7 +37,6 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20200211180108-c7c1fbc02894 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

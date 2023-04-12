@@ -53,11 +53,11 @@ func (c *Connector) ListBooks(request models.ListBooksParams) (*models.ListBooks
 
 func (c *Connector) GetBookById(bookId int64, chainId ...int64) (*models.GetBookResponse, error) {
 	var result models.GetBookResponse
-	fmt.Println("chan_ids", chainId)
-	query := models.GetBookById{
-		ChainId: chainId,
+
+	var query struct {
+		ChainId []int64 `filter:"chain_id"`
 	}
-	
+	query.ChainId = chainId
 	// setting full endpoint
 	fullEndpoint := fmt.Sprintf("%s/%s/%d?%s", c.baseUrl, booksEndpoint, bookId, urlval.MustEncode(query))
 
@@ -73,4 +73,3 @@ func (c *Connector) GetBookById(bookId int64, chainId ...int64) (*models.GetBook
 
 	return &result, nil
 }
-
