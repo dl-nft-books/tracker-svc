@@ -72,7 +72,7 @@ func (c *MarketPlaceConsumer) ConsumeMintEvents(ch <-chan etherdata.SuccessfulMi
 					}
 
 					if err = c.MintStatistics(*book, event); err != nil {
-						return errors.Wrap(err, "failed to consume mint transaction", logField)
+						return errors.Wrap(err, "failed to update mint statistics", logField)
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a marketplace with id %d", event.TokenId)
