@@ -2,11 +2,11 @@ FROM golang:1.18-alpine as buildbase
 
 RUN apk add git build-base
 
-WORKDIR /go/src/contract-runners
+WORKDIR /go/src/tracker-svc
 COPY vendor .
 COPY . .
 
-RUN GOOS=linux go build  -o /usr/local/bin/ /go/src/contract-runners
+RUN GOOS=linux go build  -o /usr/local/bin/ /go/src/tracker-svc
 
 
 FROM alpine:3.9
