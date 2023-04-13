@@ -64,19 +64,14 @@ allOf:
               - type: object
             description: Token metadata information
           type:
-            type: integer
-            format: TokenPurchasedEventType
+            type: string
             description: Event type
-            example: 3
+            example: native
             enum:
-              - name: native
-                value: 0
-              - name: erc20
-                value: 1
-              - name: nft
-                value: 2
-              - name: voucher
-                value: 3
+              - native
+              - erc20
+              - nft
+              - voucher
       relationships:
         type: object
         properties:

@@ -26,5 +26,5 @@ type PaymentAttributes struct {
 	// Token id
 	TokenId int64 `json:"token_id"`
 	// Event type
-	Type TokenPurchasedEventType `json:"type"`
+	Type string `json:"type"`
 }

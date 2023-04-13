@@ -59,7 +59,7 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 			PaymentTokenPrice: p.PriceToken,
 			MintedTokenPrice:  p.PriceMinted,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
-			Type:              resources.TokenPurchasedEventType(p.Type),
+			Type:              resources.TokenPurchasedEventType(p.Type).String(),
 			Erc20Data: resources.Erc20Data{
 				Address:  p.TokenAddress,
 				Name:     p.TokenName,
