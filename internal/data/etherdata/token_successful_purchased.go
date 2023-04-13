@@ -14,6 +14,7 @@ type TokenSuccessfullyPurchasedEvent struct {
 	ContractAddress   common.Address // address of book
 	Recipient         common.Address // Who obtained a erc-721 marketplace
 	TokenId           int64          // Token id assigned to the erc-721 marketplace
+	NftId             int64          // Token id assigned to the erc-721 marketplace
 	Uri               string         // Hash of a metadata file from the event
 	Erc20Info         Erc20Info      // Erc20Info from the address used for mint payment
 	Amount            *big.Int       // Amount of marketplace paid

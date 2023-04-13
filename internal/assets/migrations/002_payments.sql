@@ -5,6 +5,7 @@ create table payments
     id                 bigserial primary key,
     contract_address   text,
     token_id       bigint,
+    nft_id       bigint,
     book_id       bigint,
     payer_address      text,
     token_address      text,

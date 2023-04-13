@@ -172,6 +172,7 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 		TokenId:           task.Attributes.TokenId,
 		BookId:            task.Attributes.BookId,
 		PayerAddress:      event.Recipient.String(),
+		NftId:             event.NftId,
 		TokenAddress:      event.Erc20Info.TokenAddress.String(),
 		TokenSymbol:       event.Erc20Info.Symbol,
 		TokenName:         event.Erc20Info.Name,

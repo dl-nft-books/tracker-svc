@@ -21,6 +21,7 @@ type Payment struct {
 	PriceToken        string    `db:"price_token" structs:"price_token"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
 	ChainId           int64     `db:"chain_id" structs:"chain_id"`
+	NftId             int64     `db:"nft_id" structs:"nft_id"`
 	TokenId           int64     `db:"token_id" structs:"token_id"`
 	BookId            int64     `db:"book_id" structs:"book_id"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
