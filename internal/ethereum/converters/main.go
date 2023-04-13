@@ -41,13 +41,13 @@ func (c *EventConverter) TokenSuccessfullyPurchased(raw marketplace.MarketplaceT
 		return nil, errors.Wrap(err, "failed to get block timestamp")
 	}
 
-	erc20Data, err := c.GetErc20Data(raw.BuyParams.TokenContract)
+	erc20Data, err := c.GetErc20Data(raw.BuyParams.PaymentDetails.PaymentTokenAddress)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get erc20 data from the contract")
 	}
 
 	return &etherdata.TokenSuccessfullyPurchasedEvent{
-		ContractAddress:   raw.Raw.Address,
+		ContractAddress:   raw.BuyParams.TokenContract,
 		Recipient:         raw.Recipient,
 		TokenId:           raw.BuyParams.FutureTokenId.Int64(),
 		Uri:               raw.BuyParams.TokenURI,
