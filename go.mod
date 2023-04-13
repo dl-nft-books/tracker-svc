@@ -8,7 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dl-nft-books/blob-svc v0.0.4-0.20230412083832-9441aef1be89
 	github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f
-	github.com/dl-nft-books/core-svc v0.0.0-20230407125047-abf7b5bd568a
+	github.com/dl-nft-books/core-svc v0.0.0-20230413110851-a2c4cb886bf6
 	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fatih/structs v1.1.0

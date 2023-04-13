@@ -22,7 +22,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 	statistics, err := DB(r).KeyValue().New().Select([]string{
 		// amount_pie_chart
 		"stats-book-%-amount",
-		"stats-book-amount",
+		"stats-book-amount-total",
 
 		// price_pie_chart
 		"stats-token_symbol-%-price_token",

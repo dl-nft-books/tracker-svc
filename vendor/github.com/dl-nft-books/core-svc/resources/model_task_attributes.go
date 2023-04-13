@@ -5,7 +5,8 @@
 package resources
 
 type TaskAttributes struct {
-	Banner *Media `json:"banner,omitempty"`
+	// Banner info
+	Banner []byte `json:"banner"`
 	// hash of banner on IPFS
 	BannerIpfsHash string `json:"banner_ipfs_hash"`
 	// Id of book
@@ -20,5 +21,4 @@ type TaskAttributes struct {
 	TokenId int64 `json:"token_id"`
 	// name of future token
 	TokenName string `json:"token_name"`
-	Uri       string `json:"uri"`
 }
