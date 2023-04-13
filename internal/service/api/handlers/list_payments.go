@@ -52,6 +52,15 @@ func applyQFiltersPayments(qPayments data.PaymentsQ, booker *booker.Connector, r
 	if len(request.TokenAddress) > 0 {
 		qPayments = qPayments.FilterByTokenAddress(request.TokenAddress...)
 	}
+	if len(request.ContractAddress) > 0 {
+		qPayments = qPayments.FilterByContractAddress(request.ContractAddress...)
+	}
+	if len(request.TokenId) > 0 {
+		qPayments = qPayments.FilterByTokenId(request.TokenId...)
+	}
+	if len(request.ChainId) > 0 {
+		qPayments = qPayments.FilterByChainId(request.ChainId...)
+	}
 	if len(request.BookId) > 0 {
 		booksResponse, err := booker.ListBooks(models.ListBooksParams{
 			Id:      request.BookId,

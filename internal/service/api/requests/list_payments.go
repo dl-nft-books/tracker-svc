@@ -12,10 +12,12 @@ type ListPaymentsRequest struct {
 	pgdb.OffsetPageParams
 	Sorts pgdb.Sorts `url:"sort" default:"id"`
 
-	Id           []int64  `filter:"id"`
-	BookId       []int64  `filter:"book_id"`
-	ChainId      []int64  `filter:"chain_id"`
-	TokenAddress []string `filter:"token_address"`
+	Id              []int64  `filter:"id"`
+	BookId          []int64  `filter:"book_id"`
+	ChainId         []int64  `filter:"chain_id"`
+	TokenAddress    []string `filter:"token_address"`
+	TokenId         []int64  `filter:"token_id"`
+	ContractAddress []string `filter:"contract_address"`
 }
 
 func NewListPaymentsRequest(r *http.Request) (*ListPaymentsRequest, error) {
