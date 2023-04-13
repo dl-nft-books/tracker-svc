@@ -75,6 +75,11 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 						return errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
+					// Updating contract`s last mint block
+					if err = c.database.Blocks().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
+						return errors.Wrap(err, "failed to update contract`s last mint block")
+					}
+
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a marketplace with id %d", event.TokenId)
 				}
 			}
@@ -158,8 +163,10 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 }
 
 func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	// Inserting information about payment
-	_, err := c.database.Payments().New().Insert(data.Payment{
+	if _, err := c.database.Payments().New().Insert(data.Payment{
+		ContractAddress:   event.ContractAddress.String(),
+		TokenId:           task.Attributes.TokenId,
+		BookId:            task.Attributes.BookId,
 		PayerAddress:      event.Recipient.String(),
 		TokenAddress:      event.Erc20Info.TokenAddress.String(),
 		TokenSymbol:       event.Erc20Info.Symbol,
@@ -170,15 +177,9 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 		PriceToken:        event.PaymentTokenPrice.String(),
 		PurchaseTimestamp: event.Timestamp,
 		ChainId:           c.network.ChainId,
-		BookUrl:           c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
-	})
-	if err != nil {
+		Type:              int8(event.Type),
+	}); err != nil {
 		return errors.Wrap(err, "failed to add payment to the table")
-	}
-
-	// Updating contract`s last mint block
-	if err = c.database.Blocks().UpdateMintBlock(event.BlockNumber, c.network.ChainId); err != nil {
-		return errors.Wrap(err, "failed to update contract`s last mint block")
 	}
 
 	return nil

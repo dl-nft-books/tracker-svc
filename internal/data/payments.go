@@ -3,8 +3,8 @@ package data
 import (
 	"time"
 
-	"gitlab.com/distributed_lab/kit/pgdb"
 	"github.com/dl-nft-books/tracker-svc/resources"
+	"gitlab.com/distributed_lab/kit/pgdb"
 )
 
 const timestampFormat = "2006-01-02"
@@ -20,9 +20,11 @@ type Payment struct {
 	Amount            string    `db:"amount" structs:"amount"`
 	PriceToken        string    `db:"price_token" structs:"price_token"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
-	BookUrl           string    `db:"book_url" structs:"book_url"`
 	ChainId           int64     `db:"chain_id" structs:"chain_id"`
+	TokenId           int64     `db:"token_id" structs:"token_id"`
+	BookId            int64     `db:"book_id" structs:"book_id"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
+	Type              int8      `db:"type" structs:"type"`
 }
 
 type PaymentsQ interface {
@@ -49,12 +51,15 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 	return &resources.Payment{
 		Key: resources.NewKeyInt64(p.Id, resources.PAYMENT),
 		Attributes: resources.PaymentAttributes{
+			ContractAddress:   p.ContractAddress,
+			TokenId:           p.TokenId,
+			BookId:            p.BookId,
 			Amount:            p.Amount,
 			PayerAddress:      p.PayerAddress,
 			PaymentTokenPrice: p.PriceToken,
 			MintedTokenPrice:  p.PriceMinted,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
-			BookUrl:           p.BookUrl,
+			Type:              resources.TokenPurchasedEventType(p.Type),
 			Erc20Data: resources.Erc20Data{
 				Address:  p.TokenAddress,
 				Name:     p.TokenName,

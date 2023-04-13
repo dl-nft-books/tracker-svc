@@ -66,7 +66,7 @@ func (t *MarketPlaceTracker) TrackTokenSuccessfullyPurchasedEvents(ch chan<- eth
 				return errors.Wrap(err, "failed to get block to begin with")
 			}
 			if block != nil {
-				startBlock = block.MintBlock
+				startBlock = block.TokenPurchasedBlock
 			}
 
 			t.log.WithFields(logan.F{

@@ -16,8 +16,7 @@ const (
 	blocksIdColumn              = "id"
 	blocksChainIdColumn         = "chain_id"
 	blocksContractAddressColumn = "contract_address"
-	blocksMintBlockColumn       = "mint_block"
-	blocksMintByNFTBlockColumn  = "mint_by_nft_block"
+	tokenPurchasedBlockColumn   = "token_purchased_block"
 )
 
 type blocksQ struct {
@@ -60,16 +59,9 @@ func (q *blocksQ) Insert(blocks data.Blocks) (id int64, err error) {
 	return id, err
 }
 
-func (q *blocksQ) UpdateMintBlock(newMintBlock uint64, id int64) error {
+func (q *blocksQ) UpdateTokenPurchasedBlockColumn(newMintBlock uint64, id int64) error {
 	statement := squirrel.Update(blocksTable).
-		Set(blocksMintBlockColumn, newMintBlock).
-		Where(squirrel.Eq{blocksIdColumn: id})
-	return q.db.Exec(statement)
-}
-
-func (q *blocksQ) UpdateMintByNFTBlock(newMintByNFTBlock uint64, id int64) error {
-	statement := squirrel.Update(blocksTable).
-		Set(blocksMintByNFTBlockColumn, newMintByNFTBlock).
+		Set(tokenPurchasedBlockColumn, newMintBlock).
 		Where(squirrel.Eq{blocksIdColumn: id})
 	return q.db.Exec(statement)
 }

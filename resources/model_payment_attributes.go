@@ -7,8 +7,12 @@ package resources
 type PaymentAttributes struct {
 	// Amount of tokens paid
 	Amount string `json:"amount"`
+	// Book id
+	BookId int64 `json:"book_id"`
 	// Url to see the book
-	BookUrl string `json:"book_url"`
+	BookUrl *string `json:"book_url,omitempty"`
+	// Address of a book
+	ContractAddress string `json:"contract_address"`
 	// Token metadata information
 	Erc20Data Erc20Data `json:"erc20_data"`
 	// Price of a minted marketplace in $
@@ -19,4 +23,8 @@ type PaymentAttributes struct {
 	PaymentTokenPrice string `json:"payment_token_price"`
 	// Timestamp when the user have purchased a book
 	PurchaseTimestamp string `json:"purchase_timestamp"`
+	// Token id
+	TokenId int64 `json:"token_id"`
+	// Event type
+	Type TokenPurchasedEventType `json:"type"`
 }

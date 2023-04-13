@@ -4,6 +4,8 @@ create table payments
 (
     id                 bigserial primary key,
     contract_address   text,
+    token_id       bigint,
+    book_id       bigint,
     payer_address      text,
     token_address      text,
     token_symbol       text,
@@ -12,9 +14,9 @@ create table payments
     amount             text,
     price_token        text,
     price_minted       text,
-    book_url           text,
     chain_id integer,
-    purchase_timestamp timestamp
+    purchase_timestamp timestamp,
+    type     int8
 );
 
 -- +migrate Down

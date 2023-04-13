@@ -8,23 +8,40 @@ allOf:
         type: object
         required:
           - payer_address
+          - contract_address
+          - book_id
+          - token_id
           - nft_address
           - nft_id
           - floor_price
           - minted_token_price
-          - book_url
           - purchase_timestamp
         properties:
           payer_address:
             type: string
             example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
             description: Address of a user who bought a book
+          contract_address:
+            type: string
+            example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
+            description: Address of a book
+          token_id:
+            type: integer
+            example: '100500'
+            description: Token id
+            format: int64
+          book_id:
+            type: integer
+            example: '100500'
+            description: Book id
+            format: int64
           nft_address:
             type: string
             example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
             description: Address of a nft collection
           nft_id:
             type: integer
+            format: int64
             example: '100500'
             description: Nft id
           floor_price:

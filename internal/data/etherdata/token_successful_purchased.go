@@ -11,6 +11,7 @@ import (
 // the successful mint event which occurs after the user has
 // successfully passed signature from the backend and minted a book
 type TokenSuccessfullyPurchasedEvent struct {
+	ContractAddress   common.Address // address of book
 	Recipient         common.Address // Who obtained a erc-721 marketplace
 	TokenId           int64          // Token id assigned to the erc-721 marketplace
 	Uri               string         // Hash of a metadata file from the event
@@ -21,5 +22,5 @@ type TokenSuccessfullyPurchasedEvent struct {
 	Status            uint64         // 0 if failed and 1 if successful
 	BlockNumber       uint64
 	Timestamp         time.Time
-	Type              string
+	Type              uint8
 }

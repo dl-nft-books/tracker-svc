@@ -15,8 +15,9 @@ type NftPayment struct {
 	NftId             int64     `db:"nft_id" structs:"nft_id" json:"nft_id"`
 	FloorPrice        string    `db:"floor_price" structs:"floor_price" json:"floor_price"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
-	BookUrl           string    `db:"book_url" structs:"book_url"`
 	ChainId           int64     `db:"chain_id" structs:"chain_id"`
+	TokenId           int64     `db:"token_id" structs:"token_id"`
+	BookId            int64     `db:"book_id" structs:"book_id"`
 	PurchaseTimestamp time.Time `db:"purchase_timestamp" structs:"purchase_timestamp"`
 }
 
@@ -44,15 +45,17 @@ type NftPaymentsQ interface {
 
 func (p *NftPayment) Resource() (*resources.NftPayment, error) {
 	return &resources.NftPayment{
-		Key: resources.NewKeyInt64(p.Id, resources.PAYMENT),
+		Key: resources.NewKeyInt64(p.Id, resources.NFT_PAYMENT),
 		Attributes: resources.NftPaymentAttributes{
+			ContractAddress:   p.ContractAddress,
+			TokenId:           p.TokenId,
+			BookId:            p.BookId,
 			NftAddress:        p.NftAddress,
-			NftId:             int32(p.NftId),
+			NftId:             p.NftId,
 			FloorPrice:        p.FloorPrice,
 			PayerAddress:      p.PayerAddress,
 			MintedTokenPrice:  p.PriceMinted,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
-			BookUrl:           p.BookUrl,
 		},
 	}, nil
 }

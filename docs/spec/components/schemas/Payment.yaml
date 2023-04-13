@@ -8,17 +8,24 @@ allOf:
         type: object
         required:
           - payer_address
+          - contract_address
           - amount
+          - book_id
+          - token_id
           - payment_token_price
           - minted_token_price
           - erc20_data
-          - book_url
           - purchase_timestamp
+          - type
         properties:
           payer_address:
             type: string
             example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
             description: Address of a user who bought a book
+          contract_address:
+            type: string
+            example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
+            description: Address of a book
           amount:
             type: string
             example: '100500'
@@ -27,6 +34,16 @@ allOf:
             type: string
             example: '103'
             description: Price of a minted marketplace in $
+          token_id:
+            type: integer
+            example: '100500'
+            description: Token id
+            format: int64
+          book_id:
+            type: integer
+            example: '100500'
+            description: Book id
+            format: int64
           payment_token_price:
             type: string
             example: '1'
@@ -46,6 +63,20 @@ allOf:
               - $ref: '#/components/schemas/Erc20Data'
               - type: object
             description: Token metadata information
+          type:
+            type: integer
+            format: TokenPurchasedEventType
+            description: Event type
+            example: 3
+            enum:
+              - name: native
+                value: 0
+              - name: erc20
+                value: 1
+              - name: nft
+                value: 2
+              - name: voucher
+                value: 3
       relationships:
         type: object
         properties:
