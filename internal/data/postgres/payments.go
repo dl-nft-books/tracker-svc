@@ -16,12 +16,12 @@ const (
 
 	paymentsId              = "id"
 	paymentsChainId         = "chain_id"
+	paymentsTokenId         = "token_id"
 	paymentsContractAddress = "contract_address"
 	paymentsPayerAddress    = "payer_address"
 	paymentsTokenAddress    = "token_address"
 	paymentsAmount          = "amount"
 	paymentsPrice           = "price"
-	paymentsBookUrl         = "book_url"
 )
 
 type paymentsQ struct {
@@ -71,13 +71,13 @@ func (q *paymentsQ) FilterByTokenAddress(tokenAddress ...string) data.PaymentsQ 
 	return q
 }
 
-func (q *paymentsQ) FilterByBookUrl(bookUrl ...string) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsBookUrl: bookUrl})
+func (q *paymentsQ) FilterByChainId(chainId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsChainId: chainId})
 	return q
 }
 
-func (q *paymentsQ) FilterByChainId(chainId ...int64) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{nftPaymentsChainId: chainId})
+func (q *paymentsQ) FilterByTokenId(tokenId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsTokenId: tokenId})
 	return q
 }
 

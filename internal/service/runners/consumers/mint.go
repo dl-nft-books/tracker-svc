@@ -43,7 +43,11 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					})
 
 					//Check if Payment with such book_url is already exists
-					check, err := c.database.Payments().New().FilterByBookUrl(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).Get()
+					check, err := c.database.Payments().New().
+						FilterByContractAddress(event.ContractAddress.String()).
+						FilterByTokenId(task.Attributes.TokenId).
+						FilterByChainId(task.Attributes.ChainId).
+						Get()
 					if err != nil {
 						return errors.Wrap(err, "failed to check is payment exist")
 					}

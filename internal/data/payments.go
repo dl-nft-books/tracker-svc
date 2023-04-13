@@ -35,7 +35,7 @@ type PaymentsQ interface {
 	FilterByTokenAddress(tokenAddress ...string) PaymentsQ
 	FilterByContractAddress(contractAddress ...string) PaymentsQ
 	FilterByChainId(chainId ...int64) PaymentsQ
-	FilterByBookUrl(bookUrl ...string) PaymentsQ
+	FilterByTokenId(tokenId ...int64) PaymentsQ
 
 	Get() (*Payment, error)
 	Select() ([]Payment, error)
