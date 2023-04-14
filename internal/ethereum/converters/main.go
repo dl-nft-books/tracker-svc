@@ -85,7 +85,7 @@ func (c *EventConverter) GetErc20Data(address common.Address, eventType uint8) (
 		return &etherdata.Erc20Info{
 			TokenAddress: address,
 			Name:         "",
-			Symbol:       "",
+			Symbol:       "NFT",
 			Decimals:     0,
 		}, nil
 	}
