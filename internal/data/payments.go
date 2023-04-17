@@ -37,12 +37,14 @@ type PaymentsQ interface {
 	FilterByContractAddress(contractAddress ...string) PaymentsQ
 	FilterByChainId(chainId ...int64) PaymentsQ
 	FilterByTokenId(tokenId ...int64) PaymentsQ
+	FilterByBookId(bookId ...int64) PaymentsQ
+	FilterByType(paymentType ...int8) PaymentsQ
 
 	Get() (*Payment, error)
 	Select() ([]Payment, error)
 
 	Sort(sort pgdb.Sorts) PaymentsQ
-	Page(page pgdb.OffsetPageParams) PaymentsQ
+	Page(page pgdb.OffsetPageParams, cols ...string) PaymentsQ
 
 	Insert(payment Payment) (id int64, err error)
 	Delete(id int64) error

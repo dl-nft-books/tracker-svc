@@ -14,6 +14,8 @@ import (
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
+	"math"
+	"math/big"
 	"strconv"
 	"time"
 )
@@ -190,9 +192,9 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 }
 
 func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	mintedTokenPrice := strconv.FormatInt(event.MintedTokenPrice.Int64(), 10)
-	paymentTokenPrice := strconv.FormatInt(event.PaymentTokenPrice.Int64(), 10)
-	usdCurrency := strconv.FormatInt(event.MintedTokenPrice.Mul(event.MintedTokenPrice, event.PaymentTokenPrice).Int64(), 10)
+	mintedTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.MintedTokenPrice), big.NewFloat(math.Pow10(18)))
+	paymentTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
+	usdCurrency := big.NewFloat(0).Mul(mintedTokenPrice, paymentTokenPrice)
 
 	fmt.Println("mintedTokenPrice", mintedTokenPrice)
 	fmt.Println("paymentTokenPrice", paymentTokenPrice)
@@ -214,26 +216,26 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 		// Native Currency
 		data.KeyValue{ // price (native currency) by each book by each token
 			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: mintedTokenPrice,
+			Value: mintedTokenPrice.String(),
 		},
 		data.KeyValue{ // price (native currency) by each token
 			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: mintedTokenPrice,
+			Value: mintedTokenPrice.String(),
 		},
 		// USD
 		data.KeyValue{ // price (USD) by each book by each token
 			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdCurrency,
+			Value: usdCurrency.String(),
 		}, data.KeyValue{ // price (USD) by each token
 			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdCurrency,
+			Value: usdCurrency.String(),
 		},
 		data.KeyValue{ // price (USD) total
 			Key:   "stats-price_usd",
-			Value: usdCurrency,
+			Value: usdCurrency.String(),
 		}, data.KeyValue{ // price (USD) total by each book
 			Key:   "stats-book-" + book.Data.ID + "-price_usd",
-			Value: usdCurrency,
+			Value: usdCurrency.String(),
 		},
 
 		// Networks

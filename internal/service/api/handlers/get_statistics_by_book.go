@@ -23,14 +23,13 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 	}
 	statistics, err := DB(r).KeyValue().New().Select([]string{
 		// chain_pie_chart
-		fmt.Sprintf("stats-book-%d-chain_id-%", request.BookId),
+		fmt.Sprintf("stats-book-%d-chain_id-%%", request.BookId),
 
 		// date graph
-		fmt.Sprintf("stats-book-%d-amount-date-%", request.BookId),
+		fmt.Sprintf("stats-book-%d-amount-date-%%", request.BookId),
 
 		// token histogram
-		fmt.Sprintf("stats-book-%d-token_symbol-%%-price_token", request.BookId),
-		fmt.Sprintf("stats-book-%d-token_symbol-%%-price_usd", request.BookId),
+		fmt.Sprintf("stats-book-%d-token_symbol-%%", request.BookId),
 		fmt.Sprintf("stats-book-%d-price_usd", request.BookId),
 	}, []string{})
 	if err != nil {
@@ -38,9 +37,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		ape.RenderErr(w, problems.InternalError())
 		return
 	}
-	fmt.Println(statistics)
 	for _, stats := range statistics {
-		fmt.Println("stats:", stats)
 		switch {
 		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-token_symbol", request.BookId)):
 			tokenSymbol := getTokenSymbol(stats.Key)
@@ -86,7 +83,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	nftPayments, err := DB(r).NftPayments().Page(request.NFT, request.Sort).Select()
+	nftPayments, err := DB(r).Payments().Page(request.NFT, request.Sort).FilterByType(int8(resources.NFT)).FilterByBookId(request.BookId).Select()
 	for _, nftPayment := range nftPayments {
 		response.Data.Attributes.NftList = append(response.Data.Attributes.NftList, resources.NftListItem{
 			Key: resources.Key{
@@ -94,7 +91,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 				Type: resources.NFT_LIST,
 			},
 			Attributes: resources.NftListItemAttributes{
-				Address: nftPayment.NftAddress,
+				Address: nftPayment.TokenAddress,
 			},
 		})
 	}

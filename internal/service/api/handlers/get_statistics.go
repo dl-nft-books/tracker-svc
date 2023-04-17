@@ -126,7 +126,7 @@ func getChainID(key string) int64 {
 
 func getTokenSymbol(key string) string {
 	// Find the first and second occurrence of "-" in the key
-	firstIndex := strings.Index(key, "stats-token_symbol-") + len("stats-token_symbol-")
+	firstIndex := strings.Index(key, "-token_symbol-") + len("-token_symbol-")
 	secondIndex := strings.Index(key, "-price")
 	return key[firstIndex:secondIndex]
 }

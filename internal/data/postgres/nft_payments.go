@@ -103,7 +103,6 @@ func (q *nftPaymentsQ) OrderBy(column ...string) data.NftPaymentsQ {
 }
 
 func (q *nftPaymentsQ) Select() (nftPayments []data.NftPayment, err error) {
-	fmt.Println(q.selector.ToSql())
 	err = q.database.Select(&nftPayments, q.selector)
 	return
 }

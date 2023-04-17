@@ -17,11 +17,13 @@ const (
 	paymentsId              = "id"
 	paymentsChainId         = "chain_id"
 	paymentsTokenId         = "token_id"
+	paymentsBookId          = "book_id"
 	paymentsContractAddress = "contract_address"
 	paymentsPayerAddress    = "payer_address"
 	paymentsTokenAddress    = "token_address"
 	paymentsAmount          = "amount"
 	paymentsPrice           = "price"
+	paymentsType            = "type"
 )
 
 type paymentsQ struct {
@@ -40,8 +42,11 @@ func (q *paymentsQ) New() data.PaymentsQ {
 	return NewPaymentsQ(q.database.Clone())
 }
 
-func (q *paymentsQ) Page(page pgdb.OffsetPageParams) data.PaymentsQ {
-	q.selector = page.ApplyTo(q.selector, "id")
+func (q *paymentsQ) Page(page pgdb.OffsetPageParams, cols ...string) data.PaymentsQ {
+	if len(cols) == 0 {
+		cols = append(cols, "id")
+	}
+	q.selector = page.ApplyTo(q.selector, cols...)
 	return q
 }
 
@@ -78,6 +83,16 @@ func (q *paymentsQ) FilterByChainId(chainId ...int64) data.PaymentsQ {
 
 func (q *paymentsQ) FilterByTokenId(tokenId ...int64) data.PaymentsQ {
 	q.selector = q.selector.Where(squirrel.Eq{paymentsTokenId: tokenId})
+	return q
+}
+
+func (q *paymentsQ) FilterByBookId(bookId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsBookId: bookId})
+	return q
+}
+
+func (q *paymentsQ) FilterByType(paymentType ...int8) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsType: paymentType})
 	return q
 }
 
