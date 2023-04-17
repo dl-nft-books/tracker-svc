@@ -40,6 +40,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(statistics)
 	for _, stats := range statistics {
+		fmt.Println("stats:", stats)
 		switch {
 		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-token_symbol", request.BookId)):
 			tokenSymbol := getTokenSymbol(stats.Key)
@@ -52,7 +53,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-price_usd", request.BookId)):
 			response.Data.Attributes.TokensHistogram.Attributes.Total = cast.ToFloat64(stats.Value)
 			break
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-amount-date-%", request.BookId)):
+		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-amount-date-", request.BookId)):
 			date := getDate(stats.Key)
 			response.Data.Attributes.DateGraph = append(response.Data.Attributes.DateGraph, resources.DateGraph{
 				Key: resources.Key{Type: resources.DATE_GRAPH},
@@ -62,7 +63,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 				},
 			})
 			break
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-chain_id-%", request.BookId)):
+		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-chain_id-", request.BookId)):
 			id := getChainID(stats.Key)
 			if id != 0 {
 				if err != nil {
