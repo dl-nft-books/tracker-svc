@@ -6,7 +6,6 @@ type DB interface {
 
 	KeyValue() KeyValueQ
 	Payments() PaymentsQ
-	NftPayments() NftPaymentsQ
 	Blocks() BlocksQ
 
 	Transaction(func() error) error

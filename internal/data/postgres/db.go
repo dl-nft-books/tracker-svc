@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"gitlab.com/distributed_lab/kit/pgdb"
 	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"gitlab.com/distributed_lab/kit/pgdb"
 )
 
 type db struct {
@@ -25,10 +25,6 @@ func (db *db) KeyValue() data.KeyValueQ {
 
 func (db *db) Payments() data.PaymentsQ {
 	return NewPaymentsQ(db.raw)
-}
-
-func (db *db) NftPayments() data.NftPaymentsQ {
-	return NewNftPaymentsQ(db.raw)
 }
 
 func (db *db) Blocks() data.BlocksQ {

@@ -7,10 +7,10 @@ package resources
 type PaymentAttributes struct {
 	// Amount of tokens paid
 	Amount string `json:"amount"`
+	// Url to see the book's banner
+	BannerUrl string `json:"banner_url"`
 	// Book id
 	BookId int64 `json:"book_id"`
-	// Url to see the book
-	BookUrl *string `json:"book_url,omitempty"`
 	// Address of a book
 	ContractAddress string `json:"contract_address"`
 	// Token metadata information

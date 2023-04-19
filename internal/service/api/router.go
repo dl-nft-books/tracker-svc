@@ -31,13 +31,6 @@ func (a *api) router() chi.Router {
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", handlers.GetPaymentById)
 			})
-			r.Route("/nft", func(r chi.Router) {
-				r.Get("/", handlers.ListNftPayments)
-
-				r.Route("/{id}", func(r chi.Router) {
-					r.Get("/", handlers.GetNftPaymentById)
-				})
-			})
 		})
 		r.Route("/statistics", func(r chi.Router) {
 			r.Get("/", handlers.GetStatistics)

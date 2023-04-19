@@ -20,6 +20,7 @@ type Payment struct {
 	Amount            string    `db:"amount" structs:"amount"`
 	PriceToken        string    `db:"price_token" structs:"price_token"`
 	PriceMinted       string    `db:"price_minted" structs:"price_minted"`
+	BannerLink        string    `db:"banner_link" structs:"banner_link"`
 	ChainId           int64     `db:"chain_id" structs:"chain_id"`
 	NftId             int64     `db:"nft_id" structs:"nft_id"`
 	TokenId           int64     `db:"token_id" structs:"token_id"`
@@ -61,6 +62,7 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 			PayerAddress:      p.PayerAddress,
 			PaymentTokenPrice: p.PriceToken,
 			MintedTokenPrice:  p.PriceMinted,
+			BannerUrl:         p.BannerLink,
 			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
 			Type:              resources.TokenPurchasedEventType(p.Type).String(),
 			Erc20Data: resources.Erc20Data{

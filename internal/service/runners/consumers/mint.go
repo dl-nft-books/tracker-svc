@@ -181,6 +181,7 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 		Amount:            event.Amount.String(),
 		PriceMinted:       event.MintedTokenPrice.String(),
 		PriceToken:        event.PaymentTokenPrice.String(),
+		BannerLink:        c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		PurchaseTimestamp: event.Timestamp,
 		ChainId:           c.network.ChainId,
 		Type:              int8(event.Type),
@@ -195,10 +196,6 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 	mintedTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.MintedTokenPrice), big.NewFloat(math.Pow10(18)))
 	paymentTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
 	usdCurrency := big.NewFloat(0).Mul(mintedTokenPrice, paymentTokenPrice)
-
-	fmt.Println("mintedTokenPrice", mintedTokenPrice)
-	fmt.Println("paymentTokenPrice", paymentTokenPrice)
-	fmt.Println("usdCurrency", usdCurrency)
 	return c.database.KeyValue().UpdateStatistics(
 		// Amount
 		data.KeyValue{ // amount of each book

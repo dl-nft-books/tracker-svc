@@ -94,7 +94,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	nftPayments, err := DB(r).NftPayments().Page(request.NFT, request.Sort).Select()
+	nftPayments, err := DB(r).Payments().Page(request.NFT, request.Sort).FilterByType(int8(resources.NFT)).Select()
 	for _, nftPayment := range nftPayments {
 		response.Data.Attributes.NftList = append(response.Data.Attributes.NftList, resources.NftListItem{
 			Key: resources.Key{
@@ -102,7 +102,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 				Type: resources.NFT_LIST,
 			},
 			Attributes: resources.NftListItemAttributes{
-				Address: nftPayment.NftAddress,
+				Address: nftPayment.TokenAddress,
 			},
 		})
 	}

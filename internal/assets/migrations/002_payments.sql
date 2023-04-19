@@ -15,6 +15,7 @@ create table payments
     amount             text,
     price_token        text,
     price_minted       text,
+    banner_link       text,
     chain_id integer,
     purchase_timestamp timestamp,
     type     int8

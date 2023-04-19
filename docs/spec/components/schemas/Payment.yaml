@@ -16,6 +16,7 @@ allOf:
           - minted_token_price
           - erc20_data
           - purchase_timestamp
+          - banner_url
           - type
         properties:
           payer_address:
@@ -54,10 +55,10 @@ allOf:
             type: string
             example: '2006-01-02'
             description: Timestamp when the user have purchased a book
-          book_url:
+          banner_url:
             type: string
             example: ipfs.io/ipfs/url goes brrrrrrr
-            description: Url to see the book
+            description: Url to see the book's banner
           erc20_data:
             allOf:
               - $ref: '#/components/schemas/Erc20Data'

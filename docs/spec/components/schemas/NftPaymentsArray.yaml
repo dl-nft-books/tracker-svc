@@ -1,6 +1,0 @@
-type: array
-description: Array of NFT payments
-items:
-  allOf:
-    - $ref: '#/components/schemas/NftPayment'
-    - type: object
