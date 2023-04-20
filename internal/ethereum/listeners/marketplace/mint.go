@@ -22,7 +22,7 @@ func (l *tokenListener) readTokenSuccessfullyPurchasedInterval(interval helpers.
 		&bind.FilterOpts{
 			Start: interval.From,
 			End:   &interval.To,
-		}, nil,
+		},
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize an iterator")
@@ -99,7 +99,7 @@ func (l *tokenListener) listenTokenSuccessfullyPurchasedEvents(ch chan<- etherda
 	}
 
 	eventsChannel := make(chan *marketplace.MarketplaceTokenSuccessfullyPurchased)
-	subscription, err := filterer.WatchTokenSuccessfullyPurchased(&opts, eventsChannel, nil)
+	subscription, err := filterer.WatchTokenSuccessfullyPurchased(&opts, eventsChannel)
 	if err != nil {
 		return errors.Wrap(err, "failed to watch succeesfully minted events")
 	}

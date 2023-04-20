@@ -45,10 +45,10 @@ func (c *EventConverter) TokenSuccessfullyPurchased(raw marketplace.MarketplaceT
 	erc20Data, err := c.GetErc20Data(raw.BuyParams.PaymentDetails.PaymentTokenAddress, raw.PaymentType)
 	event := &etherdata.TokenSuccessfullyPurchasedEvent{
 		ContractAddress:   raw.BuyParams.TokenContract,
-		Recipient:         raw.Recipient,
-		TokenId:           raw.BuyParams.FutureTokenId.Int64(),
+		Recipient:         raw.BuyParams.Recipient,
+		TokenId:           raw.BuyParams.TokenData.TokenId.Int64(),
 		NftId:             raw.BuyParams.PaymentDetails.NftTokenId.Int64(),
-		Uri:               raw.BuyParams.TokenURI,
+		Uri:               raw.BuyParams.TokenData.TokenURI,
 		MintedTokenPrice:  raw.MintedTokenPrice,
 		Amount:            raw.PaidTokensAmount,
 		Erc20Info:         *erc20Data,
