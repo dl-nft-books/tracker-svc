@@ -3,7 +3,6 @@ package consumers
 import (
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	bookerModels "github.com/dl-nft-books/book-svc/connector/models"
 	coreModels "github.com/dl-nft-books/core-svc/connector/models"
 	coreResources "github.com/dl-nft-books/core-svc/resources"
@@ -146,7 +145,6 @@ func (c *MarketPlaceConsumer) UploadToIpfs(book bookerModels.GetBookResponse, ta
 		Image:       c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		FileURL:     fileLink.Data.Attributes.Url,
 	}
-	spew.Dump(openseaData)
 	// Uploading metadata
 	if err = c.ipfsLoader.UploadMetadata(openseaData); err != nil {
 		return errors.Wrap(err, "failed to load metadata to the ipfs")
