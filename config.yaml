@@ -49,6 +49,10 @@ pinata_connector: # You might not specify these fields if uploader mode is not p
   api_key: 75885611586eb44b9ab3
   api_secret: 445479ab40fbc3bd223585d94e4174c2bf4cc5f1f70907512bd90813a02a21f6
 
+connector:
+  url: http://localhost:8000/_/api/integrations
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHg0MDk3NDhkZmIzMWNhMTQyNGQxMzE2NjM5MThjN2E0NWYyZWE2NTA3IiwicHVycG9zZSI6InNlc3Npb24iLCJleHAiOjMyODY4MDU0NzR9.5Z7FBn4UrgjaNNOGSy0j98cb3M9san4A8kvGzq98Fsg
+
 cop:
   disabled: true
   endpoint: "http://..."
