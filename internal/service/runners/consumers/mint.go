@@ -191,9 +191,9 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 }
 
 func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	mintedTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.MintedTokenPrice), big.NewFloat(math.Pow10(18)))
+	usdPrice := new(big.Float).Quo(new(big.Float).SetInt(event.MintedTokenPrice), big.NewFloat(math.Pow10(18)))
 	paymentTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
-	usdCurrency := big.NewFloat(0).Mul(mintedTokenPrice, paymentTokenPrice)
+	tokenPrice := big.NewFloat(0).Quo(usdPrice, paymentTokenPrice)
 	return c.database.KeyValue().UpdateStatistics(
 		// Amount
 		data.KeyValue{ // amount of each book
@@ -211,26 +211,26 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 		// Native Currency
 		data.KeyValue{ // price (native currency) by each book by each token
 			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: mintedTokenPrice.String(),
+			Value: tokenPrice.String(),
 		},
 		data.KeyValue{ // price (native currency) by each token
 			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: mintedTokenPrice.String(),
+			Value: tokenPrice.String(),
 		},
 		// USD
 		data.KeyValue{ // price (USD) by each book by each token
 			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdCurrency.String(),
+			Value: usdPrice.String(),
 		}, data.KeyValue{ // price (USD) by each token
 			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdCurrency.String(),
+			Value: usdPrice.String(),
 		},
 		data.KeyValue{ // price (USD) total
 			Key:   "stats-price_usd",
-			Value: usdCurrency.String(),
+			Value: usdPrice.String(),
 		}, data.KeyValue{ // price (USD) total by each book
 			Key:   "stats-book-" + book.Data.ID + "-price_usd",
-			Value: usdCurrency.String(),
+			Value: usdPrice.String(),
 		},
 
 		// Networks
