@@ -37,6 +37,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		ape.RenderErr(w, problems.InternalError())
 		return
 	}
+	fmt.Println("statistics #", request.BookId, statistics)
 	for _, stats := range statistics {
 		switch {
 		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-token_symbol", request.BookId)):

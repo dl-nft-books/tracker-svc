@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/dl-nft-books/tracker-svc/internal/data"
 
 	sq "github.com/Masterminds/squirrel"
@@ -69,6 +70,7 @@ func (q *keyValueQ) Select(key, notKey []string) (keyValues []data.KeyValue, err
 	if len(orConditionsNot) > 0 {
 		keyValueSelect = keyValueSelect.Where(orConditionsNot)
 	}
+	fmt.Println(keyValueSelect.ToSql())
 	err = q.db.Select(&keyValues, keyValueSelect)
 	return
 }
