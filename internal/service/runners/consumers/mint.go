@@ -191,9 +191,9 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 }
 
 func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	usdPrice := new(big.Float).Quo(new(big.Float).SetInt(event.MintedTokenPrice), big.NewFloat(math.Pow10(18)))
-	paymentTokenPrice := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
-	tokenPrice := big.NewFloat(0).Quo(usdPrice, paymentTokenPrice)
+	pricePerOneToken := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
+	paymentTokenAmount := new(big.Float).Quo(new(big.Float).SetInt(event.Amount), big.NewFloat(math.Pow10(18)))
+	usdPrice := big.NewFloat(0).Mul(paymentTokenAmount, pricePerOneToken)
 	return c.database.KeyValue().UpdateStatistics(
 		// Amount
 		data.KeyValue{ // amount of each book
@@ -211,11 +211,11 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 		// Native Currency
 		data.KeyValue{ // price (native currency) by each book by each token
 			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: tokenPrice.String(),
+			Value: paymentTokenAmount.String(),
 		},
 		data.KeyValue{ // price (native currency) by each token
 			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: tokenPrice.String(),
+			Value: paymentTokenAmount.String(),
 		},
 		// USD
 		data.KeyValue{ // price (USD) by each book by each token
