@@ -17,15 +17,15 @@ const (
 	valueColumn = "value"
 )
 
-var keyValueSelect = sq.Select("*").From(keyValueTable)
-
 type keyValueQ struct {
-	db *pgdb.DB
+	db       *pgdb.DB
+	selector sq.SelectBuilder
 }
 
 func NewKeyValueQ(db *pgdb.DB) data.KeyValueQ {
 	return &keyValueQ{
-		db: db,
+		db:       db,
+		selector: sq.Select("*").From(keyValueTable),
 	}
 }
 
@@ -65,13 +65,13 @@ func (q *keyValueQ) Select(key, notKey []string) (keyValues []data.KeyValue, err
 		orConditionsNot[i] = sq.NotLike{keyColumn: k}
 	}
 	if len(orConditions) > 0 {
-		keyValueSelect = keyValueSelect.Where(orConditions)
+		q.selector = q.selector.Where(orConditions)
 	}
 	if len(orConditionsNot) > 0 {
-		keyValueSelect = keyValueSelect.Where(orConditionsNot)
+		q.selector = q.selector.Where(orConditionsNot)
 	}
-	fmt.Println(keyValueSelect.ToSql())
-	err = q.db.Select(&keyValues, keyValueSelect)
+	fmt.Println(q.selector.ToSql())
+	err = q.db.Select(&keyValues, q.selector)
 	return
 }
 
@@ -79,7 +79,7 @@ func (q *keyValueQ) LockingGet(key string) (*data.KeyValue, error) {
 	return q.get(key, true)
 }
 func (q *keyValueQ) get(key string, forUpdate bool) (*data.KeyValue, error) {
-	stmt := keyValueSelect.Where(sq.Eq{keyColumn: key})
+	stmt := q.selector.Where(sq.Eq{keyColumn: key})
 	if forUpdate {
 		stmt = stmt.Suffix("FOR UPDATE")
 	}
