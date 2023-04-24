@@ -18,6 +18,7 @@ const (
 	paymentsChainId         = "chain_id"
 	paymentsTokenId         = "token_id"
 	paymentsBookId          = "book_id"
+	paymentsBannerLink      = "banner_link"
 	paymentsContractAddress = "contract_address"
 	paymentsPayerAddress    = "payer_address"
 	paymentsTokenAddress    = "token_address"
@@ -101,6 +102,11 @@ func (q *paymentsQ) FilterByContractAddress(contractAddress ...string) data.Paym
 		contractAddress[i] = strings.ToLower(contractAddress[i])
 	}
 	q.selector = q.selector.Where(squirrel.Eq{fmt.Sprintf("lower(%v)", paymentsContractAddress): contractAddress})
+	return q
+}
+
+func (q *paymentsQ) FilterByBannerLink(bannerLink ...string) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsBannerLink: bannerLink})
 	return q
 }
 

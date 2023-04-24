@@ -12,6 +12,7 @@ allOf:
         properties:
           date:
             type: string
+            format: time.Time
           amount:
             type: integer
             format: int64

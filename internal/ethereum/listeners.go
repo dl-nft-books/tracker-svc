@@ -9,15 +9,6 @@ import (
 )
 
 type (
-	MarketplaceListener interface {
-		From(from uint64) MarketplaceListener
-		To(to uint64) MarketplaceListener
-		WithMaxDepth(maxDepth uint64) MarketplaceListener
-		WithAddress(address common.Address) MarketplaceListener
-		WithCtx(ctx context.Context) MarketplaceListener
-		WithDelayBetweenIntervals(delay time.Duration) MarketplaceListener
-	}
-
 	TokenListener interface {
 		From(from uint64) TokenListener
 		To(to uint64) TokenListener
@@ -27,6 +18,5 @@ type (
 		WithDelayBetweenIntervals(delay time.Duration) TokenListener
 
 		WatchTokenSuccessfullyPurchasedEvents(ch chan<- etherdata.TokenSuccessfullyPurchasedEvent) error
-		//WatchSuccessfulMintByNftEvents(ch chan<- etherdata.SuccessfullyMintedByNftEvent) error
 	}
 )

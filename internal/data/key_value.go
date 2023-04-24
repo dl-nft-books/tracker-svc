@@ -10,7 +10,7 @@ type KeyValueQ interface {
 	New() KeyValueQ
 
 	Get(key string) (*KeyValue, error)
-	Select(key, notKey []string) ([]KeyValue, error)
+	Select(key []string) ([]KeyValue, error)
 	// Upsert updates value if there is one, insert if no
 	Upsert(KeyValue) error
 	UpdateStatistics(kvs ...KeyValue) error

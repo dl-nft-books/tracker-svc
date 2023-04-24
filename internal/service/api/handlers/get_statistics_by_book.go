@@ -31,7 +31,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		// token histogram
 		fmt.Sprintf("stats-book-%d-token_symbol-%%", request.BookId),
 		fmt.Sprintf("stats-book-%d-price_usd", request.BookId),
-	}, []string{})
+	})
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get statistics")
 		ape.RenderErr(w, problems.InternalError())

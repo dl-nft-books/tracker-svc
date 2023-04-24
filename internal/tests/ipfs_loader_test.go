@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/dl-nft-books/tracker-svc/internal/config"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/distributed_lab/kit/kv"
-	"github.com/dl-nft-books/tracker-svc/internal/config"
 )
 
 const (
@@ -23,7 +23,7 @@ func TestIpfsLoader(t *testing.T) {
 	assert.Nil(t, err, "failed to open file")
 	assert.NotEqual(t, len(file), 0, "file not found")
 
-	output, err := implementation.Upload(fileTestName, file)
+	output, err := implementation.Uploader.Upload(fileTestName, file)
 	assert.Nil(t, err, "failed to upload file")
 
 	t.Log(*output)

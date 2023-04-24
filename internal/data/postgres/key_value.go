@@ -53,21 +53,14 @@ func (q *keyValueQ) Get(key string) (*data.KeyValue, error) {
 	return q.get(key, false)
 }
 
-func (q *keyValueQ) Select(key, notKey []string) (keyValues []data.KeyValue, err error) {
+func (q *keyValueQ) Select(key []string) (keyValues []data.KeyValue, err error) {
 	orConditions := make(sq.Or, len(key))
-	orConditionsNot := make(sq.Or, len(notKey))
 
 	for i, k := range key {
 		orConditions[i] = sq.Like{keyColumn: k}
 	}
-	for i, k := range notKey {
-		orConditionsNot[i] = sq.NotLike{keyColumn: k}
-	}
 	if len(orConditions) > 0 {
 		q.selector = q.selector.Where(orConditions)
-	}
-	if len(orConditionsNot) > 0 {
-		q.selector = q.selector.Where(orConditionsNot)
 	}
 	err = q.db.Select(&keyValues, q.selector)
 	return

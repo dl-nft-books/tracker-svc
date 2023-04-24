@@ -31,7 +31,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 
 		// chain_pie_chart
 		"stats-chain_id-%",
-	}, []string{})
+	})
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get statistics")
 		ape.RenderErr(w, problems.InternalError())

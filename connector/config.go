@@ -18,7 +18,7 @@ type tracker struct {
 
 type trackerCfg struct {
 	URL   string `fig:"url,required"`
-	Token string `fig:"marketplace,required"`
+	Token string `fig:"token,required"`
 }
 
 func NewTracker(getter kv.Getter) Tracker {

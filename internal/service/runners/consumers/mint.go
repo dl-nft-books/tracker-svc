@@ -9,6 +9,7 @@ import (
 	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
 	"github.com/dl-nft-books/tracker-svc/internal/data/opensea"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
@@ -42,18 +43,16 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 						"task_id": task.ID,
 					})
 
-					//Check if Payment with such book_url is already exists
+					//Check whether payment with such banner_link already exists
 					check, err := c.database.Payments().New().
-						FilterByContractAddress(event.ContractAddress.String()).
-						FilterByTokenId(task.Attributes.TokenId).
-						FilterByChainId(task.Attributes.ChainId).
+						FilterByBannerLink(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).
 						Get()
 					if err != nil {
 						return errors.Wrap(err, "failed to check is payment exist")
 					}
 					if check != nil {
-						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such book_url is already exist")
-						return errors.New("payment with such book_url is already exist")
+						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such banner_link is already exist")
+						continue
 					}
 
 					book, err := c.GetBook(*task)
@@ -182,7 +181,7 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 		BannerLink:        c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		PurchaseTimestamp: event.Timestamp,
 		ChainId:           c.network.ChainId,
-		Type:              int8(event.Type),
+		Type:              resources.TokenPurchasedEventType(event.Type),
 	}); err != nil {
 		return errors.Wrap(err, "failed to add payment to the table")
 	}
