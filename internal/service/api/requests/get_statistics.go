@@ -8,8 +8,7 @@ import (
 )
 
 type GetStatisticsRequest struct {
-	NFT  pgdb.OffsetPageParams `url:"nft"`
-	Sort string                `url:"nft_sort" default:"floor_price"`
+	pgdb.OffsetPageParams
 }
 
 func NewGetStatisticsRequest(r *http.Request) (*GetStatisticsRequest, error) {

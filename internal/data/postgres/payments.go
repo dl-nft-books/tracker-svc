@@ -43,11 +43,11 @@ func (q *paymentsQ) New() data.PaymentsQ {
 	return NewPaymentsQ(q.database.Clone())
 }
 
-func (q *paymentsQ) Page(page pgdb.OffsetPageParams, cols ...string) data.PaymentsQ {
-	if len(cols) == 0 {
-		cols = append(cols, "id")
+func (q *paymentsQ) Page(page pgdb.OffsetPageParams, sortByCols ...string) data.PaymentsQ {
+	if len(sortByCols) == 0 {
+		sortByCols = append(sortByCols, "id")
 	}
-	q.selector = page.ApplyTo(q.selector, cols...)
+	q.selector = page.ApplyTo(q.selector, sortByCols...)
 	return q
 }
 

@@ -22,7 +22,7 @@ allOf:
           token_list:
             type: array
             items:
-              type: string
+              $ref: '#/components/schemas/PricePieChartTokens'
           nft_list:
             type: array
             items:

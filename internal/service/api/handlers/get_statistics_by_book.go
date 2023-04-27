@@ -1,89 +1,72 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/dl-nft-books/tracker-svc/internal/service/api/requests"
 	"github.com/dl-nft-books/tracker-svc/resources"
-	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
+	"gitlab.com/distributed_lab/kit/pgdb"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
-	var (
-		response resources.StatisticsByBookResponse
-	)
+	var response resources.StatisticsByBookResponse
+	response.Data.Type = resources.STATISTICS
 	request, err := requests.NewGetStatisticsByBookRequest(r)
 	if err != nil {
 		ape.RenderErr(w, problems.BadRequest(err)...)
 		return
 	}
-	statistics, err := DB(r).KeyValue().New().Select([]string{
-		// chain_pie_chart
-		fmt.Sprintf("stats-book-%d-chain_id-%%", request.BookId),
 
-		// date graph
-		fmt.Sprintf("stats-book-%d-amount-date-%%", request.BookId),
-
-		// token histogram
-		fmt.Sprintf("stats-book-%d-token_symbol-%%", request.BookId),
-		fmt.Sprintf("stats-book-%d-price_usd", request.BookId),
-	})
-	if err != nil {
-		Log(r).WithError(err).Error("failed to get statistics")
-		ape.RenderErr(w, problems.InternalError())
-		return
-	}
-	for _, stats := range statistics {
-		switch {
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-token_symbol", request.BookId)):
-			tokenSymbol := getTokenSymbol(stats.Key)
-			if strings.Index(stats.Key, "usd") != -1 {
-				response = setUsdPriceByBook(response, tokenSymbol, cast.ToFloat64(stats.Value))
-				break
-			}
-			response = setTokenPriceByBook(response, tokenSymbol, cast.ToFloat64(stats.Value))
-			break
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-price_usd", request.BookId)):
-			response.Data.Attributes.TokensHistogram.Attributes.Total = cast.ToFloat64(stats.Value)
-			break
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-amount-date-", request.BookId)):
-			date := getDate(stats.Key)
-			response.Data.Attributes.DateGraph = append(response.Data.Attributes.DateGraph, resources.DateGraph{
-				Key: resources.Key{Type: resources.DATE_GRAPH},
-				Attributes: resources.DateGraphAttributes{
-					Amount: cast.ToInt64(stats.Value),
-					Date:   date,
+	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().FilterByBookId(request.BookId).Get()
+	response.Data.Attributes.TokensHistogram.Attributes.Total = bookStats.UsdPrice
+	// Token Histogram
+	tokenStats, err := DB(r).Statistics().TokenStatisticsQ.New().
+		FilterByBookId(request.BookId).Select()
+	for _, token := range tokenStats {
+		response.Data.Attributes.TokensHistogram.Attributes.Tokens =
+			append(response.Data.Attributes.TokensHistogram.Attributes.Tokens, resources.PricePieChartTokens{
+				Key: resources.Key{},
+				Attributes: resources.PricePieChartTokensAttributes{
+					Name:           token.TokenSymbol,
+					NativeCurrency: token.TokenPrice,
+					Usd:            token.UsdPrice,
 				},
 			})
-			break
-		case strings.HasPrefix(stats.Key, fmt.Sprintf("stats-book-%d-chain_id-", request.BookId)):
-			id := getChainID(stats.Key)
-			if id != 0 {
-				if err != nil {
-					Log(r).WithError(err).Error("failed to get book")
-					ape.RenderErr(w, problems.InternalError())
-					return
-				}
-				response.Data.Attributes.ChainPieChart.Attributes.Chains = append(
-					response.Data.Attributes.ChainPieChart.Attributes.Chains,
-					resources.ChainPieChartChains{
-						Key: resources.Key{Type: resources.CHAIN_PIE_CHART},
-						Attributes: resources.ChainPieChartChainsAttributes{
-							Amount:  cast.ToInt64(stats.Value),
-							ChainId: id,
-						},
-					})
-				break
-			}
-			response.Data.Attributes.ChainPieChart.Attributes.Total = cast.ToInt64(stats.Value)
-			break
-		}
 	}
-	nftPayments, err := DB(r).Payments().Page(request.NFT, request.Sort).FilterByType(int8(resources.NFT)).FilterByBookId(request.BookId).Select()
+
+	// Date Graph chart
+	dateStats, err := DB(r).Statistics().DateStatisticsQ.New().FilterByBookId(request.BookId).Select()
+	for _, date := range dateStats {
+		response.Data.Attributes.DateGraph =
+			append(response.Data.Attributes.DateGraph, resources.DateGraph{
+				Key: resources.Key{},
+				Attributes: resources.DateGraphAttributes{
+					Amount: date.Amount,
+					Date:   date.Date,
+				},
+			})
+	}
+
+	// Chain pie chart
+	chainStats, err := DB(r).Statistics().ChainStatisticsQ.New().FilterByBookId(request.BookId).Select()
+	for _, chain := range chainStats {
+		response.Data.Attributes.ChainPieChart.Attributes.Chains =
+			append(response.Data.Attributes.ChainPieChart.Attributes.Chains, resources.ChainPieChartChains{
+				Key: resources.Key{},
+				Attributes: resources.ChainPieChartChainsAttributes{
+					Amount:  chain.Amount,
+					ChainId: chain.ChainId,
+				},
+			})
+	}
+
+	nftPayments, err := DB(r).Payments().Page(pgdb.OffsetPageParams{
+		Limit:      request.Limit,
+		Order:      "desc",
+		PageNumber: 0,
+	}, "price_token").FilterByType(int8(resources.NFT)).FilterByBookId(request.BookId).Select()
 	for _, nftPayment := range nftPayments {
 		response.Data.Attributes.NftList = append(response.Data.Attributes.NftList, resources.NftListItem{
 			Key: resources.Key{
@@ -96,43 +79,4 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	ape.Render(w, response)
-}
-
-func setTokenPriceByBook(response resources.StatisticsByBookResponse, tokenSymbol string, price float64) resources.StatisticsByBookResponse {
-	for _, token := range response.Data.Attributes.TokensHistogram.Attributes.Tokens {
-		if token.Attributes.Name == tokenSymbol {
-			token.Attributes.NativeCurrency = price
-			return response
-		}
-	}
-	response.Data.Attributes.TokensHistogram.Attributes.Tokens = append(response.Data.Attributes.TokensHistogram.Attributes.Tokens, resources.PricePieChartTokens{
-		Key: resources.Key{Type: resources.TOKENS},
-		Attributes: resources.PricePieChartTokensAttributes{
-			Name:           tokenSymbol,
-			NativeCurrency: price,
-		},
-	})
-	return response
-}
-func setUsdPriceByBook(response resources.StatisticsByBookResponse, tokenSymbol string, price float64) resources.StatisticsByBookResponse {
-	for _, token := range response.Data.Attributes.TokensHistogram.Attributes.Tokens {
-		if token.Attributes.Name == tokenSymbol {
-			token.Attributes.Usd = price
-			return response
-		}
-	}
-	response.Data.Attributes.TokensHistogram.Attributes.Tokens = append(response.Data.Attributes.TokensHistogram.Attributes.Tokens, resources.PricePieChartTokens{
-		Key: resources.Key{Type: resources.TOKENS},
-		Attributes: resources.PricePieChartTokensAttributes{
-			Name: tokenSymbol,
-			Usd:  price,
-		},
-	})
-	return response
-}
-
-func getDate(key string) string {
-	// Find the first and second occurrence of "-" in the key
-	firstIndex := strings.Index(key, "date-") + len("date-")
-	return key[firstIndex:]
 }
