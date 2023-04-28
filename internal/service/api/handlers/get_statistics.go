@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"github.com/dl-nft-books/tracker-svc/internal/data/key_value"
 	"github.com/dl-nft-books/tracker-svc/internal/service/api/requests"
 	"github.com/dl-nft-books/tracker-svc/resources"
+	"github.com/spf13/cast"
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/kit/pgdb"
@@ -81,6 +83,8 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 				},
 			})
 	}
+	totalChains, err := DB(r).KeyValue().Get(key_value.TotalDeployChains)
+	response.Data.Attributes.ChainPieChart.Attributes.Total = cast.ToInt64(totalChains)
 
 	nftPayments, err := DB(r).Payments().Page(pgdb.OffsetPageParams{
 		Limit:      request.Limit,

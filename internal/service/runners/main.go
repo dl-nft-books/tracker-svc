@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/dl-nft-books/network-svc/connector/models"
 	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/data/key_value"
 	"github.com/dl-nft-books/tracker-svc/internal/data/postgres"
 	"github.com/dl-nft-books/tracker-svc/internal/service/runners/combiners"
 	"github.com/dl-nft-books/tracker-svc/internal/service/runners/trackers"
@@ -36,7 +37,7 @@ func Run(cfg config.Config, ctx context.Context) error {
 		time.Sleep(delayBetweenNetworkSVCCalls)
 	}
 	err = postgres.NewDB(cfg.DB()).KeyValue().Upsert(data.KeyValue{
-		Key:   "stats-chain_id-total",
+		Key:   key_value.TotalDeployChains,
 		Value: strconv.Itoa(len(networks.Data)),
 	})
 	if err != nil {
