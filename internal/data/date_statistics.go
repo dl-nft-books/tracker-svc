@@ -3,7 +3,7 @@ package data
 type DateStatistics struct {
 	Id     int64  `db:"id" structs:"-" json:"-"`
 	Amount int64  `db:"amount" structs:"amount"`
-	Date   string `db:"usd_price" structs:"usd_price"`
+	Date   string `db:"date" structs:"date"`
 	BookId int64  `db:"book_id" structs:"book_id"`
 }
 
