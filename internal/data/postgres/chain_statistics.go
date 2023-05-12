@@ -92,7 +92,7 @@ func (q *chainsQ) Insert(chain data.ChainStatistics) (id int64, err error) {
 func (q *chainsQ) Update(amount int64, id int64) error {
 	return q.database.Exec(squirrel.Update(chainsTable).
 		SetMap(map[string]interface{}{
-			"amount": amount,
+			chainsAmount: amount,
 		}).
 		Where(squirrel.Eq{chainsId: id}))
 }
