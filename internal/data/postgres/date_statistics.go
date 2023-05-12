@@ -89,9 +89,11 @@ func (q *datesQ) Insert(date data.DateStatistics) (id int64, err error) {
 	return id, err
 }
 
-func (q *datesQ) Update(updateStatements data.DateStatistics, id int64) error {
+func (q *datesQ) Update(amount int64, id int64) error {
 	return q.database.Exec(squirrel.Update(datesDate).
-		SetMap(structs.Map(&updateStatements)).
+		SetMap(map[string]interface{}{
+			"amount": amount,
+		}).
 		Where(squirrel.Eq{datesId: id}))
 }
 

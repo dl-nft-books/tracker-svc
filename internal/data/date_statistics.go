@@ -16,7 +16,7 @@ type DateStatisticsQ interface {
 
 	Get() (*DateStatistics, error)
 	Select() ([]DateStatistics, error)
-	Update(updateStatements DateStatistics, id int64) error
+	Update(amount int64, id int64) error
 	Insert(payment DateStatistics) (id int64, err error)
 	Delete(id int64) error
 }

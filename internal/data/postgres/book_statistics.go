@@ -71,7 +71,6 @@ func (q *booksQ) Get() (*data.BookStatistics, error) {
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-	fmt.Println(q.selector.ToSql())
 	return &book, err
 }
 
@@ -86,7 +85,10 @@ func (q *booksQ) Insert(book data.BookStatistics) (id int64, err error) {
 
 func (q *booksQ) Update(updateStatements data.BookStatistics, id int64) error {
 	return q.database.Exec(squirrel.Update(booksTable).
-		SetMap(structs.Map(&updateStatements)).
+		SetMap(map[string]interface{}{
+			"amount":    updateStatements.Amount,
+			"usd_price": updateStatements.UsdPrice,
+		}).
 		Where(squirrel.Eq{booksId: id}))
 }
 

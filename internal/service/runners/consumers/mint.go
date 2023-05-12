@@ -226,7 +226,6 @@ func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by book")
 	}
-	fmt.Println(bookStats)
 	if bookStats != nil {
 		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
 			Amount:   bookStats.Amount + 1,
@@ -269,9 +268,7 @@ func (c *MarketPlaceConsumer) updateDateStatistics(bookId int64, date string) er
 		return errors.Wrap(err, "failed to get statistics by date")
 	}
 	if dateStats != nil {
-		return c.database.Statistics().DateStatisticsQ.New().Update(data.DateStatistics{
-			Amount: dateStats.Amount + 1,
-		}, dateStats.Id)
+		return c.database.Statistics().DateStatisticsQ.New().Update(dateStats.Amount+1, dateStats.Id)
 	}
 	_, err = c.database.Statistics().DateStatisticsQ.New().Insert(data.DateStatistics{
 		Amount: 1,
@@ -288,9 +285,7 @@ func (c *MarketPlaceConsumer) updateChainStatistics(bookId int64) error {
 		return errors.Wrap(err, "failed to get statistics by chain")
 	}
 	if chainStats != nil {
-		return c.database.Statistics().ChainStatisticsQ.New().Update(data.ChainStatistics{
-			Amount: chainStats.Amount + 1,
-		}, chainStats.Id)
+		return c.database.Statistics().ChainStatisticsQ.New().Update(chainStats.Amount+1, chainStats.Id)
 	}
 	_, err = c.database.Statistics().ChainStatisticsQ.New().Insert(data.ChainStatistics{
 		Amount:  1,

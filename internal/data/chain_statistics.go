@@ -16,7 +16,7 @@ type ChainStatisticsQ interface {
 
 	Get() (*ChainStatistics, error)
 	Select() ([]ChainStatistics, error)
-	Update(updateStatements ChainStatistics, id int64) error
+	Update(amount int64, id int64) error
 	Insert(stats ChainStatistics) (id int64, err error)
 	Delete(id int64) error
 }

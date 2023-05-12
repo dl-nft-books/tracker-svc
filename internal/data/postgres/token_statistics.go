@@ -92,7 +92,10 @@ func (q *tokensQ) Insert(token data.TokenStatistics) (id int64, err error) {
 
 func (q *tokensQ) Update(updateStatements data.TokenStatistics, id int64) error {
 	return q.database.Exec(squirrel.Update(tokensTable).
-		SetMap(structs.Map(&updateStatements)).
+		SetMap(map[string]interface{}{
+			"token_price": updateStatements.TokenPrice,
+			"usd_price":   updateStatements.UsdPrice,
+		}).
 		Where(squirrel.Eq{tokensId: id}))
 }
 
