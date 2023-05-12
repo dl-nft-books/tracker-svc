@@ -77,7 +77,7 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					}
 
 					// Updating contract`s last mint block
-					if err = c.database.Blocks().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
+					if err = c.database.Blocks().New().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
 						return errors.Wrap(err, "failed to update contract`s last mint block")
 					}
 
@@ -222,17 +222,17 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 }
 
 func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float64) error {
-	bookStats, err := c.database.Statistics().BookStatisticsQ.FilterByBookId(bookId).Get()
+	bookStats, err := c.database.Statistics().BookStatisticsQ.New().FilterByBookId(bookId).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by book")
 	}
 	if bookStats != nil {
-		return c.database.Statistics().BookStatisticsQ.Update(data.BookStatistics{
+		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
 			Amount:   bookStats.Amount + 1,
 			UsdPrice: bookStats.UsdPrice + bookPrice,
 		}, bookStats.Id)
 	}
-	_, err = c.database.Statistics().BookStatisticsQ.Insert(data.BookStatistics{
+	_, err = c.database.Statistics().BookStatisticsQ.New().Insert(data.BookStatistics{
 		Amount:   1,
 		UsdPrice: bookPrice,
 		BookId:   bookId,
@@ -241,17 +241,17 @@ func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float
 }
 
 func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, tokenPrice float64, symbol string) error {
-	tokenStats, err := c.database.Statistics().TokenStatisticsQ.FilterByBookId(bookId).FilterByTokenSymbol(symbol).Get()
+	tokenStats, err := c.database.Statistics().TokenStatisticsQ.New().FilterByBookId(bookId).FilterByTokenSymbol(symbol).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by token")
 	}
 	if tokenStats != nil {
-		return c.database.Statistics().TokenStatisticsQ.Update(data.TokenStatistics{
+		return c.database.Statistics().TokenStatisticsQ.New().Update(data.TokenStatistics{
 			UsdPrice:   tokenStats.UsdPrice + usdPrice,
 			TokenPrice: tokenStats.TokenPrice + tokenPrice,
 		}, tokenStats.Id)
 	}
-	_, err = c.database.Statistics().TokenStatisticsQ.Insert(data.TokenStatistics{
+	_, err = c.database.Statistics().TokenStatisticsQ.New().Insert(data.TokenStatistics{
 		TokenSymbol: symbol,
 		UsdPrice:    usdPrice,
 		TokenPrice:  tokenPrice,
@@ -261,18 +261,18 @@ func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, toke
 }
 
 func (c *MarketPlaceConsumer) updateDateStatistics(bookId int64, date string) error {
-	dateStats, err := c.database.Statistics().DateStatisticsQ.
+	dateStats, err := c.database.Statistics().DateStatisticsQ.New().
 		FilterByBookId(bookId).
 		FilterByDate(date).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by date")
 	}
 	if dateStats != nil {
-		return c.database.Statistics().DateStatisticsQ.Update(data.DateStatistics{
+		return c.database.Statistics().DateStatisticsQ.New().Update(data.DateStatistics{
 			Amount: dateStats.Amount + 1,
 		}, dateStats.Id)
 	}
-	_, err = c.database.Statistics().DateStatisticsQ.Insert(data.DateStatistics{
+	_, err = c.database.Statistics().DateStatisticsQ.New().Insert(data.DateStatistics{
 		Amount: 1,
 		Date:   date,
 		BookId: bookId,
@@ -281,17 +281,17 @@ func (c *MarketPlaceConsumer) updateDateStatistics(bookId int64, date string) er
 }
 
 func (c *MarketPlaceConsumer) updateChainStatistics(bookId int64) error {
-	chainStats, err := c.database.Statistics().ChainStatisticsQ.
+	chainStats, err := c.database.Statistics().ChainStatisticsQ.New().
 		FilterByBookId(bookId).FilterByChainId(c.network.ChainId).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by chain")
 	}
 	if chainStats != nil {
-		return c.database.Statistics().ChainStatisticsQ.Update(data.ChainStatistics{
+		return c.database.Statistics().ChainStatisticsQ.New().Update(data.ChainStatistics{
 			Amount: chainStats.Amount + 1,
 		}, chainStats.Id)
 	}
-	_, err = c.database.Statistics().ChainStatisticsQ.Insert(data.ChainStatistics{
+	_, err = c.database.Statistics().ChainStatisticsQ.New().Insert(data.ChainStatistics{
 		Amount:  1,
 		ChainId: c.network.ChainId,
 		BookId:  bookId,
