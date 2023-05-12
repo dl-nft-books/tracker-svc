@@ -23,6 +23,18 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// Amount pie chart
 	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get book statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
+	if len(bookStats) == 0 {
+		Log(r).Warn("book statistics not found")
+		
+		// return empty statistics
+		ape.Render(w, response)
+		return
+	}
 	for _, book := range bookStats {
 		if book.BookId == 0 {
 			response.Data.Attributes.AmountPieChart.Attributes.Total = book.Amount
@@ -48,6 +60,11 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			Order:      "desc",
 			PageNumber: 0,
 		}, "usd_price").Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get token statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for i, token := range tokenStats {
 		if i <= int(request.Limit) {
 			response.Data.Attributes.TokenList =
@@ -73,6 +90,11 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// Chain pie chart
 	chainStats, err := DB(r).Statistics().ChainStatisticsQ.New().FilterByBookId(0).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get chain statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, chain := range chainStats {
 		response.Data.Attributes.ChainPieChart.Attributes.Chains =
 			append(response.Data.Attributes.ChainPieChart.Attributes.Chains, resources.ChainPieChartChains{
@@ -84,6 +106,11 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			})
 	}
 	totalChains, err := DB(r).KeyValue().Get(key_value.TotalDeployChains)
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get total chains")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	response.Data.Attributes.ChainPieChart.Attributes.Total = cast.ToInt64(totalChains)
 
 	nftPayments, err := DB(r).Payments().Page(pgdb.OffsetPageParams{
@@ -91,6 +118,11 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 		Order:      "desc",
 		PageNumber: 0,
 	}, "price_token").FilterByType(int8(resources.NFT)).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get nft payments")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, nftPayment := range nftPayments {
 		response.Data.Attributes.NftList = append(response.Data.Attributes.NftList, resources.NftListItem{
 			Key: resources.Key{

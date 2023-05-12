@@ -6,6 +6,7 @@ import (
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/kit/pgdb"
+	"gitlab.com/distributed_lab/logan/v3"
 	"net/http"
 	"strconv"
 )
@@ -20,10 +21,26 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().FilterByBookId(request.BookId).Get()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get book statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
+	if bookStats == nil {
+		Log(r).WithFields(logan.F{"book_id": request.BookId}).Error("book statistics not found")
+		// return empty statistics
+		ape.Render(w, response)
+		return
+	}
 	response.Data.Attributes.TokensHistogram.Attributes.Total = bookStats.UsdPrice
 	// Token Histogram
 	tokenStats, err := DB(r).Statistics().TokenStatisticsQ.New().
 		FilterByBookId(request.BookId).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get token statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, token := range tokenStats {
 		response.Data.Attributes.TokensHistogram.Attributes.Tokens =
 			append(response.Data.Attributes.TokensHistogram.Attributes.Tokens, resources.PricePieChartTokens{
@@ -38,6 +55,11 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 
 	// Date Graph chart
 	dateStats, err := DB(r).Statistics().DateStatisticsQ.New().FilterByBookId(request.BookId).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get date statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, date := range dateStats {
 		response.Data.Attributes.DateGraph =
 			append(response.Data.Attributes.DateGraph, resources.DateGraph{
@@ -51,6 +73,11 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 
 	// Chain pie chart
 	chainStats, err := DB(r).Statistics().ChainStatisticsQ.New().FilterByBookId(request.BookId).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get chain statistics")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, chain := range chainStats {
 		response.Data.Attributes.ChainPieChart.Attributes.Chains =
 			append(response.Data.Attributes.ChainPieChart.Attributes.Chains, resources.ChainPieChartChains{
@@ -67,6 +94,11 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		Order:      "desc",
 		PageNumber: 0,
 	}, "price_token").FilterByType(int8(resources.NFT)).FilterByBookId(request.BookId).Select()
+	if err != nil {
+		Log(r).WithError(err).Error("failed to get nft payments")
+		ape.RenderErr(w, problems.BadRequest(err)...)
+		return
+	}
 	for _, nftPayment := range nftPayments {
 		response.Data.Attributes.NftList = append(response.Data.Attributes.NftList, resources.NftListItem{
 			Key: resources.Key{

@@ -18,8 +18,7 @@ import (
 )
 
 var (
-	ContractNotFoundErr = errors.New("contract with specified id was not found")
-	BookNotFoundErr     = errors.New("book with specified address was not found")
+	BookNotFoundErr = errors.New("book with specified address was not found")
 )
 
 func GetPaymentById(w http.ResponseWriter, r *http.Request) {
