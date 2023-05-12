@@ -71,7 +71,7 @@ func (q *booksQ) Get() (*data.BookStatistics, error) {
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-
+	fmt.Println(q.selector.ToSql())
 	return &book, err
 }
 

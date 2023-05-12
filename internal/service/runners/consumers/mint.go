@@ -226,6 +226,7 @@ func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by book")
 	}
+	fmt.Println(bookStats)
 	if bookStats != nil {
 		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
 			Amount:   bookStats.Amount + 1,
