@@ -61,7 +61,7 @@ func (q *datesQ) FilterByBookId(bookId ...int64) data.DateStatisticsQ {
 }
 
 func (q *datesQ) FilterByDate(date ...string) data.DateStatisticsQ {
-	q.selector = q.selector.Where(squirrel.Eq{datesBookId: date})
+	q.selector = q.selector.Where(squirrel.Eq{datesDate: date})
 	return q
 }
 
