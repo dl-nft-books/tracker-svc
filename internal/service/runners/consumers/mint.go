@@ -24,6 +24,8 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 		c.logger,
 		c.cfg.Prefix+mintConsumerSuffix,
 		func(ctx context.Context) (err error) {
+			errs := make(chan error, 1)
+		mintConsume:
 			for {
 				select {
 				case event := <-ch:
@@ -32,7 +34,8 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					// Getting task by hash (uri)
 					task, err := c.GetTask(event.Uri)
 					if err != nil {
-						return errors.Wrap(err, "failed get task")
+						errs <- errors.Wrap(err, "failed get task")
+						break mintConsume
 					}
 					if task == nil {
 						continue
@@ -46,7 +49,8 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 						FilterByBannerLink(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).
 						Get()
 					if err != nil {
-						return errors.Wrap(err, "failed to check is payment exist")
+						errs <- errors.Wrap(err, "failed to check is payment exist")
+						break mintConsume
 					}
 					if check != nil {
 						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such banner_link is already exist")
@@ -55,7 +59,8 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 
 					book, err := c.GetBook(*task)
 					if err != nil {
-						return errors.Wrap(err, "failed get book", logField)
+						errs <- errors.Wrap(err, "failed get book", logField)
+						break mintConsume
 					}
 					if book == nil {
 						continue
@@ -65,25 +70,34 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					})
 
 					if err = c.UploadToIpfs(*book, *task); err != nil {
-						return errors.Wrap(err, "failed to upload to IPFS", logField)
+						errs <- errors.Wrap(err, "failed to upload to IPFS", logField)
+						break mintConsume
 					}
 
 					if err = c.MintUpdating(*task, event); err != nil {
-						return errors.Wrap(err, "failed to consume mint transaction", logField)
+						errs <- errors.Wrap(err, "failed to consume mint transaction", logField)
+						break mintConsume
 					}
 
 					if err = c.UpdateStatistics(*book, event); err != nil {
-						return errors.Wrap(err, "failed to consume mint transaction", logField)
+						errs <- errors.Wrap(err, "failed to consume mint transaction", logField)
+						break mintConsume
 					}
 
 					// Updating contract`s last mint block
 					if err = c.database.Blocks().New().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
-						return errors.Wrap(err, "failed to update contract`s last mint block")
+						errs <- errors.Wrap(err, "failed to update contract`s last mint block")
+						break mintConsume
 					}
 
 					c.logger.WithFields(logField).Infof("Successfully processed mint event of a marketplace with id %d", event.TokenId)
 				}
 			}
+
+			if err, open := <-errs; open {
+				return err
+			}
+			return nil
 		},
 		c.cfg.Backoff.NormalPeriod,
 		c.cfg.Backoff.MinAbnormalPeriod,

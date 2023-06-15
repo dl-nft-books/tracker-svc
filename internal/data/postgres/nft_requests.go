@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Masterminds/squirrel"
-	"github.com/dl-nft-books/core-svc/resources"
 	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
+	"time"
 )
 
 const (
@@ -16,7 +17,6 @@ const (
 	nftRequestsId                = "id"
 	nftRequestsPayerAddress      = "payer_address"
 	nftRequestsCollectionAddress = "collection_address"
-	nftRequestsFloorPrice        = "floor_price"
 	nftRequestsNftId             = "nft_id"
 	nftRequestsChainId           = "chain_id"
 	nftRequestsBookId            = "book_id"
@@ -134,6 +134,11 @@ func (q *nftRequestsQ) Transaction(fn func(q data.NftRequestsQ) error) (err erro
 
 func (q *nftRequestsQ) UpdateStatus(newState resources.NftRequestStatus) data.NftRequestsQ {
 	q.updater = q.updater.Set(nftRequestsStatus, newState)
+	return q
+}
+
+func (q *nftRequestsQ) UpdateLastUpdated(time time.Time) data.NftRequestsQ {
+	q.updater = q.updater.Set(nftRequestsStatus, time)
 	return q
 }
 

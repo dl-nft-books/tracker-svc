@@ -86,8 +86,8 @@ func (q *booksQ) Insert(book data.BookStatistics) (id int64, err error) {
 func (q *booksQ) Update(updateStatements data.BookStatistics, id int64) error {
 	return q.database.Exec(squirrel.Update(booksTable).
 		SetMap(map[string]interface{}{
-			"amount":    updateStatements.Amount,
-			"usd_price": updateStatements.UsdPrice,
+			booksAmount:   updateStatements.Amount,
+			booksUsdPrice: updateStatements.UsdPrice,
 		}).
 		Where(squirrel.Eq{booksId: id}))
 }

@@ -31,6 +31,10 @@ func (db *db) Blocks() data.BlocksQ {
 	return NewBlocksQ(db.raw)
 }
 
+func (db *db) NftRequests() data.NftRequestsQ {
+	return NewNftRequestsQ(db.raw)
+}
+
 func (db *db) Statistics() data.StatisticsQ {
 	return data.StatisticsQ{
 		BookStatisticsQ:  NewBookStatisticsQ(db.raw),

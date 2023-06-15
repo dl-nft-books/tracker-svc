@@ -1,21 +1,21 @@
 package data
 
 import (
-	"github.com/dl-nft-books/core-svc/resources"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"gitlab.com/distributed_lab/kit/pgdb"
 	"time"
 )
 
 type NftRequest struct {
-	Id                int64                      `db:"id" structs:"-"`
-	PayerAddress      string                     `db:"payer_address" structs:"payer_address"`
-	CollectionAddress string                     `db:"collection_address" structs:"collection_address"`
-	NftId             int64                      `db:"nft_id" structs:"nft_id"`
-	ChainId           int64                      `db:"chain_id" structs:"chain_id"`
-	BookId            int64                      `db:"book_id" structs:"book_id"`
-	Status            resources.NftRequestStatus `db:"status" structs:"status"`
-	CreatedAt         time.Time                  `db:"created_at" structs:"created_at"`
-	LastUpdatedAt     time.Time                  `db:"last_updated_at" structs:"last_updated_at"`
+	Id            int64                      `db:"id" structs:"-"`
+	Requester     string                     `db:"requester" structs:"requester"`
+	NftContract   string                     `db:"nft_contract" structs:"nft_contract"`
+	NftId         int64                      `db:"nft_id" structs:"nft_id"`
+	ChainId       int64                      `db:"chain_id" structs:"chain_id"`
+	BookId        int64                      `db:"book_id" structs:"book_id"`
+	Status        resources.NftRequestStatus `db:"status" structs:"status"`
+	CreatedAt     time.Time                  `db:"created_at" structs:"created_at"`
+	LastUpdatedAt time.Time                  `db:"last_updated_at" structs:"last_updated_at"`
 }
 
 type NftRequestsQ interface {
@@ -40,5 +40,6 @@ type NftRequestsQ interface {
 
 	FilterUpdateById(id ...int64) NftRequestsQ
 	UpdateStatus(newStatus resources.NftRequestStatus) NftRequestsQ
+	UpdateLastUpdated(time time.Time) NftRequestsQ
 	Update() error
 }

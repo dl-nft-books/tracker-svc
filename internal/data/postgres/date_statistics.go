@@ -92,7 +92,7 @@ func (q *datesQ) Insert(date data.DateStatistics) (id int64, err error) {
 func (q *datesQ) Update(amount int64, id int64) error {
 	return q.database.Exec(squirrel.Update(datesDate).
 		SetMap(map[string]interface{}{
-			"amount": amount,
+			datesAmount: amount,
 		}).
 		Where(squirrel.Eq{datesId: id}))
 }

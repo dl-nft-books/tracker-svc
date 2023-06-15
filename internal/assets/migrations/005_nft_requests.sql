@@ -3,8 +3,8 @@
 create table nft_requests
 (
     id                 bigserial primary key,
-    payer_address          text      not null,
-    collection_address     float      not null default 0,
+    requester          text      not null,
+    nftContract     float      not null default 0,
     nft_id     bigint      not null default 0,
     book_id     bigint      not null default 0,
     status             int8      not null default 0,
