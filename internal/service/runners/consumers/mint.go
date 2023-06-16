@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan etherdata.TokenSuccessfullyPurchasedEvent) {
+func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan etherdata.TokenSuccessfullyPurchasedEvent) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -34,7 +34,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 					// Getting task by hash (uri)
 					task, err := c.GetTask(event.Uri)
 					if err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed get task")
 					}
 					if task == nil {
@@ -49,7 +48,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 						FilterByBannerLink(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).
 						Get()
 					if err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed to check is payment exist")
 					}
 					if check != nil {
@@ -59,7 +57,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 
 					book, err := c.GetBook(*task)
 					if err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed get book", logField)
 					}
 					if book == nil {
@@ -70,17 +67,14 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 					})
 
 					if err = c.UploadToIpfs(*book, *task); err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed to upload to IPFS", logField)
 					}
 
 					if err = c.MintUpdating(*task, event); err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
 					if err = c.UpdateStatistics(*book, event); err != nil {
-						ch <- event
 						return errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
