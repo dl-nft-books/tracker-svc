@@ -29,8 +29,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 				c.logger,
 				c.cfg.Prefix+mintConsumerSuffix,
 				func(ctx context.Context) (ok bool, err error) {
-					fmt.Println("DEBUG: Start consume running...")
-
 					logField := logan.F{"contract_address": c.network.FactoryAddress}
 
 					// Getting task by hash (uri)
@@ -71,7 +69,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 					})
 
 					if err = c.UploadToIpfs(*book, *task); err != nil {
-						fmt.Println("DEBUG: Ooops, error for testing")
 						return false, errors.Wrap(err, "failed to upload to IPFS", logField)
 					}
 
@@ -98,81 +95,6 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 	}
 }
 
-//	func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan etherdata.TokenSuccessfullyPurchasedEvent) {
-//		running.WithBackOff(
-//			c.ctx,
-//			c.logger,
-//			c.cfg.Prefix+mintConsumerSuffix,
-//			func(ctx context.Context) (err error) {
-//				fmt.Println("DEBUG: Start consume running...")
-//				for {
-//					select {
-//					case event := <-ch:
-//						logField := logan.F{"contract_address": c.network.FactoryAddress}
-//
-//						// Getting task by hash (uri)
-//						task, err := c.GetTask(event.Uri)
-//						if err != nil {
-//							return errors.Wrap(err, "failed get task")
-//						}
-//						if task == nil {
-//							continue
-//						}
-//						logField = logField.Merge(logan.F{
-//							"task_id": task.ID,
-//						})
-//
-//						//Check whether payment with such banner_link already exists
-//						check, err := c.database.Payments().New().
-//							FilterByBannerLink(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).
-//							Get()
-//						if err != nil {
-//							return errors.Wrap(err, "failed to check is payment exist")
-//						}
-//						if check != nil {
-//							c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such banner_link is already exist")
-//							continue
-//						}
-//
-//						book, err := c.GetBook(*task)
-//						if err != nil {
-//							return errors.Wrap(err, "failed get book", logField)
-//						}
-//						if book == nil {
-//							continue
-//						}
-//						logField = logField.Merge(logan.F{
-//							"book_id": book.Data.ID,
-//						})
-//
-//						if err = c.UploadToIpfs(*book, *task); err != nil {
-//							fmt.Println("DEBUG: return event to channel")
-//							ch <- event
-//							return errors.Wrap(err, "failed to upload to IPFS", logField)
-//						}
-//
-//						if err = c.MintUpdating(*task, event); err != nil {
-//							return errors.Wrap(err, "failed to consume mint transaction", logField)
-//						}
-//
-//						if err = c.UpdateStatistics(*book, event); err != nil {
-//							return errors.Wrap(err, "failed to consume mint transaction", logField)
-//						}
-//
-//						// Updating contract`s last mint block
-//						if err = c.database.Blocks().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
-//							return errors.Wrap(err, "failed to update contract`s last mint block")
-//						}
-//
-//						c.logger.WithFields(logField).Infof("Successfully processed mint event of a marketplace with id %d", event.TokenId)
-//					}
-//				}
-//			},
-//			c.cfg.Backoff.NormalPeriod,
-//			c.cfg.Backoff.MinAbnormalPeriod,
-//			c.cfg.Backoff.MaxAbnormalPeriod,
-//		)
-//	}
 func (c *MarketPlaceConsumer) GetTask(uri string) (*coreResources.Task, error) {
 	// Getting task by hash (uri)
 	tasksResponse, err := c.core.ListTasks(coreModels.ListTasksRequest{IpfsHash: &uri})

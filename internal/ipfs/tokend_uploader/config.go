@@ -19,5 +19,5 @@ func NewTokenDIpfsUploader(getter kv.Getter) TokenDIpfsUploader {
 }
 
 func (t *tokendUploader) TokenDIpfsImplementation() ipfs.Uploader {
-	return NewTokenDLoader(ipfsApi.NewShell("https://ipfs.errortokend.io/api/"))
+	return NewTokenDLoader(ipfsApi.NewShell("https://ipfs.tokend.io/api/"))
 }
