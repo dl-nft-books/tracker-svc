@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan etherdata.TokenSuccessfullyPurchasedEvent) {
+func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan etherdata.TokenSuccessfullyPurchasedEvent) {
 	running.WithBackOff(
 		c.ctx,
 		c.logger,
@@ -67,6 +67,8 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch <-chan e
 					})
 
 					if err = c.UploadToIpfs(*book, *task); err != nil {
+						fmt.Println("return event to channel")
+						ch <- event
 						return errors.Wrap(err, "failed to upload to IPFS", logField)
 					}
 
