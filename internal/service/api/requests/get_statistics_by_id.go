@@ -12,9 +12,8 @@ import (
 )
 
 type GetStatisticsByBookRequest struct {
-	NFT    pgdb.OffsetPageParams `url:"nft"`
-	Sort   string                `url:"nft_sort" default:"floor_price"`
-	BookId int64                 `json:"-"`
+	pgdb.OffsetPageParams
+	BookId int64 `json:"-"`
 }
 
 func NewGetStatisticsByBookRequest(r *http.Request) (*GetStatisticsByBookRequest, error) {

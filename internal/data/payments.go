@@ -7,7 +7,7 @@ import (
 	"gitlab.com/distributed_lab/kit/pgdb"
 )
 
-const timestampFormat = "2006-01-02"
+const TimestampFormat = "2006-01-02"
 
 type Payment struct {
 	Id                int64                             `db:"id" structs:"-" json:"-"`
@@ -46,7 +46,7 @@ type PaymentsQ interface {
 	Select() ([]Payment, error)
 
 	Sort(sort pgdb.Sorts) PaymentsQ
-	Page(page pgdb.OffsetPageParams, cols ...string) PaymentsQ
+	Page(page pgdb.OffsetPageParams, sortByCols ...string) PaymentsQ
 
 	Insert(payment Payment) (id int64, err error)
 	Delete(id int64) error
@@ -64,7 +64,7 @@ func (p *Payment) Resource() (*resources.Payment, error) {
 			PaymentTokenPrice: p.PriceToken,
 			MintedTokenPrice:  p.PriceMinted,
 			BannerUrl:         p.BannerLink,
-			PurchaseTimestamp: p.PurchaseTimestamp.Format(timestampFormat),
+			PurchaseTimestamp: p.PurchaseTimestamp.Format(TimestampFormat),
 			Type:              p.Type.String(),
 			Erc20Data: resources.Erc20Data{
 				Address:  p.TokenAddress,

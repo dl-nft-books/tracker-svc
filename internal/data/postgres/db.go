@@ -31,6 +31,15 @@ func (db *db) Blocks() data.BlocksQ {
 	return NewBlocksQ(db.raw)
 }
 
+func (db *db) Statistics() data.StatisticsQ {
+	return data.StatisticsQ{
+		BookStatisticsQ:  NewBookStatisticsQ(db.raw),
+		TokenStatisticsQ: NewTokenStatisticsQ(db.raw),
+		DateStatisticsQ:  NewDateStatisticsQ(db.raw),
+		ChainStatisticsQ: NewChainStatisticsQ(db.raw),
+	}
+}
+
 func (db *db) Transaction(fn func() error) error {
 	return db.raw.Transaction(func() error {
 		return fn()

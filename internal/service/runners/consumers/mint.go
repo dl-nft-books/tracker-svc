@@ -16,8 +16,6 @@ import (
 	"gitlab.com/distributed_lab/running"
 	"math"
 	"math/big"
-	"strconv"
-	"time"
 )
 
 func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan etherdata.TokenSuccessfullyPurchasedEvent) {
@@ -192,54 +190,109 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 }
 
 func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	pricePerOneToken := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18)))
-	paymentTokenAmount := new(big.Float).Quo(new(big.Float).SetInt(event.Amount), big.NewFloat(math.Pow10(18)))
-	usdPrice := big.NewFloat(0).Mul(paymentTokenAmount, pricePerOneToken)
-	return c.database.KeyValue().UpdateStatistics(
-		// Amount
-		data.KeyValue{ // amount of each book
-			Key:   "stats-book-" + book.Data.ID + "-amount",
-			Value: "1",
-		}, data.KeyValue{ // amount of all books
-			Key:   "stats-book-amount-total",
-			Value: "1",
-		}, data.KeyValue{ // amount of all books by day
-			Key:   "stats-book-" + book.Data.ID + "-amount-date-" + time.Now().Format("2006-Jan-02"),
-			Value: "1",
-		},
+	pricePerOneToken, _ := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18))).Float64()
+	tokenPrice, _ := new(big.Float).Quo(new(big.Float).SetInt(event.Amount), big.NewFloat(math.Pow10(18))).Float64()
+	usdPrice := pricePerOneToken * tokenPrice
+	bookId := cast.ToInt64(book.Data.ID)
 
-		// Price
-		// Native Currency
-		data.KeyValue{ // price (native currency) by each book by each token
-			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: paymentTokenAmount.String(),
-		},
-		data.KeyValue{ // price (native currency) by each token
-			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_token",
-			Value: paymentTokenAmount.String(),
-		},
-		// USD
-		data.KeyValue{ // price (USD) by each book by each token
-			Key:   "stats-book-" + book.Data.ID + "-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdPrice.String(),
-		}, data.KeyValue{ // price (USD) by each token
-			Key:   "stats-token_symbol-" + event.Erc20Info.Symbol + "-price_usd",
-			Value: usdPrice.String(),
-		},
-		data.KeyValue{ // price (USD) total
-			Key:   "stats-price_usd",
-			Value: usdPrice.String(),
-		}, data.KeyValue{ // price (USD) total by each book
-			Key:   "stats-book-" + book.Data.ID + "-price_usd",
-			Value: usdPrice.String(),
-		},
+	if err := c.updateBookStatistics(bookId, usdPrice); err != nil {
+		return errors.Wrap(err, "failed to update book statistics")
+	}
+	if err := c.updateBookStatistics(0, usdPrice); err != nil {
+		return errors.Wrap(err, "failed to update book statistics")
+	}
 
-		// Networks
-		data.KeyValue{ // network statistic
-			Key:   "stats-chain_id-" + strconv.FormatInt(c.network.ChainId, 10),
-			Value: "1",
-		}, data.KeyValue{ // network statistic by each book
-			Key:   "stats-book-" + book.Data.ID + "-chain_id-" + strconv.FormatInt(c.network.ChainId, 10),
-			Value: "1",
-		})
+	if err := c.updateTokenStatistics(bookId, usdPrice, tokenPrice, event.Erc20Info.Symbol); err != nil {
+		return errors.Wrap(err, "failed to update token statistics ")
+	}
+	if err := c.updateTokenStatistics(0, usdPrice, tokenPrice, event.Erc20Info.Symbol); err != nil {
+		return errors.Wrap(err, "failed to update token statistics ")
+	}
+
+	if err := c.updateDateStatistics(bookId, event.Timestamp.Format(data.TimestampFormat)); err != nil {
+		return errors.Wrap(err, "failed to update date statistics ")
+	}
+
+	if err := c.updateChainStatistics(bookId); err != nil {
+		return errors.Wrap(err, "failed to update chain statistics ")
+	}
+	if err := c.updateChainStatistics(0); err != nil {
+		return errors.Wrap(err, "failed to update chain statistics ")
+	}
+
+	return nil
+}
+
+func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float64) error {
+	bookStats, err := c.database.Statistics().BookStatisticsQ.New().FilterByBookId(bookId).Get()
+	if err != nil {
+		return errors.Wrap(err, "failed to get statistics by book")
+	}
+	if bookStats != nil {
+		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
+			Amount:   bookStats.Amount + 1,
+			UsdPrice: bookStats.UsdPrice + bookPrice,
+		}, bookStats.Id)
+	}
+	_, err = c.database.Statistics().BookStatisticsQ.New().Insert(data.BookStatistics{
+		Amount:   1,
+		UsdPrice: bookPrice,
+		BookId:   bookId,
+	})
+	return err
+}
+
+func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, tokenPrice float64, symbol string) error {
+	tokenStats, err := c.database.Statistics().TokenStatisticsQ.New().FilterByBookId(bookId).FilterByTokenSymbol(symbol).Get()
+	if err != nil {
+		return errors.Wrap(err, "failed to get statistics by token")
+	}
+	if tokenStats != nil {
+		return c.database.Statistics().TokenStatisticsQ.New().Update(data.TokenStatistics{
+			UsdPrice:   tokenStats.UsdPrice + usdPrice,
+			TokenPrice: tokenStats.TokenPrice + tokenPrice,
+		}, tokenStats.Id)
+	}
+	_, err = c.database.Statistics().TokenStatisticsQ.New().Insert(data.TokenStatistics{
+		TokenSymbol: symbol,
+		UsdPrice:    usdPrice,
+		TokenPrice:  tokenPrice,
+		BookId:      bookId,
+	})
+	return err
+}
+
+func (c *MarketPlaceConsumer) updateDateStatistics(bookId int64, date string) error {
+	dateStats, err := c.database.Statistics().DateStatisticsQ.New().
+		FilterByBookId(bookId).
+		FilterByDate(date).Get()
+	if err != nil {
+		return errors.Wrap(err, "failed to get statistics by date")
+	}
+	if dateStats != nil {
+		return c.database.Statistics().DateStatisticsQ.New().Update(dateStats.Amount+1, dateStats.Id)
+	}
+	_, err = c.database.Statistics().DateStatisticsQ.New().Insert(data.DateStatistics{
+		Amount: 1,
+		Date:   date,
+		BookId: bookId,
+	})
+	return err
+}
+
+func (c *MarketPlaceConsumer) updateChainStatistics(bookId int64) error {
+	chainStats, err := c.database.Statistics().ChainStatisticsQ.New().
+		FilterByBookId(bookId).FilterByChainId(c.network.ChainId).Get()
+	if err != nil {
+		return errors.Wrap(err, "failed to get statistics by chain")
+	}
+	if chainStats != nil {
+		return c.database.Statistics().ChainStatisticsQ.New().Update(chainStats.Amount+1, chainStats.Id)
+	}
+	_, err = c.database.Statistics().ChainStatisticsQ.New().Insert(data.ChainStatistics{
+		Amount:  1,
+		ChainId: c.network.ChainId,
+		BookId:  bookId,
+	})
+	return err
 }

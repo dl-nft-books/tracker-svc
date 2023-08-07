@@ -7,11 +7,12 @@ allOf:
       attributes:
         type: object
         required:
-          - address
+          - book_id
           - amount
         properties:
-          address:
-            type: string
+          book_id:
+            type: integer
+            format: int64
           amount:
             type: integer
             format: int64
