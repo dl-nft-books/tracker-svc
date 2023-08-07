@@ -40,7 +40,7 @@ type PaymentsQ interface {
 	FilterByChainId(chainId ...int64) PaymentsQ
 	FilterByTokenId(tokenId ...int64) PaymentsQ
 	FilterByBookId(bookId ...int64) PaymentsQ
-	FilterByType(paymentType ...int8) PaymentsQ
+	FilterByType(paymentType ...resources.TokenPurchasedEventType) PaymentsQ
 
 	Get() (*Payment, error)
 	Select() ([]Payment, error)

@@ -13,8 +13,6 @@ allOf:
           name:
             type: string
           native_currency:
-            type: float
-            format: float64
+            type: string
           usd:
-            type: float
-            format: float64
+            type: string

@@ -231,12 +231,12 @@ func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float
 	if bookStats != nil {
 		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
 			Amount:   bookStats.Amount + 1,
-			UsdPrice: bookStats.UsdPrice + bookPrice,
+			UsdPrice: cast.ToString(cast.ToFloat64(bookStats.UsdPrice) + bookPrice),
 		}, bookStats.Id)
 	}
 	_, err = c.database.Statistics().BookStatisticsQ.New().Insert(data.BookStatistics{
 		Amount:   1,
-		UsdPrice: bookPrice,
+		UsdPrice: cast.ToString(bookPrice),
 		BookId:   bookId,
 	})
 	return err
@@ -249,14 +249,14 @@ func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, toke
 	}
 	if tokenStats != nil {
 		return c.database.Statistics().TokenStatisticsQ.New().Update(data.TokenStatistics{
-			UsdPrice:   tokenStats.UsdPrice + usdPrice,
-			TokenPrice: tokenStats.TokenPrice + tokenPrice,
+			UsdPrice:   cast.ToString(cast.ToFloat64(tokenStats.UsdPrice) + usdPrice),
+			TokenPrice: cast.ToString(cast.ToFloat64(tokenStats.TokenPrice) + tokenPrice),
 		}, tokenStats.Id)
 	}
 	_, err = c.database.Statistics().TokenStatisticsQ.New().Insert(data.TokenStatistics{
 		TokenSymbol: symbol,
-		UsdPrice:    usdPrice,
-		TokenPrice:  tokenPrice,
+		UsdPrice:    cast.ToString(usdPrice),
+		TokenPrice:  cast.ToString(tokenPrice),
 		BookId:      bookId,
 	})
 	return err
