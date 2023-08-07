@@ -1,10 +1,10 @@
 package data
 
 type BookStatistics struct {
-	Id       int64   `db:"id" structs:"-" json:"-"`
-	Amount   int64   `db:"amount" structs:"amount"`
-	UsdPrice float64 `db:"usd_price" structs:"usd_price"`
-	BookId   int64   `db:"book_id" structs:"book_id"`
+	Id       int64  `db:"id" structs:"-" json:"-"`
+	Amount   int64  `db:"amount" structs:"amount"`
+	UsdPrice string `db:"usd_price" structs:"usd_price"`
+	BookId   int64  `db:"book_id" structs:"book_id"`
 }
 
 type BookStatisticsQ interface {

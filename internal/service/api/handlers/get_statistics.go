@@ -30,7 +30,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(bookStats) == 0 {
 		Log(r).Warn("book statistics not found")
-		
+
 		// return empty statistics
 		ape.Render(w, response)
 		return
@@ -117,7 +117,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 		Limit:      request.Limit,
 		Order:      "desc",
 		PageNumber: 0,
-	}, "price_token").FilterByType(int8(resources.NFT)).Select()
+	}, "price_token").FilterByType(resources.NFT).Select()
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get nft payments")
 		ape.RenderErr(w, problems.BadRequest(err)...)

@@ -5,7 +5,7 @@ create table book_statistics
     id              bigserial primary key,
     book_id        bigint UNIQUE default 0,
     amount        bigint,
-    usd_price float
+    usd_price text
 );
 
 create table token_statistics
@@ -13,8 +13,8 @@ create table token_statistics
     id              bigserial primary key,
     book_id         bigint default 0,
     token_symbol    text,
-    usd_price       float,
-    token_price     float
+    usd_price       text,
+    token_price     text
 );
 
 create table date_statistics
