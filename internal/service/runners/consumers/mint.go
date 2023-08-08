@@ -14,7 +14,6 @@ import (
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
-	"math"
 	"math/big"
 )
 
@@ -74,7 +73,7 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 						return false, errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
-					if err = c.UpdateStatistics(*book, event); err != nil {
+					if err = c.UpdateStatistics(cast.ToInt64(book.Data.ID), event); err != nil {
 						return false, errors.Wrap(err, "failed to consume mint transaction", logField)
 					}
 
@@ -189,23 +188,18 @@ func (c *MarketPlaceConsumer) MintUpdating(task coreResources.Task, event etherd
 	return nil
 }
 
-func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyPurchasedEvent) error {
-	pricePerOneToken, _ := new(big.Float).Quo(new(big.Float).SetInt(event.PaymentTokenPrice), big.NewFloat(math.Pow10(18))).Float64()
-	tokenPrice, _ := new(big.Float).Quo(new(big.Float).SetInt(event.Amount), big.NewFloat(math.Pow10(18))).Float64()
-	usdPrice := pricePerOneToken * tokenPrice
-	bookId := cast.ToInt64(book.Data.ID)
-
-	if err := c.updateBookStatistics(bookId, usdPrice); err != nil {
+func (c *MarketPlaceConsumer) UpdateStatistics(bookId int64, event etherdata.TokenSuccessfullyPurchasedEvent) error {
+	if err := c.updateBookStatistics(bookId, event.MintedTokenPrice); err != nil {
 		return errors.Wrap(err, "failed to update book statistics")
 	}
-	if err := c.updateBookStatistics(0, usdPrice); err != nil {
+	if err := c.updateBookStatistics(0, event.MintedTokenPrice); err != nil {
 		return errors.Wrap(err, "failed to update book statistics")
 	}
 
-	if err := c.updateTokenStatistics(bookId, usdPrice, tokenPrice, event.Erc20Info.Symbol); err != nil {
+	if err := c.updateTokenStatistics(bookId, event.MintedTokenPrice, event.Amount, event.Erc20Info.Symbol); err != nil {
 		return errors.Wrap(err, "failed to update token statistics ")
 	}
-	if err := c.updateTokenStatistics(0, usdPrice, tokenPrice, event.Erc20Info.Symbol); err != nil {
+	if err := c.updateTokenStatistics(0, event.MintedTokenPrice, event.Amount, event.Erc20Info.Symbol); err != nil {
 		return errors.Wrap(err, "failed to update token statistics ")
 	}
 
@@ -223,40 +217,49 @@ func (c *MarketPlaceConsumer) UpdateStatistics(book bookerModels.GetBookResponse
 	return nil
 }
 
-func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice float64) error {
+func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice *big.Int) error {
 	bookStats, err := c.database.Statistics().BookStatisticsQ.New().FilterByBookId(bookId).Get()
+
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by book")
 	}
 	if bookStats != nil {
+		var totalUsdPrice *big.Int
+		totalUsdPrice.SetString(bookStats.UsdPrice, 10)
+
 		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
 			Amount:   bookStats.Amount + 1,
-			UsdPrice: cast.ToString(cast.ToFloat64(bookStats.UsdPrice) + bookPrice),
+			UsdPrice: totalUsdPrice.Add(totalUsdPrice, bookPrice).String(),
 		}, bookStats.Id)
 	}
 	_, err = c.database.Statistics().BookStatisticsQ.New().Insert(data.BookStatistics{
 		Amount:   1,
-		UsdPrice: cast.ToString(bookPrice),
+		UsdPrice: bookPrice.String(),
 		BookId:   bookId,
 	})
 	return err
 }
 
-func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, tokenPrice float64, symbol string) error {
+func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, tokenPrice *big.Int, symbol string) error {
 	tokenStats, err := c.database.Statistics().TokenStatisticsQ.New().FilterByBookId(bookId).FilterByTokenSymbol(symbol).Get()
 	if err != nil {
 		return errors.Wrap(err, "failed to get statistics by token")
 	}
+
 	if tokenStats != nil {
+		var totalTokenPrice, totalUsdPrice *big.Int
+		totalTokenPrice.SetString(tokenStats.TokenPrice, 10)
+		totalUsdPrice.SetString(tokenStats.UsdPrice, 10)
+
 		return c.database.Statistics().TokenStatisticsQ.New().Update(data.TokenStatistics{
-			UsdPrice:   cast.ToString(cast.ToFloat64(tokenStats.UsdPrice) + usdPrice),
-			TokenPrice: cast.ToString(cast.ToFloat64(tokenStats.TokenPrice) + tokenPrice),
+			UsdPrice:   totalUsdPrice.Add(usdPrice, totalUsdPrice).String(),
+			TokenPrice: totalTokenPrice.Add(tokenPrice, totalTokenPrice).String(),
 		}, tokenStats.Id)
 	}
 	_, err = c.database.Statistics().TokenStatisticsQ.New().Insert(data.TokenStatistics{
 		TokenSymbol: symbol,
-		UsdPrice:    cast.ToString(usdPrice),
-		TokenPrice:  cast.ToString(tokenPrice),
+		UsdPrice:    usdPrice.String(),
+		TokenPrice:  tokenPrice.String(),
 		BookId:      bookId,
 	})
 	return err
