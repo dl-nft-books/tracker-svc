@@ -49,7 +49,10 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 						return false, errors.Wrap(err, "failed to check is payment exist")
 					}
 					if check != nil {
-						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such banner_link is already exist")
+						c.logger.WithFields(logan.F{
+							"book_url":           check.BannerLink,
+							"purchase_timestamp": check.PurchaseTimestamp.Format("02-01-06 15:04:05")}).
+							Warn("payment with such banner_link is already exist")
 
 						return true, nil
 					}
@@ -224,7 +227,7 @@ func (c *MarketPlaceConsumer) updateBookStatistics(bookId int64, bookPrice *big.
 		return errors.Wrap(err, "failed to get statistics by book")
 	}
 	if bookStats != nil {
-		var totalUsdPrice *big.Int
+		totalUsdPrice := new(big.Int)
 		totalUsdPrice.SetString(bookStats.UsdPrice, 10)
 
 		return c.database.Statistics().BookStatisticsQ.New().Update(data.BookStatistics{
@@ -247,9 +250,11 @@ func (c *MarketPlaceConsumer) updateTokenStatistics(bookId int64, usdPrice, toke
 	}
 
 	if tokenStats != nil {
-		var totalTokenPrice, totalUsdPrice *big.Int
-		totalTokenPrice.SetString(tokenStats.TokenPrice, 10)
+		totalUsdPrice := new(big.Int)
 		totalUsdPrice.SetString(tokenStats.UsdPrice, 10)
+
+		totalTokenPrice := new(big.Int)
+		totalTokenPrice.SetString(tokenStats.TokenPrice, 10)
 
 		return c.database.Statistics().TokenStatisticsQ.New().Update(data.TokenStatistics{
 			UsdPrice:   totalUsdPrice.Add(usdPrice, totalUsdPrice).String(),
