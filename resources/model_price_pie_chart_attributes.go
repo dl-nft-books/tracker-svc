@@ -6,5 +6,5 @@ package resources
 
 type PricePieChartAttributes struct {
 	Tokens []PricePieChartTokens `json:"tokens"`
-	Total  float64               `json:"total"`
+	Total  string                `json:"total"`
 }

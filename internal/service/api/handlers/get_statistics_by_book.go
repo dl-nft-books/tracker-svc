@@ -93,7 +93,7 @@ func GetStatisticsByBook(w http.ResponseWriter, r *http.Request) {
 		Limit:      request.Limit,
 		Order:      "desc",
 		PageNumber: 0,
-	}, "price_token").FilterByType(int8(resources.NFT)).FilterByBookId(request.BookId).Select()
+	}, "price_token").FilterByType(resources.NFT).FilterByBookId(request.BookId).Select()
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get nft payments")
 		ape.RenderErr(w, problems.BadRequest(err)...)

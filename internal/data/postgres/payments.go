@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
@@ -92,7 +93,7 @@ func (q *paymentsQ) FilterByBookId(bookId ...int64) data.PaymentsQ {
 	return q
 }
 
-func (q *paymentsQ) FilterByType(paymentType ...int8) data.PaymentsQ {
+func (q *paymentsQ) FilterByType(paymentType ...resources.TokenPurchasedEventType) data.PaymentsQ {
 	q.selector = q.selector.Where(squirrel.Eq{paymentsType: paymentType})
 	return q
 }

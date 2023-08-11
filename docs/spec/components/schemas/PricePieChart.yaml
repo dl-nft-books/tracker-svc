@@ -14,5 +14,4 @@ allOf:
             items:
               $ref: '#/components/schemas/PricePieChartTokens'
           total:
-            type: float
-            format: float64
+            type: string

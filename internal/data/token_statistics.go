@@ -3,11 +3,11 @@ package data
 import "gitlab.com/distributed_lab/kit/pgdb"
 
 type TokenStatistics struct {
-	Id          int64   `db:"id" structs:"-" json:"-"`
-	TokenSymbol string  `db:"token_symbol" structs:"token_symbol"`
-	UsdPrice    float64 `db:"usd_price" structs:"usd_price"`
-	TokenPrice  float64 `db:"token_price" structs:"token_price"`
-	BookId      int64   `db:"book_id" structs:"book_id"`
+	Id          int64  `db:"id" structs:"-" json:"-"`
+	TokenSymbol string `db:"token_symbol" structs:"token_symbol"`
+	UsdPrice    string `db:"usd_price" structs:"usd_price"`
+	TokenPrice  string `db:"token_price" structs:"token_price"`
+	BookId      int64  `db:"book_id" structs:"book_id"`
 }
 
 type TokenStatisticsQ interface {
