@@ -71,7 +71,7 @@ func (c *TokenCombiner) ProduceAndConsumeNftRequestCanceledEvent() {
 func (c *TokenCombiner) ProduceAndConsumeAllEvents() {
 	c.logger.Infof("Initializing all possible consumers and producers for %s", c.marketplaceAddress)
 	c.ProduceAndConsumeTokenSuccessfullyPurchasedEvent()
-	c.ProduceAndConsumeNftRequestCreatedEvent()
+	c.ProduceAndConsumeTokenSuccessfullyExchangedEvent()
 	c.ProduceAndConsumeNftRequestCreatedEvent()
 	c.ProduceAndConsumeNftRequestCanceledEvent()
 }

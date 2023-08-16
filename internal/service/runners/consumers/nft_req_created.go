@@ -36,15 +36,14 @@ func (c *MarketPlaceConsumer) ConsumeNFTRequestCreatedEvent(ch <-chan etherdata.
 						continue
 					}
 					if _, err = c.database.NftRequests().New().Insert(data.NftRequest{
-						Id:            event.RequestId.Int64(),
-						Requester:     event.Requester.String(),
-						NftContract:   event.Requester.String(),
-						NftId:         event.NftId.Int64(),
-						ChainId:       c.network.ChainId,
-						BookId:        cast.ToInt64(book.Data[0].ID),
-						Status:        resources.NftRequestPending,
-						CreatedAt:     event.Timestamp,
-						LastUpdatedAt: event.Timestamp,
+						Id:          event.RequestId.Int64(),
+						Requester:   event.Requester.String(),
+						NftContract: event.NftContract.String(),
+						NftId:       event.NftId.Int64(),
+						ChainId:     c.network.ChainId,
+						BookId:      cast.ToInt64(book.Data[0].ID),
+						Status:      resources.NftRequestPending,
+						CreatedAt:   event.Timestamp,
 					}); err != nil {
 						return errors.Wrap(err, "failed to consume nft request created transaction", logField)
 					}

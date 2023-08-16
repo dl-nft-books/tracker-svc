@@ -126,15 +126,16 @@ func (c *EventConverter) TokenSuccessfullyExchanged(raw marketplace.MarketplaceT
 	}
 
 	event := &etherdata.TokenSuccessfullyExchangedEvent{
-		ContractAddress: raw.NftRequestInfo.TokenContract,
-		Recipient:       raw.AcceptRequestParams.Recipient,
-		RequestId:       raw.AcceptRequestParams.RequestId.Int64(),
-		TokenId:         raw.AcceptRequestParams.TokenData.TokenId.Int64(),
-		NftId:           raw.NftRequestInfo.NftId.Int64(),
-		Uri:             raw.AcceptRequestParams.TokenData.TokenURI,
-		Status:          receipt.Status,
-		BlockNumber:     raw.Raw.BlockNumber,
-		Timestamp:       *purchaseTimestamp,
+		TokenContract: raw.NftRequestInfo.TokenContract,
+		Recipient:     raw.AcceptRequestParams.Recipient,
+		RequestId:     raw.AcceptRequestParams.RequestId.Int64(),
+		TokenId:       raw.AcceptRequestParams.TokenData.TokenId.Int64(),
+		NftAddress:    raw.NftRequestInfo.NftContract,
+		NftId:         raw.NftRequestInfo.NftId.Int64(),
+		Uri:           raw.AcceptRequestParams.TokenData.TokenURI,
+		Status:        receipt.Status,
+		BlockNumber:   raw.Raw.BlockNumber,
+		Timestamp:     *purchaseTimestamp,
 	}
 
 	return event, nil

@@ -35,6 +35,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 		ape.Render(w, response)
 		return
 	}
+
 	for _, book := range bookStats {
 		if book.BookId == 0 {
 			response.Data.Attributes.AmountPieChart.Attributes.Total = book.Amount
@@ -46,7 +47,8 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 				Key: resources.Key{},
 				Attributes: resources.AmountPieChartBooksAttributes{
 					BookId: book.BookId,
-					Amount: 0,
+					Name:   "",
+					Amount: book.Amount,
 				},
 			})
 	}

@@ -11,26 +11,28 @@ import (
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/running"
+	"math/big"
 )
 
 func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyExchangedEvent(ch <-chan etherdata.TokenSuccessfullyExchangedEvent) {
-	running.WithBackOff(
-		c.ctx,
-		c.logger,
-		c.cfg.Prefix+nftExchangedConsumerSuffix,
-		func(ctx context.Context) (err error) {
-			for {
-				select {
-				case event := <-ch:
+	for {
+		select {
+		case event := <-ch:
+			running.UntilSuccess(
+				c.ctx,
+				c.logger,
+				c.cfg.Prefix+nftExchangedConsumerSuffix,
+				func(ctx context.Context) (ok bool, err error) {
+
 					logField := logan.F{"contract_address": c.network.FactoryAddress}
 
 					// Getting task by hash (uri)
 					task, err := c.GetTask(event.Uri)
 					if err != nil {
-						return errors.Wrap(err, "failed get task")
+						return false, errors.Wrap(err, "failed get task")
 					}
 					if task == nil {
-						continue
+						return true, nil
 					}
 					logField = logField.Merge(logan.F{
 						"task_id": task.ID,
@@ -41,71 +43,64 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyExchangedEvent(ch <-chan e
 						FilterByBannerLink(c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash).
 						Get()
 					if err != nil {
-						return errors.Wrap(err, "failed to check is payment exist")
+						return false, errors.Wrap(err, "failed to check is payment exist")
 					}
 					if check != nil {
 						c.logger.WithFields(logan.F{"book_url": c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash}).Warn("payment with such banner_link is already exist")
-						continue
+						return true, nil
 					}
 
 					book, err := c.GetBook(*task)
 					if err != nil {
-						return errors.Wrap(err, "failed get book", logField)
+						return false, errors.Wrap(err, "failed get book", logField)
 					}
 					if book == nil {
-						continue
+						return true, nil
 					}
 					logField = logField.Merge(logan.F{
 						"book_id": book.Data.ID,
 					})
 
 					if err = c.UploadToIpfs(*book, *task); err != nil {
-						return errors.Wrap(err, "failed to upload to IPFS", logField)
+						return false, errors.Wrap(err, "failed to upload to IPFS", logField)
 					}
 
 					if err = c.ExchangeUpdating(*task, event); err != nil {
-						return errors.Wrap(err, "failed to consume nft request created transaction", logField)
+						return false, errors.Wrap(err, "failed to consume nft request created transaction", logField)
 					}
 
 					if err = c.UpdateStatisticsExchanged(*book, event); err != nil {
-						return errors.Wrap(err, "failed to consume nft request created transaction", logField)
+						return false, errors.Wrap(err, "failed to consume nft request created transaction", logField)
 					}
 
 					// Updating contract`s last nft request created block
 					if err = c.database.Blocks().UpdateTokenExchangedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
-						return errors.Wrap(err, "failed to update contract`s last nft request created block")
+						return false, errors.Wrap(err, "failed to update contract`s last nft request created block")
 					}
 
-					c.logger.WithFields(logField).Infof("Successfully processed nft request created event of a marketplace with id %d", event.TokenId)
-				}
-			}
-		},
-		c.cfg.Backoff.NormalPeriod,
-		c.cfg.Backoff.MinAbnormalPeriod,
-		c.cfg.Backoff.MaxAbnormalPeriod,
-	)
+					c.logger.WithFields(logField).Infof("Successfully processed nft request exchanged event of a marketplace with id %d", event.TokenId)
+					return true, nil
+				},
+				c.cfg.Backoff.MinAbnormalPeriod,
+				c.cfg.Backoff.MaxAbnormalPeriod,
+			)
+		}
+	}
 }
 
 func (c *MarketPlaceConsumer) ExchangeUpdating(task coreResources.Task, event etherdata.TokenSuccessfullyExchangedEvent) error {
 	if _, err := c.database.Payments().New().Insert(data.Payment{
-		ContractAddress:   event.ContractAddress.String(),
+		ContractAddress:   event.TokenContract.String(),
 		TokenId:           task.Attributes.TokenId,
 		BookId:            task.Attributes.BookId,
 		PayerAddress:      event.Recipient.String(),
 		NftId:             event.NftId,
-		TokenAddress:      event.ContractAddress.String(),
+		TokenAddress:      event.NftAddress.String(),
 		BannerLink:        c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		PurchaseTimestamp: event.Timestamp,
 		ChainId:           c.network.ChainId,
 		Type:              resources.NFT,
 	}); err != nil {
-		return errors.Wrap(err, "failed to add payment to the table")
-	}
-
-	if err := c.database.NftRequests().New().
-		UpdateStatus(resources.NftRequestAccepted).
-		UpdateLastUpdated(event.Timestamp).
-		FilterUpdateById(event.RequestId).Update(); err != nil {
 		return errors.Wrap(err, "failed to add payment to the table")
 	}
 
@@ -115,10 +110,10 @@ func (c *MarketPlaceConsumer) ExchangeUpdating(task coreResources.Task, event et
 func (c *MarketPlaceConsumer) UpdateStatisticsExchanged(book bookerModels.GetBookResponse, event etherdata.TokenSuccessfullyExchangedEvent) error {
 	bookId := cast.ToInt64(book.Data.ID)
 
-	if err := c.updateBookStatistics(bookId, 0); err != nil {
+	if err := c.updateBookStatistics(bookId, big.NewInt(0)); err != nil {
 		return errors.Wrap(err, "failed to update book statistics")
 	}
-	if err := c.updateBookStatistics(0, 0); err != nil {
+	if err := c.updateBookStatistics(0, big.NewInt(0)); err != nil {
 		return errors.Wrap(err, "failed to update book statistics")
 	}
 
