@@ -22,7 +22,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Amount pie chart
-	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().Select()
+	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().SelectWithChainId()
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get book statistics")
 		ape.RenderErr(w, problems.BadRequest(err)...)
@@ -45,8 +45,9 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			append(response.Data.Attributes.AmountPieChart.Attributes.Books, resources.AmountPieChartBooks{
 				Key: resources.Key{},
 				Attributes: resources.AmountPieChartBooksAttributes{
-					BookId: book.BookId,
-					Amount: 0,
+					BookId:  book.BookId,
+					ChainId: book.ChainId,
+					Amount:  book.Amount,
 				},
 			})
 	}

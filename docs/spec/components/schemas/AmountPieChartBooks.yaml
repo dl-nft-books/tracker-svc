@@ -8,9 +8,13 @@ allOf:
         type: object
         required:
           - book_id
+          - chain_id
           - amount
         properties:
           book_id:
+            type: integer
+            format: int64
+          chain_id:
             type: integer
             format: int64
           amount:

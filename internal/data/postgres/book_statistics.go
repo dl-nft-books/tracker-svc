@@ -65,6 +65,14 @@ func (q *booksQ) Select() (books []data.BookStatistics, err error) {
 	return
 }
 
+func (q *booksQ) SelectWithChainId() (books []data.BookStatisticsWithChains, err error) {
+	query := squirrel.Select(fmt.Sprintf("%s.*, min(chain_id) as chain_id", booksTable)).From(booksTable).
+		Join(fmt.Sprintf("%s ON %s.book_id = %s.book_id", chainsTable, booksTable, chainsTable)).
+		GroupBy(fmt.Sprintf("%s.id", booksTable))
+	err = q.database.Select(&books, query)
+	return
+}
+
 func (q *booksQ) Get() (*data.BookStatistics, error) {
 	var book data.BookStatistics
 	err := q.database.Get(&book, q.selector)

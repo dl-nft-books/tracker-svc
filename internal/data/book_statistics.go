@@ -7,6 +7,11 @@ type BookStatistics struct {
 	BookId   int64  `db:"book_id" structs:"book_id"`
 }
 
+type BookStatisticsWithChains struct {
+	BookStatistics
+	ChainId int64 `db:"chain_id" structs:"chain_id"`
+}
+
 type BookStatisticsQ interface {
 	New() BookStatisticsQ
 
@@ -15,6 +20,7 @@ type BookStatisticsQ interface {
 
 	Get() (*BookStatistics, error)
 	Select() ([]BookStatistics, error)
+	SelectWithChainId() (books []BookStatisticsWithChains, err error)
 
 	Insert(payment BookStatistics) (id int64, err error)
 	Update(updateStatements BookStatistics, id int64) error
