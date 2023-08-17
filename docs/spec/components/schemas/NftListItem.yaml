@@ -8,6 +8,10 @@ allOf:
         type: object
         required:
           - address
+          - chain_id
         properties:
           address:
             type: string
+          chain_id:
+            type: integer
+            format: int64

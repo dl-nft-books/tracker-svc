@@ -132,6 +132,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			},
 			Attributes: resources.NftListItemAttributes{
 				Address: nftPayment.TokenAddress,
+				ChainId: nftPayment.ChainId,
 			},
 		})
 	}
