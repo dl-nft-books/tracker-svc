@@ -14,7 +14,6 @@ type DB interface {
 
 	KeyValue() KeyValueQ
 	Payments() PaymentsQ
-	NftRequests() NftRequestsQ
 	Blocks() BlocksQ
 	Statistics() StatisticsQ
 
