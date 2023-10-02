@@ -8,8 +8,7 @@ import (
 )
 
 // NFTRequestCreatedEvent is a struct containing all the data from
-// the successful mint event which occurs after the user has
-// successfully passed signature from the backend and minted a book
+// the successful nft request created event
 type NFTRequestCreatedEvent struct {
 	RequestId     *big.Int
 	Requester     common.Address

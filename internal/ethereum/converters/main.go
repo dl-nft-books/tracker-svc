@@ -70,7 +70,7 @@ func (c *EventConverter) NFTRequestCreated(raw marketplace.MarketplaceNFTRequest
 		})
 	}
 
-	purchaseTimestamp, err := c.getBlockTimestamp(raw.Raw.BlockNumber)
+	requestTimestamp, err := c.getBlockTimestamp(raw.Raw.BlockNumber)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get block timestamp")
 	}
@@ -83,7 +83,7 @@ func (c *EventConverter) NFTRequestCreated(raw marketplace.MarketplaceNFTRequest
 		NftId:         raw.NftId,
 		Status:        receipt.Status,
 		BlockNumber:   raw.Raw.BlockNumber,
-		Timestamp:     *purchaseTimestamp,
+		Timestamp:     *requestTimestamp,
 	}
 
 	return event, nil
@@ -128,10 +128,10 @@ func (c *EventConverter) TokenSuccessfullyExchanged(raw marketplace.MarketplaceT
 	event := &etherdata.TokenSuccessfullyExchangedEvent{
 		TokenContract: raw.NftRequestInfo.TokenContract,
 		Recipient:     raw.AcceptRequestParams.Recipient,
-		RequestId:     raw.AcceptRequestParams.RequestId.Int64(),
-		TokenId:       raw.AcceptRequestParams.TokenData.TokenId.Int64(),
+		RequestId:     raw.AcceptRequestParams.RequestId,
+		TokenId:       raw.AcceptRequestParams.TokenData.TokenId,
 		NftAddress:    raw.NftRequestInfo.NftContract,
-		NftId:         raw.NftRequestInfo.NftId.Int64(),
+		NftId:         raw.NftRequestInfo.NftId,
 		Uri:           raw.AcceptRequestParams.TokenData.TokenURI,
 		Status:        receipt.Status,
 		BlockNumber:   raw.Raw.BlockNumber,

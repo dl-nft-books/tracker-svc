@@ -69,6 +69,11 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyExchangedEvent(ch <-chan e
 						return false, errors.Wrap(err, "failed to consume nft request created transaction", logField)
 					}
 
+					err = c.core.UpdateNFTRequestStatus(event.RequestId.Int64(), coreResources.RequestAccepted)
+					if err != nil {
+						return false, errors.Wrap(err, "failed to update nft request status in core-svc", logField)
+					}
+
 					if err = c.UpdateStatisticsExchanged(*book, event); err != nil {
 						return false, errors.Wrap(err, "failed to consume nft request created transaction", logField)
 					}
@@ -94,7 +99,7 @@ func (c *MarketPlaceConsumer) ExchangeUpdating(task coreResources.Task, event et
 		TokenId:           task.Attributes.TokenId,
 		BookId:            task.Attributes.BookId,
 		PayerAddress:      event.Recipient.String(),
-		NftId:             event.NftId,
+		NftId:             event.NftId.Int64(),
 		TokenAddress:      event.NftAddress.String(),
 		BannerLink:        c.ipfsLoader.BaseUri + task.Attributes.BannerIpfsHash,
 		PurchaseTimestamp: event.Timestamp,
