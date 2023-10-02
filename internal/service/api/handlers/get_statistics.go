@@ -22,7 +22,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Amount pie chart
-	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().Select()
+	bookStats, err := DB(r).Statistics().BookStatisticsQ.New().SelectWithChainId()
 	if err != nil {
 		Log(r).WithError(err).Error("failed to get book statistics")
 		ape.RenderErr(w, problems.BadRequest(err)...)
@@ -133,6 +133,7 @@ func GetStatistics(w http.ResponseWriter, r *http.Request) {
 			},
 			Attributes: resources.NftListItemAttributes{
 				Address: nftPayment.TokenAddress,
+				ChainId: nftPayment.ChainId,
 			},
 		})
 	}
