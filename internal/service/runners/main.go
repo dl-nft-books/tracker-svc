@@ -36,7 +36,8 @@ func Run(cfg config.Config, ctx context.Context) error {
 		}
 		time.Sleep(delayBetweenNetworkSVCCalls)
 	}
-	err = postgres.NewDB(cfg.DB()).KeyValue().Upsert(data.KeyValue{
+	db := postgres.NewDB(cfg.DB())
+	err = db.KeyValue().Upsert(data.KeyValue{
 		Key:   key_value.TotalDeployChains,
 		Value: strconv.Itoa(len(networks.Data)),
 	})
@@ -55,6 +56,19 @@ func Run(cfg config.Config, ctx context.Context) error {
 			return errors.Wrap(err, "failed to get marketplace contract")
 		}
 		marketplaceContract, err := contractsRegistry.GetMarketplaceContract(nil)
+		block, err := db.Blocks().FilterByChainId(network.ChainId).Get()
+		if err != nil {
+			return errors.Wrap(err, "failed to get contract`s last mint block")
+		}
+		if block == nil {
+			if _, err = db.Blocks().Insert(data.Blocks{
+				ContractAddress:     marketplaceContract.Hex(),
+				ChainId:             network.ChainId,
+				TokenPurchasedBlock: uint64(network.FirstBlock),
+			}); err != nil {
+				return errors.Wrap(err, "failed to insert contract`s last mint block")
+			}
+		}
 		go func(address common.Address, network models.NetworkDetailedResponse) {
 			deployedTokensCh <- trackers.DeployedToken{
 				Address: marketplaceContract,

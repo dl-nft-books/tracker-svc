@@ -59,10 +59,10 @@ func (q *blocksQ) Insert(blocks data.Blocks) (id int64, err error) {
 	return id, err
 }
 
-func (q *blocksQ) UpdateTokenPurchasedBlockColumn(newMintBlock uint64, id int64) error {
+func (q *blocksQ) UpdateTokenPurchasedBlockColumn(newMintBlock uint64, chainId int64) error {
 	statement := squirrel.Update(blocksTable).
 		Set(tokenPurchasedBlockColumn, newMintBlock).
-		Where(squirrel.Eq{blocksIdColumn: id})
+		Where(squirrel.Eq{blocksChainIdColumn: chainId})
 	return q.db.Exec(statement)
 }
 

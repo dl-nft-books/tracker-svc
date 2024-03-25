@@ -31,10 +31,12 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 					// Getting task by hash (uri)
 					task, err := c.GetTask(event.Uri)
 					if err != nil {
+						logField = logField.Merge(logan.F{
+							"event_uri": event.Uri,
+						})
 						return false, errors.Wrap(err, "failed get task")
 					}
 					if task == nil {
-
 						return true, nil
 					}
 					logField = logField.Merge(logan.F{
@@ -49,11 +51,16 @@ func (c *MarketPlaceConsumer) ConsumeTokenSuccessfullyPurchasedEvent(ch chan eth
 						return false, errors.Wrap(err, "failed to check is payment exist")
 					}
 					if check != nil {
+						// Updating contract`s last mint block
+						if err = c.database.Blocks().UpdateTokenPurchasedBlockColumn(event.BlockNumber, c.network.ChainId); err != nil {
+							return false, errors.Wrap(err, "failed to update contract`s last mint block")
+						}
 						c.logger.WithFields(logan.F{
 							"book_url":           check.BannerLink,
-							"purchase_timestamp": check.PurchaseTimestamp.Format("02-01-06 15:04:05")}).
+							"purchase_timestamp": check.PurchaseTimestamp.Format("02-01-06 15:04:05"),
+							"block_number":       event.BlockNumber,
+						}).
 							Warn("payment with such banner_link is already exist")
-
 						return true, nil
 					}
 
