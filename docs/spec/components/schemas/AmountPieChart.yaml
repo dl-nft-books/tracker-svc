@@ -1,0 +1,19 @@
+allOf:
+  - $ref: '#/components/schemas/StatisticsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        type: object
+        required:
+          - books
+          - total
+        properties:
+          books:
+            type: array
+            items:
+              $ref: '#/components/schemas/AmountPieChartBooks'
+          total:
+            type: integer
+            format: int64

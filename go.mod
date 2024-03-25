@@ -1,10 +1,15 @@
-module gitlab.com/tokend/nft-books/contract-tracker
+module github.com/dl-nft-books/tracker-svc
 
 go 1.18
 
 require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/davecgh/go-spew v1.1.1
+	github.com/dl-nft-books/blob-svc v0.0.4-0.20230412083832-9441aef1be89
+	github.com/dl-nft-books/book-svc v0.0.0-20230411130424-8a2d7515116f
+	github.com/dl-nft-books/core-svc v0.0.0-20230413110851-a2c4cb886bf6
+	github.com/dl-nft-books/network-svc v0.0.0-20230329160452-99950496eafe
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fatih/structs v1.1.0
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -22,10 +27,6 @@ require (
 	gitlab.com/distributed_lab/logan v3.8.1+incompatible
 	gitlab.com/distributed_lab/running v1.6.0
 	gitlab.com/distributed_lab/urlval v3.0.0+incompatible
-	gitlab.com/tokend/nft-books/blob-svc v0.0.4-0.20221207105353-c6d1df229e8d
-	gitlab.com/tokend/nft-books/book-svc v0.0.0-20230228160144-6852ac514928
-	gitlab.com/tokend/nft-books/generator-svc v0.0.0-20230228161040-e9785ea79bd4
-	gitlab.com/tokend/nft-books/network-svc v0.0.0-20230228124725-092327ef3392
 )
 
 require (
@@ -36,7 +37,6 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20200211180108-c7c1fbc02894 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

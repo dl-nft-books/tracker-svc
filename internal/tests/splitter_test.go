@@ -2,7 +2,7 @@ package tests
 
 import (
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/helpers"
+	"github.com/dl-nft-books/tracker-svc/internal/helpers"
 	"testing"
 )
 

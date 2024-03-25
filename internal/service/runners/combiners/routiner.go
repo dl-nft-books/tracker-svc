@@ -2,10 +2,10 @@ package combiners
 
 import (
 	"context"
+	"github.com/dl-nft-books/tracker-svc/internal/config"
+	"github.com/dl-nft-books/tracker-svc/internal/service/runners/trackers"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/running"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/runners/consumers"
 )
 
 const tokensRoutinerSuffix = "-tokens"
@@ -30,7 +30,7 @@ func NewTokenRoutiner(cfg config.Config, ctx context.Context) *TokenRoutiner {
 
 // Watch listens to the newly deployed token contracts and runs
 // consumer and producer for them while acting as a sort of 'routines' manager
-func (r *TokenRoutiner) Watch(ch <-chan consumers.DeployedToken) {
+func (r *TokenRoutiner) Watch(ch <-chan trackers.DeployedToken) {
 	running.WithBackOff(
 		r.ctx,
 		r.logger,

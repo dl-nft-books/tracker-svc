@@ -1,18 +1,18 @@
 package config
 
 import (
+	documenter "github.com/dl-nft-books/blob-svc/connector/config"
+	booker "github.com/dl-nft-books/book-svc/connector"
+	core "github.com/dl-nft-books/core-svc/connector"
+	networker "github.com/dl-nft-books/network-svc/connector"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs/infura"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs/pinata"
+	tokendUploader "github.com/dl-nft-books/tracker-svc/internal/ipfs/tokend_uploader"
 	"gitlab.com/distributed_lab/kit/comfig"
 	"gitlab.com/distributed_lab/kit/copus"
 	"gitlab.com/distributed_lab/kit/copus/types"
 	"gitlab.com/distributed_lab/kit/kv"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/config"
-	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/infura"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/pinata"
-	tokendUploader "gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs/tokend_uploader"
-	generatorer "gitlab.com/tokend/nft-books/generator-svc/connector"
-	networker "gitlab.com/tokend/nft-books/network-svc/connector"
 )
 
 type Config interface {
@@ -36,7 +36,7 @@ type Config interface {
 	documenter.Documenter
 	booker.Booker
 	networker.NetworkConfigurator
-	generatorer.GeneratorConfigurator
+	core.GeneratorConfigurator
 }
 
 type config struct {
@@ -61,7 +61,7 @@ type config struct {
 	// Connectors
 	booker.Booker
 	networker.NetworkConfigurator
-	generatorer.GeneratorConfigurator
+	core.GeneratorConfigurator
 	documenter.Documenter
 }
 
@@ -78,6 +78,6 @@ func New(getter kv.Getter) Config {
 		TokenDIpfsUploader:    tokendUploader.NewTokenDIpfsUploader(getter),
 		Booker:                booker.NewBooker(getter),
 		NetworkConfigurator:   networker.NewNetworkConfigurator(getter),
-		GeneratorConfigurator: generatorer.NewGeneratorConfigurator(getter),
+		GeneratorConfigurator: core.NewGeneratorConfigurator(getter),
 	}
 }

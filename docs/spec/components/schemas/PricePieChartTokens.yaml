@@ -1,0 +1,18 @@
+allOf:
+  - $ref: '#/components/schemas/StatisticsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        required:
+          - name
+          - native_currency
+          - usd
+        properties:
+          name:
+            type: string
+          native_currency:
+            type: string
+          usd:
+            type: string

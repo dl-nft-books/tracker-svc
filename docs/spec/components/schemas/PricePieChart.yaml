@@ -1,0 +1,17 @@
+allOf:
+  - $ref: '#/components/schemas/StatisticsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        required:
+          - tokens
+          - total
+        properties:
+          tokens:
+            type: array
+            items:
+              $ref: '#/components/schemas/PricePieChartTokens'
+          total:
+            type: string

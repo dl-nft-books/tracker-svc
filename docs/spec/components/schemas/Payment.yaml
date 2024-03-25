@@ -8,42 +8,71 @@ allOf:
         type: object
         required:
           - payer_address
+          - contract_address
           - amount
+          - book_id
+          - token_id
           - payment_token_price
           - minted_token_price
           - erc20_data
-          - book_url
           - purchase_timestamp
+          - banner_url
+          - type
         properties:
           payer_address:
             type: string
             example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
             description: Address of a user who bought a book
+          contract_address:
+            type: string
+            example: '0x77dADb3Ce09Ef981A008fDC1cE40D8A023E0925e'
+            description: Address of a book
           amount:
             type: string
-            example: "100500"
+            example: '100500'
             description: Amount of tokens paid
           minted_token_price:
             type: string
-            example: "103"
-            description: Price of a minted token in $
+            example: '103'
+            description: Price of a minted marketplace in $
+          token_id:
+            type: integer
+            example: '100500'
+            description: Token id
+            format: int64
+          book_id:
+            type: integer
+            example: '100500'
+            description: Book id
+            format: int64
           payment_token_price:
             type: string
-            example: "1"
-            description: Price of a payment token (which the minted token was bought by) in $
+            example: '1'
+            description: >-
+              Price of a payment token (which the minted token was bought by) in
+              $
           purchase_timestamp:
             type: string
-            example: "2006-01-02"
+            example: '2006-01-02'
             description: Timestamp when the user have purchased a book
-          book_url:
+          banner_url:
             type: string
-            example: "ipfs.io/ipfs/url goes brrrrrrr"
-            description: Url to see the book
+            example: ipfs.io/ipfs/url goes brrrrrrr
+            description: Url to see the book's banner
           erc20_data:
             allOf:
               - $ref: '#/components/schemas/Erc20Data'
               - type: object
             description: Token metadata information
+          type:
+            type: string
+            description: Event type
+            example: native
+            enum:
+              - native
+              - erc20
+              - nft
+              - voucher
       relationships:
         type: object
         properties:
@@ -52,6 +81,4 @@ allOf:
             description: Information about related book
             properties:
               data:
-                type: object
                 $ref: '#/components/schemas/BookKey'
-

@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/fatih/structs"
@@ -16,15 +16,15 @@ const (
 	valueColumn = "value"
 )
 
-var keyValueSelect = sq.Select("*").From(keyValueTable)
-
 type keyValueQ struct {
-	db *pgdb.DB
+	db       *pgdb.DB
+	selector sq.SelectBuilder
 }
 
 func NewKeyValueQ(db *pgdb.DB) data.KeyValueQ {
 	return &keyValueQ{
-		db: db,
+		db:       db,
+		selector: sq.Select("*").From(keyValueTable),
 	}
 }
 
@@ -36,6 +36,15 @@ func (q *keyValueQ) Upsert(kv data.KeyValue) error {
 	return q.db.Exec(query)
 }
 
+func (q *keyValueQ) UpdateStatistics(kvs ...data.KeyValue) error {
+	query := sq.Insert(keyValueTable)
+	for _, kv := range kvs {
+		query = query.Values(kv.Key, kv.Value)
+	}
+	query = query.Suffix("ON CONFLICT (key) DO UPDATE SET value = CAST(key_value.value as float) + CAST(EXCLUDED.value as float)")
+	return q.db.Exec(query)
+}
+
 func (q *keyValueQ) New() data.KeyValueQ {
 	return NewKeyValueQ(q.db.Clone())
 }
@@ -44,11 +53,24 @@ func (q *keyValueQ) Get(key string) (*data.KeyValue, error) {
 	return q.get(key, false)
 }
 
+func (q *keyValueQ) Select(key []string) (keyValues []data.KeyValue, err error) {
+	orConditions := make(sq.Or, len(key))
+
+	for i, k := range key {
+		orConditions[i] = sq.Like{keyColumn: k}
+	}
+	if len(orConditions) > 0 {
+		q.selector = q.selector.Where(orConditions)
+	}
+	err = q.db.Select(&keyValues, q.selector)
+	return
+}
+
 func (q *keyValueQ) LockingGet(key string) (*data.KeyValue, error) {
 	return q.get(key, true)
 }
 func (q *keyValueQ) get(key string, forUpdate bool) (*data.KeyValue, error) {
-	stmt := keyValueSelect.Where(sq.Eq{keyColumn: key})
+	stmt := q.selector.Where(sq.Eq{keyColumn: key})
 	if forUpdate {
 		stmt = stmt.Suffix("FOR UPDATE")
 	}

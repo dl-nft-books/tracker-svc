@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/opensea"
+	"github.com/dl-nft-books/tracker-svc/internal/data/opensea"
 
+	documenter "github.com/dl-nft-books/blob-svc/connector/api"
+	"github.com/dl-nft-books/tracker-svc/internal/config"
+	"github.com/dl-nft-books/tracker-svc/internal/ipfs"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	documenter "gitlab.com/tokend/nft-books/blob-svc/connector/api"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/config"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/ipfs"
 )
 
 type IpfsLoader struct {
@@ -32,13 +32,13 @@ func NewIpfsLoader(cfg config.Config) *IpfsLoader {
 	}
 }
 
-func (l *IpfsLoader) UploadFile(uri string) error {
-	fileName := fmt.Sprintf("%s.pdf", uri)
+func (l *IpfsLoader) UploadBanner(uri string) error {
+	bannerName := fmt.Sprintf("%s.png", uri)
 
 	l.logger.Debugf("Caught request to process uri %s", uri)
-	l.logger.Debugf("Trying to find file %s", fileName)
+	l.logger.Debugf("Trying to find banner %s", bannerName)
 
-	documentLink, err := l.documenter.GetDocumentLink(fileName)
+	documentLink, err := l.documenter.GetDocumentLink(bannerName)
 	if err != nil {
 		return errors.Wrap(err, "failed to get document link")
 	}
@@ -47,6 +47,7 @@ func (l *IpfsLoader) UploadFile(uri string) error {
 	l.logger.Debugf("Trying to download via %s", documentUrl)
 
 	downloadedDocument, err := downloadDocument(documentUrl)
+
 	if err != nil {
 		return errors.Wrap(err, "failed to download document")
 	}
@@ -55,12 +56,12 @@ func (l *IpfsLoader) UploadFile(uri string) error {
 
 	response, err := l.implementation.Upload(uri, downloadedDocument)
 	if err != nil {
-		return errors.Wrap(err, "failed to add file to the ipfs")
+		return errors.Wrap(err, "failed to add banner to the ipfs")
 	}
 
 	l.logger.Debugf("Successfully loaded document.\nResponse: %s", *response)
 
-	if _, err = l.documenter.DeleteDocument(fileName); err != nil {
+	if _, err = l.documenter.DeleteDocument(bannerName); err != nil {
 		return errors.Wrap(err, "failed to delete document")
 	}
 
@@ -82,8 +83,9 @@ func (l *IpfsLoader) UploadMetadata(info opensea.Metadata) error {
 	l.logger.Debug("Metadata marshalled successfully")
 	l.logger.Debug("Loading metadata to IPFS...")
 
-	metadataFileName := l.GetHashOutUri(info.FileURL) + "-meta"
-	response, err := l.implementation.Upload(metadataFileName, raw)
+	metadataBannerName := l.GetHashOutUri(info.Image) + "-meta"
+
+	response, err := l.implementation.Upload(metadataBannerName, raw)
 	if err != nil {
 		return errors.Wrap(err, "failed to add metadata to the ipfs")
 	}

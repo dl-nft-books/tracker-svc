@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/cli"
+	"github.com/dl-nft-books/tracker-svc/internal/cli"
 )
 
 func main() {

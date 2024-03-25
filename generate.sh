@@ -3,8 +3,8 @@
 GENERATOR_IMAGE=registry.gitlab.com/tokend/openapi-go-generator:69f004b58152c83f007b593cc13e94b81d7200da
 
 
-GENERATED="/home/dima/Projects/gitlab.com/tokend/nft-books/contract-tracker/resources"
-OPENAPI_DIR="/home/dima/Projects/gitlab.com/tokend/nft-books/contract-tracker/docs/web_deploy/"
+GENERATED="/home/mango/Documents/DistributedLab/NFT-books_github/tracker-svc/resources"
+OPENAPI_DIR="/home/mango/Documents/DistributedLab/NFT-books_github/tracker-svc/docs/web_deploy/"
 PACKAGE_NAME=resources
 
 function printHelp {
@@ -51,7 +51,7 @@ function parseArgs {
 function generate {
     (cd docs && npm run build)
     docker run -v "${OPENAPI_DIR}":/openapi -v "${GENERATED}":/generated "${GENERATOR_IMAGE}" generate -pkg "${PACKAGE_NAME}" --raw-formats-as-types
-    goimports -w ${GENERATED}
+    #goimports -w ${GENERATED}
 }
 
 parseArgs "$@"

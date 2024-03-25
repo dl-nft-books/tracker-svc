@@ -1,5 +1,3 @@
 package key_value
 
-const (
-	FactoryTrackerCursor = "factory_tracker_last_block"
-)
+const TotalDeployChains = "stats-chain_id-total"

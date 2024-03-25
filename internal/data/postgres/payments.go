@@ -3,25 +3,29 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"github.com/fatih/structs"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 )
 
 const (
 	paymentsTable = "payments"
 
 	paymentsId              = "id"
-	paymentsContractId      = "contract_id"
+	paymentsChainId         = "chain_id"
+	paymentsTokenId         = "token_id"
+	paymentsBookId          = "book_id"
+	paymentsBannerLink      = "banner_link"
 	paymentsContractAddress = "contract_address"
 	paymentsPayerAddress    = "payer_address"
 	paymentsTokenAddress    = "token_address"
 	paymentsAmount          = "amount"
 	paymentsPrice           = "price"
-	paymentsBookUrl         = "book_url"
+	paymentsType            = "type"
 )
 
 type paymentsQ struct {
@@ -40,8 +44,11 @@ func (q *paymentsQ) New() data.PaymentsQ {
 	return NewPaymentsQ(q.database.Clone())
 }
 
-func (q *paymentsQ) Page(page pgdb.OffsetPageParams) data.PaymentsQ {
-	q.selector = page.ApplyTo(q.selector, "id")
+func (q *paymentsQ) Page(page pgdb.OffsetPageParams, sortByCols ...string) data.PaymentsQ {
+	if len(sortByCols) == 0 {
+		sortByCols = append(sortByCols, "id")
+	}
+	q.selector = page.ApplyTo(q.selector, sortByCols...)
 	return q
 }
 
@@ -71,13 +78,23 @@ func (q *paymentsQ) FilterByTokenAddress(tokenAddress ...string) data.PaymentsQ 
 	return q
 }
 
-func (q *paymentsQ) FilterByBookUrl(bookUrl ...string) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsBookUrl: bookUrl})
+func (q *paymentsQ) FilterByChainId(chainId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsChainId: chainId})
 	return q
 }
 
-func (q *paymentsQ) FilterByContractId(contractId ...int64) data.PaymentsQ {
-	q.selector = q.selector.Where(squirrel.Eq{paymentsContractId: contractId})
+func (q *paymentsQ) FilterByTokenId(tokenId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsTokenId: tokenId})
+	return q
+}
+
+func (q *paymentsQ) FilterByBookId(bookId ...int64) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsBookId: bookId})
+	return q
+}
+
+func (q *paymentsQ) FilterByType(paymentType ...resources.TokenPurchasedEventType) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsType: paymentType})
 	return q
 }
 
@@ -86,6 +103,11 @@ func (q *paymentsQ) FilterByContractAddress(contractAddress ...string) data.Paym
 		contractAddress[i] = strings.ToLower(contractAddress[i])
 	}
 	q.selector = q.selector.Where(squirrel.Eq{fmt.Sprintf("lower(%v)", paymentsContractAddress): contractAddress})
+	return q
+}
+
+func (q *paymentsQ) FilterByBannerLink(bannerLink ...string) data.PaymentsQ {
+	q.selector = q.selector.Where(squirrel.Eq{paymentsBannerLink: bannerLink})
 	return q
 }
 

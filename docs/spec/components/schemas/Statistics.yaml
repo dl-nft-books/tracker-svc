@@ -1,0 +1,29 @@
+allOf:
+  - $ref: '#/components/schemas/StatisticsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        type: object
+        required:
+          - amount_pie_chart
+          - price_pie_chart
+          - chain_pie_chart
+          - token_list
+          - nft_list
+        properties:
+          amount_pie_chart:
+            $ref: '#/components/schemas/AmountPieChart'
+          price_pie_chart:
+            $ref: '#/components/schemas/PricePieChart'
+          chain_pie_chart:
+            $ref: '#/components/schemas/ChainPieChart'
+          token_list:
+            type: array
+            items:
+              $ref: '#/components/schemas/PricePieChartTokens'
+          nft_list:
+            type: array
+            items:
+              $ref: '#/components/schemas/NftListItem'

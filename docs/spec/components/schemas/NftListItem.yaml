@@ -1,0 +1,17 @@
+allOf:
+  - $ref: '#/components/schemas/StatisticsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        type: object
+        required:
+          - address
+          - chain_id
+        properties:
+          address:
+            type: string
+          chain_id:
+            type: integer
+            format: int64

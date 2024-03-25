@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	booker "github.com/dl-nft-books/book-svc/connector"
+	"github.com/dl-nft-books/book-svc/connector/models"
+	"github.com/dl-nft-books/tracker-svc/internal/data"
+	"github.com/dl-nft-books/tracker-svc/internal/service/api/requests"
+	"github.com/dl-nft-books/tracker-svc/resources"
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	booker "gitlab.com/tokend/nft-books/book-svc/connector"
-	"gitlab.com/tokend/nft-books/book-svc/connector/models"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/requests"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
 	"net/http"
 )
 
@@ -52,9 +52,19 @@ func applyQFiltersPayments(qPayments data.PaymentsQ, booker *booker.Connector, r
 	if len(request.TokenAddress) > 0 {
 		qPayments = qPayments.FilterByTokenAddress(request.TokenAddress...)
 	}
+	if len(request.ContractAddress) > 0 {
+		qPayments = qPayments.FilterByContractAddress(request.ContractAddress...)
+	}
+	if len(request.TokenId) > 0 {
+		qPayments = qPayments.FilterByTokenId(request.TokenId...)
+	}
+	if len(request.ChainId) > 0 {
+		qPayments = qPayments.FilterByChainId(request.ChainId...)
+	}
 	if len(request.BookId) > 0 {
 		booksResponse, err := booker.ListBooks(models.ListBooksParams{
-			Id: request.BookId,
+			Id:      request.BookId,
+			ChainId: request.ChainId,
 		})
 
 		if err != nil {
@@ -63,9 +73,10 @@ func applyQFiltersPayments(qPayments data.PaymentsQ, booker *booker.Connector, r
 
 		bookContracts := make([]string, 0)
 		for _, book := range booksResponse.Data {
-			bookContracts = append(bookContracts, book.Attributes.ContractAddress)
+			for _, network := range book.Attributes.Networks {
+				bookContracts = append(bookContracts, network.Attributes.ContractAddress)
+			}
 		}
-
 		qPayments = qPayments.FilterByContractAddress(bookContracts...)
 	}
 
@@ -89,7 +100,7 @@ func formListPaymentsResponse(r *http.Request, request *requests.ListPaymentsReq
 			return nil, errors.Wrap(err, "failed to convert payment to the resource format")
 		}
 
-		pairDataRelationships, err := getPaymentRelationships(payment, DB(r), Booker(r))
+		pairDataRelationships, err := getPaymentRelationships(payment, Booker(r))
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get payment relationships")
 		}

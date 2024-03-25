@@ -1,8 +1,8 @@
 package postgres
 
 import (
+	"github.com/dl-nft-books/tracker-svc/internal/data"
 	"gitlab.com/distributed_lab/kit/pgdb"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data"
 )
 
 type db struct {
@@ -23,20 +23,21 @@ func (db *db) KeyValue() data.KeyValueQ {
 	return NewKeyValueQ(db.raw)
 }
 
-func (db *db) Contracts() data.ContractsQ {
-	return NewContractsQ(db.raw)
-}
-
 func (db *db) Payments() data.PaymentsQ {
 	return NewPaymentsQ(db.raw)
 }
 
-func (db *db) NftPayments() data.NftPaymentsQ {
-	return NewNftPaymentsQ(db.raw)
-}
-
 func (db *db) Blocks() data.BlocksQ {
 	return NewBlocksQ(db.raw)
+}
+
+func (db *db) Statistics() data.StatisticsQ {
+	return data.StatisticsQ{
+		BookStatisticsQ:  NewBookStatisticsQ(db.raw),
+		TokenStatisticsQ: NewTokenStatisticsQ(db.raw),
+		DateStatisticsQ:  NewDateStatisticsQ(db.raw),
+		ChainStatisticsQ: NewChainStatisticsQ(db.raw),
+	}
 }
 
 func (db *db) Transaction(fn func() error) error {

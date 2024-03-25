@@ -1,8 +1,8 @@
 package models
 
 import (
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/service/api/requests"
-	"gitlab.com/tokend/nft-books/contract-tracker/resources"
+	"github.com/dl-nft-books/tracker-svc/internal/service/api/requests"
+	"github.com/dl-nft-books/tracker-svc/resources"
 )
 
 type (

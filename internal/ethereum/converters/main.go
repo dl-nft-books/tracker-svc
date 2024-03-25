@@ -2,18 +2,17 @@ package converters
 
 import (
 	"context"
-	"math/big"
-	"time"
-
+	"github.com/dl-nft-books/tracker-svc/internal/data/etherdata"
+	"github.com/dl-nft-books/tracker-svc/resources"
+	"github.com/dl-nft-books/tracker-svc/solidity/generated/erc20"
+	"github.com/dl-nft-books/tracker-svc/solidity/generated/marketplace"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gitlab.com/distributed_lab/logan/v3"
 	"gitlab.com/distributed_lab/logan/v3/errors"
-	"gitlab.com/tokend/nft-books/contract-tracker/internal/data/etherdata"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/erc20"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokencontract"
-	"gitlab.com/tokend/nft-books/contract-tracker/solidity/generated/tokenfactory"
+	"math/big"
+	"time"
 )
 
 type EventConverter struct {
@@ -30,25 +29,7 @@ func NewEventConverter(client *ethclient.Client, ctx context.Context, nativeToke
 	}
 }
 
-func (c *EventConverter) Deploy(raw tokenfactory.TokenfactoryTokenContractDeployed) (*etherdata.ContractDeployedEvent, error) {
-	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
-			"tx_hash": raw.Raw.TxHash.String(),
-		})
-	}
-
-	return &etherdata.ContractDeployedEvent{
-		Address:     raw.NewTokenContractAddr,
-		BlockNumber: raw.Raw.BlockNumber,
-		Name:        raw.TokenContractParams.TokenName,
-		Symbol:      raw.TokenContractParams.TokenSymbol,
-		Status:      receipt.Status,
-		TokenId:     raw.TokenContractParams.TokenContractId.Uint64(),
-	}, nil
-}
-
-func (c *EventConverter) SuccessfulMint(raw tokencontract.TokencontractSuccessfullyMinted) (*etherdata.SuccessfulMintEvent, error) {
+func (c *EventConverter) TokenSuccessfullyPurchased(raw marketplace.MarketplaceTokenSuccessfullyPurchased) (*etherdata.TokenSuccessfullyPurchasedEvent, error) {
 	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
@@ -61,77 +42,24 @@ func (c *EventConverter) SuccessfulMint(raw tokencontract.TokencontractSuccessfu
 		return nil, errors.Wrap(err, "failed to get block timestamp")
 	}
 
-	erc20Data, err := c.GetErc20Data(raw.PaymentTokenAddress)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get erc20 data from the contract")
-	}
-
-	return &etherdata.SuccessfulMintEvent{
-		Recipient:         raw.Recipient,
-		TokenId:           raw.MintedTokenInfo.TokenId.Int64(),
-		Uri:               raw.MintedTokenInfo.TokenURI,
-		MintedTokenPrice:  raw.MintedTokenInfo.MintedTokenPrice,
-		Erc20Info:         *erc20Data,
+	erc20Data, err := c.GetErc20Data(raw.BuyParams.PaymentDetails.PaymentTokenAddress, raw.PaymentType)
+	event := &etherdata.TokenSuccessfullyPurchasedEvent{
+		ContractAddress:   raw.BuyParams.TokenContract,
+		Recipient:         raw.BuyParams.Recipient,
+		TokenId:           raw.BuyParams.TokenData.TokenId.Int64(),
+		NftId:             raw.BuyParams.PaymentDetails.NftTokenId.Int64(),
+		Uri:               raw.BuyParams.TokenData.TokenURI,
+		MintedTokenPrice:  raw.MintedTokenPrice,
 		Amount:            raw.PaidTokensAmount,
-		PaymentTokenPrice: raw.PaymentTokenPrice,
+		Erc20Info:         *erc20Data,
+		PaymentTokenPrice: raw.BuyParams.PaymentDetails.PaymentTokenPrice,
 		Status:            receipt.Status,
 		BlockNumber:       raw.Raw.BlockNumber,
 		Timestamp:         *purchaseTimestamp,
-	}, nil
-}
-
-func (c *EventConverter) SuccessfulMintByNft(raw tokencontract.TokencontractSuccessfullyMintedByNFT) (*etherdata.SuccessfullyMintedByNftEvent, error) {
-	receipt, err := c.client.TransactionReceipt(c.ctx, raw.Raw.TxHash)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get tx receipt", logan.F{
-			"tx_hash": raw.Raw.TxHash.String(),
-		})
+		Type:              raw.PaymentType,
 	}
 
-	purchaseTimestamp, err := c.getBlockTimestamp(raw.Raw.BlockNumber)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get block timestamp")
-	}
-
-	return &etherdata.SuccessfullyMintedByNftEvent{
-		Recipient:        raw.Recipient,
-		TokenId:          raw.MintedTokenInfo.TokenId.Int64(),
-		Uri:              raw.MintedTokenInfo.TokenURI,
-		MintedTokenPrice: raw.MintedTokenInfo.MintedTokenPrice,
-		NftFloorPrice:    raw.NftFloorPrice,
-		NftAddress:       raw.NftAddress,
-		NftId:            raw.TokenId.Int64(),
-		Status:           receipt.Status,
-		BlockNumber:      raw.Raw.BlockNumber,
-		Timestamp:        *purchaseTimestamp,
-	}, nil
-}
-
-func (c *EventConverter) Transfer(raw tokencontract.TokencontractTransfer) etherdata.TransferEvent {
-	return etherdata.TransferEvent{
-		From:        raw.From,
-		To:          raw.To,
-		TokenId:     raw.TokenId.Uint64(),
-		BlockNumber: raw.Raw.BlockNumber,
-	}
-}
-
-func (c *EventConverter) Update(raw tokencontract.TokencontractTokenContractParamsUpdated) etherdata.UpdateEvent {
-	return etherdata.UpdateEvent{
-		Name:        raw.TokenName,
-		Symbol:      raw.TokenSymbol,
-		Price:       raw.NewPrice.String(),
-		FloorPrice:  raw.NewMinNFTFloorPrice.String(),
-		BlockNumber: raw.Raw.BlockNumber,
-	}
-}
-
-func (c *EventConverter) UpdateVoucher(raw tokencontract.TokencontractVoucherParamsUpdated) etherdata.VoucherUpdateEvent {
-	return etherdata.VoucherUpdateEvent{
-		VoucherTokenAddress: raw.NewVoucherTokenContract,
-		VoucherTokenAmount:  raw.NewVoucherTokensAmount,
-		BlockNumber:         raw.Raw.BlockNumber,
-	}
+	return event, nil
 }
 
 // getBlockTimestamp is a function that returns a timestamp
@@ -152,7 +80,15 @@ func (c *EventConverter) getBlockTimestamp(blockNumber uint64) (*time.Time, erro
 // address specified in parameters. If address is etherdata.NullAddress, function
 // returns the native erc20 data. Otherwise, contract on the specified
 // address must implement IERC20 interface.
-func (c *EventConverter) GetErc20Data(address common.Address) (*etherdata.Erc20Info, error) {
+func (c *EventConverter) GetErc20Data(address common.Address, eventType uint8) (*etherdata.Erc20Info, error) {
+	if resources.TokenPurchasedEventType(eventType) == resources.NFT {
+		return &etherdata.Erc20Info{
+			TokenAddress: address,
+			Name:         "",
+			Symbol:       "NFT",
+			Decimals:     0,
+		}, nil
+	}
 	if address == etherdata.NullAddress {
 		return &c.nativeToken, nil
 	}
@@ -166,17 +102,17 @@ func (c *EventConverter) GetErc20Data(address common.Address) (*etherdata.Erc20I
 
 	tokenName, err := erc20Instance.Name(&bind.CallOpts{})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read token's name from the contract instance")
+		return nil, errors.Wrap(err, "failed to read marketplace's name from the contract instance")
 	}
 
 	tokenSymbol, err := erc20Instance.Symbol(&bind.CallOpts{})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read token's symbol from the contract instance")
+		return nil, errors.Wrap(err, "failed to read marketplace's symbol from the contract instance")
 	}
 
 	tokenDecimals, err := erc20Instance.Decimals(&bind.CallOpts{})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get token's decimals")
+		return nil, errors.Wrap(err, "failed to get marketplace's decimals")
 	}
 
 	return &etherdata.Erc20Info{
